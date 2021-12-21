@@ -4,6 +4,7 @@ namespace Map {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	public class MapChunk : MonoBehaviour {
 		[SerializeField] private MeshFilter meshFilter;
+		[SerializeField] private MeshCollider meshCollider;
 		private int pointsPerSide = 251;
 		private float chunkSideDimension = 10f;
 		private Vector3[] vertices;
@@ -54,6 +55,7 @@ namespace Map {
 			mesh.triangles = triangles;
 
 			meshFilter.mesh = mesh;
+			meshCollider.sharedMesh = mesh;
 
 		}
 	}

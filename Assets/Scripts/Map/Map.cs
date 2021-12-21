@@ -7,7 +7,7 @@ namespace Map {
 		[SerializeField] private MapChunk mapChunkPrefab;
 
 		private void Start () {
-			GenerateFlatMap(10, 250, 100f);
+			GenerateFlatMap(10, 10, 100f);
 		}
 
 		public void GenerateFlatMap (int chunksPerSide, int chunkResolution, float mapSize) {
