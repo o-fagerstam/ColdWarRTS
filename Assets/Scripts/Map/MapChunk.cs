@@ -3,15 +3,12 @@ using UnityEngine;
 namespace Map {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer))]
 	public class MapChunk : MonoBehaviour {
-		private MeshFilter meshFilter;
+		[SerializeField] private MeshFilter meshFilter;
 		private int pointsPerSide = 251;
 		private float chunkSideDimension = 10f;
 		private Vector3[] vertices;
 		private int[] triangles;
 		private Vector2[] uvs;
-		private void Start () {
-			meshFilter = GetComponent<MeshFilter>();
-		}
 
 		public void GenerateFlatChunk (int squaresPerSide, float chunkSize) {
 			pointsPerSide = squaresPerSide + 1;
