@@ -28,9 +28,14 @@ namespace Controls {
 
 		protected override void OnSpacePressed () {
 			if (currentForestSection != null) {
+				Debug.Log("Attempting close");
+				if (!currentForestSection.Close()) {
+					return;
+				}
+				Debug.Log("Closed");
 				OnExitForestDrawMode?.Invoke();
+				currentForestSection = null;
 			}
-			currentForestSection = null;
 		}
 	}
 }

@@ -3,13 +3,16 @@ using System.Collections.Generic;
 using UnityEngine;
 namespace Math {
 	public class Polygon {
-		private List<Vector2> vertices = new List<Vector2>();
+		private readonly List<Vector2> vertices = new List<Vector2>();
+		private bool isClosed;
 		public int NumOfVertices => vertices.Count;
+		public bool IsClosed => isClosed;
 		public IEnumerable<Vector2> Vertices => vertices;
 		public IEnumerable<Tuple<Vector2, Vector2>> Lines {
 			get {
 				List<Tuple<Vector2, Vector2>> lines = new List<Tuple<Vector2, Vector2>>();
 				int i = 0;
+				int stoppingPoint = isClosed ? 0 : NumOfVertices - 1;
 				do {
 					int next = (i + 1)%NumOfVertices;
 					lines.Add(new Tuple<Vector2, Vector2>(vertices[i], vertices[next]));
@@ -17,6 +20,14 @@ namespace Math {
 				} while (i != 0);
 				return lines;
 			}
+		}
+		
+		public Polygon() {}
+		private Polygon (List<Vector2> vertices, bool isClosed = false) {
+			foreach (Vector2 vertex in vertices) {
+				this.vertices.Add(vertex);
+			}
+			this.isClosed = isClosed;
 		}
 
 		public bool AddPoint (Vector2 point) {
@@ -26,6 +37,17 @@ namespace Math {
 			vertices.Add(point);
 			return true;
 		}
+
+		public bool ClosePolygon () {
+			if (!ValidateClosePolygon()) {
+				return false;
+			}
+			isClosed = true;
+			return true;
+		}
+
+
+
 
 		public bool PointInPolygon (Vector2 point) {
 			if (NumOfVertices < 3) {
@@ -57,19 +79,42 @@ namespace Math {
 		public bool ValidateNewPoint (Vector2 point) {
 			if (NumOfVertices < 2) { return true; }
 
-			Vector2 lastPoint = vertices[NumOfVertices - 1];
+			Polygon testPolygon = new Polygon(vertices);
+			testPolygon.UnvalidatedAddPoint(point);
+			return !testPolygon.HasIntersectingLines();
+		}
+		/// <summary>
+		/// Validate if the polygon can be closed.
+		/// </summary>
+		public bool ValidateClosePolygon () {
+			if (NumOfVertices < 3) { return false; }
 
-			for (int i = 0; i < NumOfVertices-2; i++) {
-				if (LinesIntersect(vertices[i], vertices[i + 1], lastPoint, point)) {
-					Debug.Log($"Found intersecting line {i}, {i+1}");
+			Polygon testPolygon = new Polygon(vertices, true);
+			return !testPolygon.HasIntersectingLines();
+		}
+		
+		private void UnvalidatedAddPoint (Vector2 point) {
+			vertices.Add(point);
+		}
 
-					Vector3 vert1 = new Vector3(vertices[i].x, .1f, vertices[i].y);
-					Vector3 vert2 = new Vector3(vertices[i+1].x, .1f, vertices[i+1].y);
-					Debug.DrawLine(vert1, vert2, Color.red, 4f);
-					return false;
+		private bool HasIntersectingLines () {
+			for (int i = 0; i < NumOfVertices-3; i++) {
+				for (int j = i+2; j < NumOfVertices-2; j++) {
+					if (LinesIntersect(vertices[i], vertices[i + 1], vertices[j], vertices[j + 1])) {
+						return true;
+					}
 				}
 			}
-			return true;
+
+			if (isClosed) {
+				for (int i = 1; i < NumOfVertices-2; i++) {
+					if (LinesIntersect(vertices[i], vertices[i + 1], vertices[0], vertices[NumOfVertices - 1])) {
+						return true;
+					}
+				}
+			}
+
+			return false;
 		}
 		
 
@@ -109,5 +154,6 @@ namespace Math {
 		private enum Orientation {
 			Clockwise, CounterClockwise, Collinear
 		}
+
 	}
 }

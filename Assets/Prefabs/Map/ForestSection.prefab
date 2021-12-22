@@ -10,6 +10,7 @@ GameObject:
   m_Component:
   - component: {fileID: 5901074456156655476}
   - component: {fileID: -4291172762214712010}
+  - component: {fileID: 8188708964252741011}
   m_Layer: 0
   m_Name: ForestSection
   m_TagString: Untagged
@@ -43,3 +44,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c363181c484bc0955f0a4eabd4ee70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &8188708964252741011
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5213190249166633191}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 70f5ea48f51df344e9450acc2dbab4e5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  useCullingMasks: 0
+  forestSection: {fileID: -4291172762214712010}

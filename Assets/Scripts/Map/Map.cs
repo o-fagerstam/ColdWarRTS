@@ -1,15 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using Sirenix.OdinInspector;
 using UnityEngine;
 namespace Map {
 	public class Map : MonoBehaviour {
-		private List<MapChunk> chunks = new List<MapChunk>();
+		[SerializeField] private List<MapChunk> chunks = new List<MapChunk>();
 		[SerializeField] private MapChunk mapChunkPrefab;
 
-		private void Start () {
-			GenerateFlatMap(10, 10, 100f);
-		}
-
+		[Button]
 		public void GenerateFlatMap (int chunksPerSide, int chunkResolution, float mapSize) {
 			ClearMap();
 
@@ -27,7 +25,13 @@ namespace Map {
 
 		private void ClearMap () {
 			foreach (MapChunk chunk in chunks) {
-				Destroy(chunk);
+				if (Application.isPlaying) {
+					Destroy(chunk); 
+					
+				} 
+				else {
+					DestroyImmediate(chunk);
+				}
 			}
 			chunks.Clear();
 		}
