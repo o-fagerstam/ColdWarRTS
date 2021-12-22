@@ -1,8 +1,7 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
-	public class RtsController : MonoBehaviour {
+	public abstract class RtsController : MonoBehaviour {
 		[SerializeField] private LayerMask groundLayerMask;
 		
 		private float scrollSpeed = 5f;
@@ -12,7 +11,7 @@ namespace Controls {
 		}
 		private void Update()
 		{
-			UpdateKeyboardMovement();
+			UpdateKeyboardControl();
 			UpdateMouseControl();
 		}
 		private void UpdateMouseControl () {
@@ -28,9 +27,25 @@ namespace Controls {
 			if (!Physics.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity, groundLayerMask)) {
 				return;
 			}
-			
-			Debug.Log($"Clicked on point: {raycastHit.point}");
+
+			if (Mouse.current.leftButton.wasPressedThisFrame) {
+				OnLeftButtonPressed(raycastHit.point);
+			}
+			if (Mouse.current.rightButton.wasPressedThisFrame) {
+				OnRightButtonPressed(raycastHit.point);
+			}
 		}
+		
+		protected virtual void OnLeftButtonPressed (Vector3 point) {}
+		protected virtual void OnRightButtonPressed (Vector3 point) {}
+
+		private void UpdateKeyboardControl () {
+			UpdateKeyboardMovement();
+			if (Keyboard.current.spaceKey.wasPressedThisFrame) {
+				OnSpacePressed();
+			}
+		}
+		protected virtual void OnSpacePressed () {}
 
 		private void UpdateKeyboardMovement () {
 			if (Keyboard.current.wKey.isPressed) {
