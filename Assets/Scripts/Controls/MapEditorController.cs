@@ -1,12 +1,18 @@
 ﻿using System;
 using Map;
-using Math;
+using Sirenix.OdinInspector;
+using Sirenix.Serialization;
 using UnityEngine;
 namespace Controls {
 	public class MapEditorController : RtsController {
-		private ForestSection currentForestSection;
-		[SerializeField] private ForestSection forestSectionPrefab;
+		[Title("Map Editor Controller")]
+		[SceneObjectsOnly] 
 		[SerializeField] private Map.Map map;
+		[AssetsOnly] 
+		[SerializeField] private ForestSection forestSectionPrefab;
+		[Title("Debug")]
+		[ReadOnly] 
+		[ShowInInspector] private ForestSection currentForestSection;
 
 		public event Action OnEnterForestDrawMode;
 		public event Action OnExitForestDrawMode;

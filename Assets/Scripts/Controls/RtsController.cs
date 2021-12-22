@@ -1,7 +1,10 @@
-﻿using UnityEngine;
+﻿using Sirenix.OdinInspector;
+using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
 	public abstract class RtsController : MonoBehaviour {
+		[Title("RTS Controller")]
+		[AssetsOnly]
 		[SerializeField] private LayerMask groundLayerMask;
 		
 		private float scrollSpeed = 5f;
