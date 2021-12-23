@@ -23,6 +23,11 @@ namespace Map {
 		}
 
 		public event Action OnPolygonChanged;
+		public event Action OnDestruction;
+
+		private void OnDestroy () {
+			OnDestruction?.Invoke();
+		}
 
 		public bool AddPoint (Vector3 point) {
 			bool result = polygon.AddPoint(WorldVec3ToLocalVec2(point));

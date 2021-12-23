@@ -11,15 +11,22 @@ namespace Map {
         private void Start () {
             forestSection = GetComponent<ForestSection>();
             forestSection.OnPolygonChanged += HandleForestSectionChanged;
+            forestSection.OnDestruction += HandleForestSectionDestruction;
         }
+
 
         private void OnDestroy () {
             forestSection.OnPolygonChanged -= HandleForestSectionChanged;
+            forestSection.OnDestruction -= HandleForestSectionDestruction;
         }
 
         private void HandleForestSectionChanged () {
             path = GeneratePathFromPoints(forestSection.Points);
             drawClosed = forestSection.IsClosed;
+        }
+        
+        private void HandleForestSectionDestruction () {
+            Destroy(this);
         }
 
         private PolylinePath GeneratePathFromPoints (IEnumerable<Vector3> points) {

@@ -1,39 +1,42 @@
 ﻿using System;
-using Map;
+using System.Collections.Generic;
+using Controls.MapEditorTools;
 using Sirenix.OdinInspector;
-using Sirenix.Serialization;
+using UI;
 using UnityEngine;
 namespace Controls {
 	public class MapEditorController : RtsController {
 		[Title("Map Editor Controller")]
 		[SceneObjectsOnly] 
 		[SerializeField] private Map.Map map;
-		[AssetsOnly] 
-		[SerializeField] private ForestSection forestSectionPrefab;
 		[Title("Debug")]
-		[ReadOnly] 
-		[ShowInInspector] private ForestSection currentForestSection;
-
-		public event Action OnEnterForestDrawMode;
-		public event Action OnExitForestDrawMode;
+		[ReadOnly] [ShowInInspector] private MapEditorTool currentTool;
 		
-		protected override void OnLeftButtonPressed (Vector3 point) {
-			if (currentForestSection == null) {
-				OnEnterForestDrawMode?.Invoke();
-				currentForestSection = Instantiate(forestSectionPrefab, point, Quaternion.identity);
-			}
+		public void SelectTool (MapEditorTool tool) {
+			currentTool = tool;
+			tool.OnToolFinished += HandleToolFinished;
+			tool.Activate();
+		}
+		
+		private void HandleToolFinished (MapEditorTool tool) {
+			ClearTool();
+			tool.OnToolFinished -= HandleToolFinished;
+		}
+		
+		public void ClearTool () {
+			currentTool = null;
+		}
 
-			currentForestSection.AddPoint(point);
+		protected override void OnLeftClickGround (RaycastHit hit) {
+			if (currentTool != null) { currentTool.OnLeftClickGround(hit);  }
+		}
+
+		protected override void OnRightClickGround (RaycastHit hit) {
+			if (currentTool != null) { currentTool.OnRightClickGround(hit);}
 		}
 
 		protected override void OnSpacePressed () {
-			if (currentForestSection != null) {
-				if (!currentForestSection.Close()) {
-					return;
-				}
-				OnExitForestDrawMode?.Invoke();
-				currentForestSection = null;
-			}
+			if (currentTool != null) { currentTool.OnSpacePressed(); }
 		}
 	}
 }

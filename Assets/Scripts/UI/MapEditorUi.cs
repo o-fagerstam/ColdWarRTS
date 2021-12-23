@@ -1,0 +1,27 @@
+﻿using Controls;
+using Controls.MapEditorTools;
+using Sirenix.OdinInspector;
+using UnityEngine;
+namespace UI {
+	public class MapEditorUi : MonoBehaviour {
+		[Required][SceneObjectsOnly][SerializeField]
+		private MapEditorController mapEditorController;
+		[ReadOnly][ShowInInspector] private TooltipText tooltip;
+		private void Start () {
+			tooltip = GetComponentInChildren<TooltipText>();
+			foreach (ToolSelectButton toolSelectButton in GetComponentsInChildren<ToolSelectButton>()) {
+				toolSelectButton.OnToolSelected += HandleToolSelected;
+			}
+		}
+
+		private void HandleToolSelected (MapEditorTool tool) {
+			tooltip.Subscribe(tool);
+			tool.OnToolFinished += HandleToolFinished;
+			mapEditorController.SelectTool(tool);
+		}
+		private void HandleToolFinished (MapEditorTool tool) {
+			tooltip.Unsubscribe(tool);
+			tool.OnToolFinished -= HandleToolFinished;
+		}
+	}
+}

@@ -1,5 +1,6 @@
 ﻿using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls {
 	public abstract class RtsController : MonoBehaviour {
@@ -9,10 +10,10 @@ namespace Controls {
 		
 		private float scrollSpeed = 5f;
 		private Transform cameraFollowTransform;
-		private void Start () {
+		protected virtual void Start () {
 			cameraFollowTransform = transform;
 		}
-		private void Update()
+		protected virtual void Update()
 		{
 			UpdateKeyboardControl();
 			UpdateMouseControl();
@@ -25,6 +26,10 @@ namespace Controls {
 			{
 				return;
 			}
+
+			if (EventSystem.current.IsPointerOverGameObject()) {
+				return;
+			}
 			
 			Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 			if (!Physics.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity, groundLayerMask)) {
@@ -32,15 +37,15 @@ namespace Controls {
 			}
 
 			if (Mouse.current.leftButton.wasPressedThisFrame) {
-				OnLeftButtonPressed(raycastHit.point);
+				OnLeftClickGround(raycastHit);
 			}
 			if (Mouse.current.rightButton.wasPressedThisFrame) {
-				OnRightButtonPressed(raycastHit.point);
+				OnRightClickGround(raycastHit);
 			}
 		}
 		
-		protected virtual void OnLeftButtonPressed (Vector3 point) {}
-		protected virtual void OnRightButtonPressed (Vector3 point) {}
+		protected virtual void OnLeftClickGround (RaycastHit hit) {}
+		protected virtual void OnRightClickGround (RaycastHit hit) {}
 
 		private void UpdateKeyboardControl () {
 			UpdateKeyboardMovement();
