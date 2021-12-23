@@ -1,11 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
 using Math;
+using Sirenix.OdinInspector;
 using UnityEngine;
+using Random = UnityEngine.Random;
 namespace Map {
 	public class ForestSection : MonoBehaviour {
 
 		private readonly Polygon polygon = new Polygon();
+		private readonly List<GameObject> trees = new List<GameObject>();
+		[AssetsOnly][Required][SerializeField] private GameObject treePrefab;
+		[SerializeField] private float treeRadius = 0.15f;
 		public bool IsClosed => polygon.IsClosed;
 		public IEnumerable<Vector3> Points {
 			get {
@@ -34,6 +39,7 @@ namespace Map {
 		public bool Close () {
 			bool result = polygon.ClosePolygon();
 			if (result) {
+				GenerateTrees();
 				OnPolygonChanged?.Invoke();
 			}
 			return result;
@@ -52,14 +58,15 @@ namespace Map {
 			Vector3 position = transform.position;
 			return new Vector3(point.x + position.x, position.y, point.y + position.z);
 		}
-
-		private void OnDrawGizmos () {
-			Gizmos.color = Color.black;
-			foreach (Vector2 polygonVertex in polygon.Vertices) {
-				Gizmos.DrawSphere(LocalVec2ToWorldVec3(polygonVertex), 0.2f);
-			}
-			foreach ((Vector2 p1, Vector2 p2) in polygon.Lines) {
-				Gizmos.DrawLine(LocalVec2ToWorldVec3(p1), LocalVec2ToWorldVec3(p2));
+		
+		private void GenerateTrees () {
+			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(treeRadius, polygon);
+			foreach (Vector2 point in polygonPoints) {
+				Vector3 worldPoint = LocalVec2ToWorldVec3(point);
+				Vector3 rotation = new Vector3(0f, Random.value*360, 0f);
+				Quaternion quatRotation = Quaternion.Euler(rotation);
+				GameObject newTree = Instantiate(treePrefab, worldPoint, quatRotation, transform);
+				trees.Add(newTree);
 			}
 		}
 	}

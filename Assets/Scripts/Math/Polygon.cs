@@ -21,7 +21,45 @@ namespace Math {
 				return lines;
 			}
 		}
-		
+
+		public Vector2 BoundingBoxSize {
+			get {
+				if (vertices.Count == 0) {
+					throw new Exception("Cannot find bounding box of empty polygon");
+				}
+				float xMin = float.MaxValue;
+				float yMin = float.MaxValue;
+				float xMax = float.MinValue;
+				float yMax = float.MinValue;
+
+				foreach (Vector2 vertex in vertices) {
+					xMin = Mathf.Min(xMin, vertex.x);
+					xMax = Mathf.Max(xMax, vertex.x);
+					yMin = Mathf.Min(yMin, vertex.y);
+					yMax = Mathf.Max(yMax, vertex.y);
+				}
+
+				return new Vector2(xMax - xMin, yMax - yMin);
+			}
+		}
+
+		public Vector2 PolyOriginRelativeToBoundingBoxOrigin {
+			get {
+				if (vertices.Count == 0) {
+					throw new Exception("Cannot find bounding box of empty polygon");
+				}
+				float xMin = float.MaxValue;
+				float yMin = float.MaxValue;
+
+				foreach (Vector2 vertex in vertices) {
+					xMin = Mathf.Min(xMin, vertex.x);
+					yMin = Mathf.Min(yMin, vertex.y);
+				}
+
+				return new Vector2(xMin, yMin);
+			}
+		}
+
 		public Polygon() {}
 		private Polygon (List<Vector2> vertices, bool isClosed = false) {
 			foreach (Vector2 vertex in vertices) {
@@ -46,15 +84,12 @@ namespace Math {
 			return true;
 		}
 
-
-
-
 		public bool PointInPolygon (Vector2 point) {
 			if (NumOfVertices < 3) {
 				return false;
 			}
 
-			Vector2 extremePoint = new Vector2(Mathf.Infinity, point.y);
+			Vector2 extremePoint = new Vector2(1000000f, point.y);
 
 			int intersectionCount = 0, i = 0;
 			do {
