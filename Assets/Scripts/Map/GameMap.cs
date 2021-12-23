@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Utils;
 namespace Map {
-	public class Map : MonoBehaviour {
+	public class GameMap : MonoBehaviour {
 		[SerializeField] private List<MapChunk> chunks = new List<MapChunk>();
 		[SerializeField] private MapChunk mapChunkPrefab;
 
@@ -25,15 +26,20 @@ namespace Map {
 
 		private void ClearMap () {
 			foreach (MapChunk chunk in chunks) {
-				if (Application.isPlaying) {
-					Destroy(chunk); 
-					
-				} 
-				else {
-					DestroyImmediate(chunk);
-				}
+				SafeDestroyUtil.SafeDestroyGameObject(chunk);
 			}
 			chunks.Clear();
+		}
+		public void EditElevation (Vector3 hitPoint, float radius, float magnitude) {
+			Vector2 rectSize = new Vector2(radius * 2, radius * 2);
+			Rect hitRect = new Rect(VectorUtil.Flatten(hitPoint) - rectSize/2, rectSize);
+
+			foreach (MapChunk chunk in chunks) {
+				if (chunk.worldRect.Overlaps(hitRect)) {
+					chunk.EditElevation(hitPoint, radius, magnitude);
+				}
+			}
+			
 		}
 	}
 }

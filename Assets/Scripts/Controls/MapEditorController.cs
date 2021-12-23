@@ -8,7 +8,7 @@ namespace Controls {
 	public class MapEditorController : RtsController {
 		[Title("Map Editor Controller")]
 		[SceneObjectsOnly] 
-		[SerializeField] private Map.Map map;
+		[SerializeField] private Map.GameMap map;
 		[Title("Debug")]
 		[ReadOnly] [ShowInInspector] private MapEditorTool currentTool;
 		
