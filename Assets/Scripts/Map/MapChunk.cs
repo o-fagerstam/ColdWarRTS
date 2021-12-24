@@ -1,4 +1,5 @@
 ﻿using System;
+using Math;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
@@ -10,11 +11,11 @@ namespace Map {
 		private int squaresPerSide = 10;
 		private float visibleChunkSideDimension = 10f;
 		[ShowInInspector] [ReadOnly] public GameMap Map { get; private set; }
-		public Rect worldRect {
+		public Rectangle worldRectangle {
 			get {
 				Vector2 size = new Vector2(visibleChunkSideDimension, visibleChunkSideDimension);
 				Vector2 pos2d = VectorUtil.Flatten(transform.position);
-				return new Rect(pos2d - size/2, size);
+				return new Rectangle(pos2d, size);
 			}
 		}
 
@@ -37,7 +38,7 @@ namespace Map {
 			Vector2[] uvs = new Vector2[realPointsPerSide*realPointsPerSide];
 
 			float startSideOffset = -(realChunkSideDimension/2);
-			float dstBetweenPoints = visibleChunkSideDimension/(squaresPerSide);
+			float dstBetweenPoints = visibleChunkSideDimension/squaresPerSide;
 
 			for (int y = 0; y < realPointsPerSide; y++) {
 				for (int x = 0; x < realPointsPerSide; x++) {
@@ -117,7 +118,7 @@ namespace Map {
 			Vector3[] vertices = (Vector3[]) meshFilter.mesh.vertices.Clone();
 			float sqrRadius = radius*radius;
 			for (int i = 0; i < vertices.Length; i++ ) {
-				float sqrDistance = (hitPointLocal - vertices[i]).sqrMagnitude;
+				float sqrDistance = (VectorUtil.Flatten(hitPointLocal) - VectorUtil.Flatten(vertices[i])).sqrMagnitude;
 				if (sqrDistance > sqrRadius) {
 					continue;
 				}
@@ -125,16 +126,22 @@ namespace Map {
 				float centerPointCloseness = 1f - distance/radius;
 				vertices[i].y += magnitude*centerPointCloseness;
 			}
-			// meshFilter.sharedMesh.vertices = vertices;
-			// meshFilter.sharedMesh.RecalculateBounds();
-			// meshFilter.sharedMesh.RecalculateNormals();
-			// meshFilter.sharedMesh.RecalculateTangents();
-			// meshCollider.sharedMesh = meshFilter.mesh;
-			
+
 			RecalculateMesh(
 				vertices,
 				meshFilter.sharedMesh.uv
 			);
+		}
+
+		private void OnDrawGizmosSelected () {
+			Gizmos.color = Color.black;
+			foreach (Vector3 vertex in meshFilter.sharedMesh.vertices) {
+				Gizmos.DrawSphere(vertex + transform.position, 0.1f);
+			}
+			Gizmos.color = Color.red;
+			Rectangle rectangle = worldRectangle;
+			Gizmos.DrawWireCube(VectorUtil.AddY(rectangle.Center), VectorUtil.AddY(rectangle.Dimension, 1f));
+			
 		}
 	}
 }

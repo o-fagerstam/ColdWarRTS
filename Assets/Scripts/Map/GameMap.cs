@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Math;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
@@ -7,6 +8,10 @@ namespace Map {
 	public class GameMap : MonoBehaviour {
 		[SerializeField] private List<MapChunk> chunks = new List<MapChunk>();
 		[SerializeField] private MapChunk mapChunkPrefab;
+
+		private void Start () {
+			GenerateFlatMap(20, 10, 100f);
+		}
 
 		[Button]
 		public void GenerateFlatMap (int chunksPerSide, int chunkResolution, float mapSize) {
@@ -31,11 +36,11 @@ namespace Map {
 			chunks.Clear();
 		}
 		public void EditElevation (Vector3 hitPoint, float radius, float magnitude) {
-			Vector2 rectSize = new Vector2(radius * 2, radius * 2);
-			Rect hitRect = new Rect(VectorUtil.Flatten(hitPoint) - rectSize/2, rectSize);
+			Vector2 rectangleSize = new Vector2(radius * 2, radius * 2);
+			Rectangle hitRectangle = new Rectangle(VectorUtil.Flatten(hitPoint), rectangleSize);
 
 			foreach (MapChunk chunk in chunks) {
-				if (chunk.worldRect.Overlaps(hitRect)) {
+				if (chunk.worldRectangle.Overlaps(hitRectangle)) {
 					chunk.EditElevation(hitPoint, radius, magnitude);
 				}
 			}

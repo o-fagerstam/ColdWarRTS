@@ -12,6 +12,11 @@ namespace Controls.MapEditorTools {
 			EditMapElevation(hit, 2f);
 		}
 
+		public override void OnRightClickGround (RaycastHit hit) {
+			base.OnRightClickGround(hit);
+			EditMapElevation(hit, -2f);
+		}
+
 		public void EditMapElevation (RaycastHit hit, float magnitude) {
 			MapChunk chunk = hit.transform.GetComponent<MapChunk>();
 			GameMap map = chunk.Map;
