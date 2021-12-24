@@ -1,13 +1,11 @@
-﻿using Sirenix.OdinInspector;
+﻿using Constants;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls {
 	public abstract class RtsController : MonoBehaviour {
-		[Title("RTS Controller")]
-		[AssetsOnly]
-		[SerializeField] private LayerMask groundLayerMask;
-		
+
 		private float scrollSpeed = 5f;
 		private Transform cameraFollowTransform;
 		protected virtual void Start () {
@@ -32,7 +30,7 @@ namespace Controls {
 			}
 			
 			Ray ray = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
-			if (!Physics.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity, groundLayerMask)) {
+			if (!Physics.Raycast(ray, out RaycastHit raycastHit, Mathf.Infinity, LayerMasks.groundMask)) {
 				return;
 			}
 
