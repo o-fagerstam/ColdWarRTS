@@ -8,8 +8,8 @@ namespace Map {
 	public class MapChunk : MonoBehaviour {
 		[SerializeField] private MeshFilter meshFilter;
 		[SerializeField] private MeshCollider meshCollider;
-		private int squaresPerSide = 10;
-		private float visibleChunkSideDimension = 10f;
+		private int squaresPerSide;
+		private float visibleChunkSideDimension ;
 		[ShowInInspector] [ReadOnly] public GameMap Map { get; private set; }
 		public Rectangle worldRectangle {
 			get {
@@ -124,24 +124,14 @@ namespace Map {
 				}
 				float distance = Mathf.Sqrt(sqrDistance);
 				float centerPointCloseness = 1f - distance/radius;
-				vertices[i].y += magnitude*centerPointCloseness;
+				AnimationCurve curve = AnimationCurve.EaseInOut(0f,0f,1f,1f);
+				vertices[i].y += magnitude*curve.Evaluate(centerPointCloseness);
 			}
 
 			RecalculateMesh(
 				vertices,
 				meshFilter.sharedMesh.uv
 			);
-		}
-
-		private void OnDrawGizmosSelected () {
-			Gizmos.color = Color.black;
-			foreach (Vector3 vertex in meshFilter.sharedMesh.vertices) {
-				Gizmos.DrawSphere(vertex + transform.position, 0.1f);
-			}
-			Gizmos.color = Color.red;
-			Rectangle rectangle = worldRectangle;
-			Gizmos.DrawWireCube(VectorUtil.AddY(rectangle.Center), VectorUtil.AddY(rectangle.Dimension, 1f));
-			
 		}
 	}
 }

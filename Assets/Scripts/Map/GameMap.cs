@@ -10,10 +10,9 @@ namespace Map {
 		[SerializeField] private MapChunk mapChunkPrefab;
 
 		private void Start () {
-			GenerateFlatMap(20, 10, 100f);
+			GenerateFlatMap(20, 20, 100f);
 		}
 
-		[Button]
 		public void GenerateFlatMap (int chunksPerSide, int chunkResolution, float mapSize) {
 			ClearMap();
 
