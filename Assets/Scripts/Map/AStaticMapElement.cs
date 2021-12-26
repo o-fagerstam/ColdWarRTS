@@ -3,15 +3,16 @@ using System.Collections.Generic;
 using Math;
 using Singleton;
 using UnityEngine;
+using Utils;
 namespace Map {
 	public abstract class AStaticMapElement : MonoBehaviour {
-		protected readonly Polygon polygon = new Polygon();
-		public bool IsClosed => polygon.IsClosed;
+		protected readonly Polygon localSpacePolygon = new Polygon();
+		public bool IsClosed => localSpacePolygon.IsClosed;
 		private bool elevationUpdateNeeded;
 		public IEnumerable<Vector3> Points {
 			get {
 				List<Vector3> points = new List<Vector3>();
-				foreach (Vector2 vertex in polygon.Vertices) {
+				foreach (Vector2 vertex in localSpacePolygon.Vertices) {
 					points.Add(LocalVec2ToWorldVec3(vertex));
 				}
 				return points;
@@ -39,7 +40,7 @@ namespace Map {
 		protected abstract void ElevationUpdate ();
 
 		public bool AddPoint (Vector3 point) {
-			bool result = polygon.AddPoint(WorldVec3ToLocalVec2(point));
+			bool result = localSpacePolygon.AddVertex(WorldVec3ToLocalVec2(point));
 			if (result) {
 				OnPolygonChanged?.Invoke(this, IsClosed);
 			}
@@ -47,11 +48,11 @@ namespace Map {
 		}
 
 		public bool ValidateAddPoint (Vector3 point) {
-			return polygon.ValidateNewPoint(WorldVec3ToLocalVec2(point));
+			return localSpacePolygon.ValidateNewPoint(WorldVec3ToLocalVec2(point));
 		}
 
 		public virtual bool Close () {
-			bool result = polygon.ClosePolygon();
+			bool result = localSpacePolygon.ClosePolygon();
 			if (result) {
 				OnPolygonChanged?.Invoke(this, true);
 				SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
@@ -60,7 +61,7 @@ namespace Map {
 		}
 
 		public bool PointInsideSection (Vector3 point) {
-			return polygon.PointInPolygon(WorldVec3ToLocalVec2(point));
+			return localSpacePolygon.PointInPolygon(WorldVec3ToLocalVec2(point));
 		}
 		
 		
@@ -79,8 +80,10 @@ namespace Map {
 			elevationUpdateNeeded = true;
 		}
 
-		public bool Overlaps (Rectangle rectangle) {
-			return polygon.Overlaps(rectangle);
+		public bool Overlaps (Rectangle worldRectangle) {
+			return localSpacePolygon
+				.ToWorldPolygon(VectorUtil.Flatten(transform.position))
+				.Overlaps(worldRectangle);
 		}
 	}
 }

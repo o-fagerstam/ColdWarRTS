@@ -68,7 +68,7 @@ namespace Math {
 			this.isClosed = isClosed;
 		}
 
-		public bool AddPoint (Vector2 point) {
+		public bool AddVertex (Vector2 point) {
 			if (!ValidateNewPoint(point)) {
 				return false;
 			}
@@ -200,11 +200,11 @@ namespace Math {
 			foreach ((Vector2 p1, Vector2 q1) in thisLines) {
 				foreach ((Vector2 p2, Vector2 q2) in otherLines) {
 					if (LinesIntersect(p1, q1, p2, q2)) {
-						return false;
+						return true;
 					}
 				}
 			}
-			return true;
+			return false;
 		}
 
 		public bool Overlaps (Rectangle other) {
@@ -215,6 +215,13 @@ namespace Math {
 			Clockwise, CounterClockwise, Collinear
 		}
 
+		public Polygon ToWorldPolygon (Vector2 originWorldPosition) {
+			List<Vector2> worldVerts = new List<Vector2>();
+			foreach (Vector2 vertex in vertices) {
+				worldVerts.Add(vertex + originWorldPosition);
+			}
+			return new Polygon(worldVerts, isClosed);
+		}
 	}
 
 }

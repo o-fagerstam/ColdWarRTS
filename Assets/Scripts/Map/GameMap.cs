@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using Math;
 using Singleton;
 using UnityEngine;
@@ -21,7 +20,7 @@ namespace Map {
 			Vector3 chunkBaseWorldOffset = transform.position + new Vector3(-(mapSize/2f), 0f, -(mapSize/2f));
 			for (int y = 0; y < chunksPerSide; y++) {
 				for (int x = 0; x < chunksPerSide; x++) {
-					Vector3 newChunkPosition = new Vector3(x * chunkSize, 0f, y*chunkSize) + chunkBaseWorldOffset;
+					Vector3 newChunkPosition = new Vector3(x*chunkSize, 0f, y*chunkSize) + chunkBaseWorldOffset;
 					MapChunk newChunk = Instantiate(mapChunkPrefab, newChunkPosition, Quaternion.identity, transform);
 					newChunk.GenerateFlatChunk(chunkResolution, chunkSize);
 					chunks.Add(newChunk);
@@ -47,12 +46,25 @@ namespace Map {
 			}
 		}
 		public void EditElevation (Vector3 hitPoint, float radius, float magnitude) {
-			Vector2 rectangleSize = new Vector2(radius * 2, radius * 2);
+			Vector2 rectangleSize = new Vector2(radius*2, radius*2);
 			Rectangle hitRectangle = new Rectangle(VectorUtil.Flatten(hitPoint), rectangleSize);
 
+			foreach (MapChunk chunk in GetOverlappingChunks(hitRectangle)) {
+				chunk.EditElevation(hitPoint, radius, magnitude);
+			}
+		}
+
+		public IEnumerable<MapChunk> GetOverlappingChunks (Rectangle worldSpaceRectangle) {
 			foreach (MapChunk chunk in chunks) {
-				if (chunk.worldRectangle.Overlaps(hitRectangle)) {
-					chunk.EditElevation(hitPoint, radius, magnitude);
+				if (chunk.worldRectangle.Overlaps(worldSpaceRectangle)) {
+					yield return chunk;
+				}
+			}
+		}
+		public IEnumerable<MapChunk> GetOverlappingChunks (Polygon worldSpacePolygon) {
+			foreach (MapChunk chunk in chunks) {
+				if (chunk.worldRectangle.Overlaps(worldSpacePolygon)) {
+					yield return chunk;
 				}
 			}
 		}

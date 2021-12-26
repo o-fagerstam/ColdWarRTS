@@ -21,7 +21,7 @@ namespace Map {
 		}
 		
 		private void GenerateTrees () {
-			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(TreeRadius, polygon);
+			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(TreeRadius, localSpacePolygon);
 			foreach (Vector2 point in polygonPoints) {
 				Vector3 worldPoint = LocalVec2ToWorldVec3(point);
 				Vector3 rotation = new Vector3(0f, Random.value*360, 0f);
