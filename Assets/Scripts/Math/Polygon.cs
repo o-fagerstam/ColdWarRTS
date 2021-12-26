@@ -189,6 +189,11 @@ namespace Math {
 
 		}
 
+		/// <summary>
+		/// Checks if two polygons overlap.
+		/// NB Make sure that both polygons are in the same space (local/world)!
+		/// </summary>
+		/// <param name="other">The other polygon</param>
 		public bool Overlaps (Polygon other) {
 			List<Tuple<Vector2, Vector2>> thisLines = Lines.ToList();
 			List<Tuple<Vector2, Vector2>> otherLines = other.Lines.ToList();
@@ -207,12 +212,13 @@ namespace Math {
 			return false;
 		}
 
-		public bool Overlaps (Rectangle other) {
-			return Overlaps(new Polygon(other));
-		}
-
-		private enum Orientation {
-			Clockwise, CounterClockwise, Collinear
+		/// <summary>
+		/// Checks if this polygon overlaps with a rectangle.
+		/// NB Make sure that both polygons are in the same space (local/world)!
+		/// </summary>
+		/// <param name="rectangle">The rectangle to check against</param>
+		public bool Overlaps (Rectangle rectangle) {
+			return Overlaps(new Polygon(rectangle));
 		}
 
 		public Polygon ToWorldPolygon (Vector2 originWorldPosition) {
@@ -221,6 +227,10 @@ namespace Math {
 				worldVerts.Add(vertex + originWorldPosition);
 			}
 			return new Polygon(worldVerts, isClosed);
+		}
+		
+		private enum Orientation {
+			Clockwise, CounterClockwise, Collinear
 		}
 	}
 
