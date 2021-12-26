@@ -1,78 +1,53 @@
 ﻿using System;
 using System.Collections.Generic;
+using Constants;
 using Math;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Utils;
 using Random = UnityEngine.Random;
 namespace Map {
-	public class ForestSection : MonoBehaviour {
+	public class ForestSection : AStaticMapElement {
 
-		private readonly Polygon polygon = new Polygon();
+
 		private readonly List<GameObject> trees = new List<GameObject>();
 		[AssetsOnly][Required][SerializeField] private GameObject treePrefab;
-		[SerializeField] private float treeRadius = 0.15f;
-		public bool IsClosed => polygon.IsClosed;
-		public IEnumerable<Vector3> Points {
-			get {
-				List<Vector3> points = new List<Vector3>();
-				foreach (Vector2 vertex in polygon.Vertices) {
-					points.Add(LocalVec2ToWorldVec3(vertex));
-				}
-				return points;
-			}
-		}
+		[ShowInInspector] private static readonly float TreeRadius = 0.4f;
 
-		public event Action OnPolygonChanged;
-		public event Action OnDestruction;
-
-		private void OnDestroy () {
-			OnDestruction?.Invoke();
-		}
-
-		public bool AddPoint (Vector3 point) {
-			bool result = polygon.AddPoint(WorldVec3ToLocalVec2(point));
-			if (result) {
-				OnPolygonChanged?.Invoke();
-			}
-			return result;
-		}
-
-		public bool ValidateAddPoint (Vector3 point) {
-			return polygon.ValidateNewPoint(WorldVec3ToLocalVec2(point));
-		}
-
-		public bool Close () {
-			bool result = polygon.ClosePolygon();
+		public override bool Close () {
+			bool result = base.Close();
 			if (result) {
 				GenerateTrees();
-				OnPolygonChanged?.Invoke();
+				return true;
 			}
-			return result;
-		}
-
-		public bool PointInsideSection (Vector3 point) {
-			return polygon.PointInPolygon(WorldVec3ToLocalVec2(point));
-		}
-
-		private Vector2 WorldVec3ToLocalVec2 (Vector3 point) {
-			Vector3 position = transform.position;
-			return new Vector2(point.x - position.x, point.z - position.z);
-		}
-
-		private Vector3 LocalVec2ToWorldVec3 (Vector2 point) {
-			Vector3 position = transform.position;
-			return new Vector3(point.x + position.x, position.y, point.y + position.z);
+			return false;
 		}
 		
 		private void GenerateTrees () {
-			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(treeRadius, polygon);
+			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(TreeRadius, polygon);
 			foreach (Vector2 point in polygonPoints) {
 				Vector3 worldPoint = LocalVec2ToWorldVec3(point);
 				Vector3 rotation = new Vector3(0f, Random.value*360, 0f);
 				Quaternion quatRotation = Quaternion.Euler(rotation);
 				GameObject newTree = Instantiate(treePrefab, worldPoint, quatRotation, transform);
+				SetTreeElevation(newTree);
 				trees.Add(newTree);
 			}
+		}
+
+		protected override void ElevationUpdate () {
+			foreach (GameObject tree in trees) {
+				SetTreeElevation(tree);
+			}
+		}
+
+		private void SetTreeElevation (GameObject tree) {
+			Vector3 treePosition = tree.transform.position;
+			if (!RaycastUtil.ElevationRaycast(treePosition, out RaycastHit hit)) {
+				throw new Exception("Failed to raycast new tree position: No ground below?");
+			}
+			treePosition.y = hit.point.y;
+			tree.transform.position = treePosition;
 		}
 	}
 }

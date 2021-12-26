@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 namespace Math {
 	public class Polygon {
@@ -10,15 +11,13 @@ namespace Math {
 		public IEnumerable<Vector2> Vertices => vertices;
 		public IEnumerable<Tuple<Vector2, Vector2>> Lines {
 			get {
-				List<Tuple<Vector2, Vector2>> lines = new List<Tuple<Vector2, Vector2>>();
 				int i = 0;
 				int stoppingPoint = isClosed ? 0 : NumOfVertices - 1;
 				do {
 					int next = (i + 1)%NumOfVertices;
-					lines.Add(new Tuple<Vector2, Vector2>(vertices[i], vertices[next]));
+					yield return new Tuple<Vector2, Vector2>(vertices[i], vertices[next]);
 					i = next;
 				} while (i != 0);
-				return lines;
 			}
 		}
 
@@ -60,7 +59,8 @@ namespace Math {
 			}
 		}
 
-		public Polygon() {}
+		public Polygon () {}
+		public Polygon (Rectangle rectangle) : this(rectangle.GetCorners().ToList(), true) {}
 		private Polygon (List<Vector2> vertices, bool isClosed = false) {
 			foreach (Vector2 vertex in vertices) {
 				this.vertices.Add(vertex);
@@ -101,7 +101,7 @@ namespace Math {
 					}
 					intersectionCount++;
 				}
-				
+
 				i = next;
 			} while (i != 0);
 
@@ -127,14 +127,18 @@ namespace Math {
 			Polygon testPolygon = new Polygon(vertices, true);
 			return !testPolygon.HasIntersectingLines();
 		}
-		
+
 		private void UnvalidatedAddPoint (Vector2 point) {
 			vertices.Add(point);
 		}
 
+		private void UnvalidatedCLosePolygon () {
+			isClosed = true;
+		}
+
 		private bool HasIntersectingLines () {
-			for (int i = 0; i < NumOfVertices-3; i++) {
-				for (int j = i+2; j < NumOfVertices-2; j++) {
+			for (int i = 0; i < NumOfVertices - 3; i++) {
+				for (int j = i + 2; j < NumOfVertices - 2; j++) {
 					if (LinesIntersect(vertices[i], vertices[i + 1], vertices[j], vertices[j + 1])) {
 						return true;
 					}
@@ -142,16 +146,15 @@ namespace Math {
 			}
 
 			if (isClosed) {
-				for (int i = 1; i < NumOfVertices-2; i++) {
+				for (int i = 1; i < NumOfVertices - 2; i++) {
 					if (LinesIntersect(vertices[i], vertices[i + 1], vertices[0], vertices[NumOfVertices - 1])) {
 						return true;
 					}
 				}
 			}
-
 			return false;
 		}
-		
+
 
 		private Orientation GetThreePointOrientation (Vector2 p, Vector2 q, Vector2 r) {
 			float val = (q.y - p.y)*(r.x - q.x) - (r.y - q.y)*(q.x - p.x);
@@ -167,17 +170,17 @@ namespace Math {
 
 		private bool OnCollinearSegment (Vector2 p, Vector3 q, Vector3 r) {
 			return q.x <= Mathf.Max(p.x, r.x) && q.x >= Mathf.Min(p.x, r.x) &&
-			        q.y <= Mathf.Min(p.y, r.y) && q.y >= Mathf.Min(p.y, r.y);
+			       q.y <= Mathf.Min(p.y, r.y) && q.y >= Mathf.Min(p.y, r.y);
 		}
-		
+
 		private bool LinesIntersect (Vector2 p1, Vector2 q1, Vector2 p2, Vector2 q2) {
 			Orientation o1 = GetThreePointOrientation(p1, q1, p2);
 			Orientation o2 = GetThreePointOrientation(p1, q1, q2);
 			Orientation o3 = GetThreePointOrientation(p2, q2, p1);
 			Orientation o4 = GetThreePointOrientation(p2, q2, q1);
 
-			if (o1 != o2 && o3 != o4) { return true;}
-			
+			if (o1 != o2 && o3 != o4) { return true; }
+
 			return o1 == Orientation.Collinear &&
 			       (OnCollinearSegment(p1, p2, q1) ||
 			        OnCollinearSegment(p1, q2, q1) ||
@@ -186,9 +189,32 @@ namespace Math {
 
 		}
 
+		public bool Overlaps (Polygon other) {
+			List<Tuple<Vector2, Vector2>> thisLines = Lines.ToList();
+			List<Tuple<Vector2, Vector2>> otherLines = other.Lines.ToList();
+
+			if (PointInPolygon(otherLines[0].Item1) || other.PointInPolygon(thisLines[0].Item1)) {
+				return true;
+			}
+
+			foreach ((Vector2 p1, Vector2 q1) in thisLines) {
+				foreach ((Vector2 p2, Vector2 q2) in otherLines) {
+					if (LinesIntersect(p1, q1, p2, q2)) {
+						return false;
+					}
+				}
+			}
+			return true;
+		}
+
+		public bool Overlaps (Rectangle other) {
+			return Overlaps(new Polygon(other));
+		}
+
 		private enum Orientation {
 			Clockwise, CounterClockwise, Collinear
 		}
 
 	}
+
 }

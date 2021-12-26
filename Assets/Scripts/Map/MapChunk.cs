@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using Math;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -8,6 +9,7 @@ namespace Map {
 	public class MapChunk : MonoBehaviour {
 		[SerializeField] private MeshFilter meshFilter;
 		[SerializeField] private MeshCollider meshCollider;
+		[SerializeField][ReadOnly] private List<AStaticMapElement> staticMapElements;
 		private int squaresPerSide;
 		private float visibleChunkSideDimension ;
 		[ShowInInspector] [ReadOnly] public GameMap Map { get; private set; }
@@ -132,6 +134,20 @@ namespace Map {
 				vertices,
 				meshFilter.sharedMesh.uv
 			);
+
+			foreach (AStaticMapElement staticMapElement in staticMapElements) {
+				staticMapElement.NotifyUpdateNeeded();
+			}
+		}
+
+		public void AddStaticMapElement (AStaticMapElement element) {
+			staticMapElements.Add(element);
+			element.OnDestruction += HandleStaticMapElementDestroyed;
+		}
+
+		public void HandleStaticMapElementDestroyed (AStaticMapElement element) {
+			element.OnDestruction -= HandleStaticMapElementDestroyed;
+			staticMapElements.Remove(element);
 		}
 	}
 }

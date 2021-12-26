@@ -1,19 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using Math;
+using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {
-	public class GameMap : MonoBehaviour {
+	public class GameMap : ASingleton {
 		[SerializeField] private List<MapChunk> chunks = new List<MapChunk>();
 		[SerializeField] private MapChunk mapChunkPrefab;
 
-		private void Start () {
+		protected override void Start () {
+			base.Start();
 			GenerateFlatMap(20, 20, 100f);
 		}
 
-		public void GenerateFlatMap (int chunksPerSide, int chunkResolution, float mapSize) {
+		private void GenerateFlatMap (int chunksPerSide, int chunkResolution, float mapSize) {
 			ClearMap();
 
 			float chunkSize = mapSize/chunksPerSide;
@@ -28,11 +30,22 @@ namespace Map {
 			}
 		}
 
+		public void RegisterStaticMapElement (AStaticMapElement element) {
+			foreach (MapChunk mapChunk in chunks) {
+				if (element.Overlaps(mapChunk.worldRectangle)) {
+					mapChunk.AddStaticMapElement(element);
+				}
+			}
+		}
+
 		private void ClearMap () {
 			foreach (MapChunk chunk in chunks) {
 				SafeDestroyUtil.SafeDestroyGameObject(chunk);
 			}
 			chunks.Clear();
+			foreach (AStaticMapElement staticMapElement in FindObjectsOfType<AStaticMapElement>(true)) {
+				SafeDestroyUtil.SafeDestroyGameObject(staticMapElement);
+			}
 		}
 		public void EditElevation (Vector3 hitPoint, float radius, float magnitude) {
 			Vector2 rectangleSize = new Vector2(radius * 2, radius * 2);
@@ -43,7 +56,6 @@ namespace Map {
 					chunk.EditElevation(hitPoint, radius, magnitude);
 				}
 			}
-			
 		}
 	}
 }

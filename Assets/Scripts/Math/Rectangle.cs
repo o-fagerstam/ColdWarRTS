@@ -1,4 +1,5 @@
-﻿using UnityEngine;
+﻿using System.Collections.Generic;
+using UnityEngine;
 namespace Math {
 	public readonly struct Rectangle {
 		private readonly Vector2 center; //Position of center
@@ -6,6 +7,12 @@ namespace Math {
 
 		public Vector2 Center => center;
 		public Vector2 Dimension => dimension;
+		public IEnumerable<Vector2> GetCorners () {
+			yield return new Vector2(xMin, yMin);
+			yield return new Vector2(xMin, yMax);
+			yield return new Vector2(xMax, yMax);
+			yield return new Vector2(xMax, yMin);
+		}
 		public float xMin => center.x - dimension.x/2f;
 		public float xMax => center.x + dimension.x/2f;
 		public float yMin => center.y - dimension.y/2f;
@@ -24,6 +31,10 @@ namespace Math {
 				return false;
 			}
 			return true;
+		}
+
+		public bool Overlaps (Polygon other) {
+			return other.Overlaps(this);
 		}
 	}
 }

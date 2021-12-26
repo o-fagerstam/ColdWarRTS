@@ -13,8 +13,7 @@ namespace Map {
             forestSection.OnPolygonChanged += HandleForestSectionChanged;
             forestSection.OnDestruction += HandleForestSectionDestruction;
         }
-
-
+        
         private void OnDestroy () {
             forestSection.OnPolygonChanged -= HandleForestSectionChanged;
             forestSection.OnDestruction -= HandleForestSectionDestruction;
@@ -25,7 +24,7 @@ namespace Map {
             drawClosed = forestSection.IsClosed;
         }
         
-        private void HandleForestSectionDestruction () {
+        private void HandleForestSectionDestruction (AStaticMapElement element) {
             Destroy(this);
         }
 
