@@ -1,9 +1,9 @@
 ﻿using System;
 using UnityEngine;
 namespace Controls.MapEditorTools {
-	public abstract class MapEditorTool : MonoBehaviour {
+	public abstract class AMapEditorTool : MonoBehaviour {
 
-		public event Action<MapEditorTool> OnToolFinished;
+		public event Action<AMapEditorTool> OnToolFinished;
 		public event Action<string> OnTooltipUpdate;
 
 		protected void ToolFinished () { OnToolFinished?.Invoke(this);}

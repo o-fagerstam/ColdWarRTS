@@ -5,9 +5,9 @@ using UnityEngine;
 using UnityEngine.UI;
 namespace UI {
 	public class ToolSelectButton : MonoBehaviour {
-		[SerializeField] [Required] private MapEditorTool tool;
+		[SerializeField] [Required] private AMapEditorTool tool;
 		[ShowInInspector] [ReadOnly] private Button button;
-		public event Action<MapEditorTool> OnToolSelected;
+		public event Action<AMapEditorTool> OnToolSelected;
 		protected void Start () {
 			button = GetComponent<Button>();
 			button.onClick.AddListener(InvokeToolSelected);

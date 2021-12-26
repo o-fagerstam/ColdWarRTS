@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using Constants;
 using Math;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -8,9 +7,7 @@ using Utils;
 using Random = UnityEngine.Random;
 namespace Map {
 	public class ForestSection : AStaticMapElement {
-
-
-		private readonly List<GameObject> trees = new List<GameObject>();
+		[ShowInInspector] private readonly List<GameObject> trees = new List<GameObject>();
 		[AssetsOnly][Required][SerializeField] private GameObject treePrefab;
 		[ShowInInspector] private static readonly float TreeRadius = 0.4f;
 

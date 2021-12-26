@@ -1,7 +1,7 @@
 ﻿using Map;
 using UnityEngine;
 namespace Controls.MapEditorTools {
-	public class EditElevationTool : MapEditorTool {
+	public class EditElevationTool : AMapEditorTool {
 		private const string TOOLTIP_BASE = "Left click: Raise, Right click: Lower, Scroll: Change brush size, Space: Exit";
 		public override void Activate () {
 			UpdateTooltip(TOOLTIP_BASE);

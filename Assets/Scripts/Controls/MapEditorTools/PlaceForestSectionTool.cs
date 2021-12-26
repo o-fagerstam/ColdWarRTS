@@ -1,8 +1,10 @@
 ﻿using Map;
+using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using Utils;
 namespace Controls.MapEditorTools {
-	public class PlaceForestSectionTool : MapEditorTool {
+	public class PlaceForestSectionTool : AMapEditorTool {
 		
 		[AssetsOnly] [Required]
 		[SerializeField] private ForestSection forestSectionPrefab;
@@ -17,7 +19,11 @@ namespace Controls.MapEditorTools {
 			base.OnLeftClickGround(hit);
 			Vector3 point = hit.point;
 			if (currentForestSection == null) {
-				currentForestSection = Instantiate(forestSectionPrefab, point, Quaternion.identity);
+				currentForestSection = Instantiate(
+					forestSectionPrefab, 
+					point, 
+					Quaternion.identity, 
+					SingletonManager.Retrieve<GameMap>().transform);
 				UpdateTooltip(TOOLTIP_DURING_PLACEMENT);
 			}
 
@@ -27,7 +33,7 @@ namespace Controls.MapEditorTools {
 		public override void OnRightClickGround (RaycastHit hit) {
 			base.OnRightClickGround(hit);
 			if (currentForestSection != null) {
-				Destroy(currentForestSection);
+				SafeDestroyUtil.SafeDestroyGameObject(currentForestSection);
 				ToolFinished();
 			}
 		}

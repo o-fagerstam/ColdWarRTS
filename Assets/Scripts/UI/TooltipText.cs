@@ -10,11 +10,11 @@ namespace UI {
 			text = GetComponent<TMP_Text>();
 		}
 
-		public void Subscribe (MapEditorTool tool) {
+		public void Subscribe (AMapEditorTool tool) {
 			tool.OnTooltipUpdate += HandleTooltipUpdate;
 		}
 
-		public void Unsubscribe (MapEditorTool tool) {
+		public void Unsubscribe (AMapEditorTool tool) {
 			tool.OnTooltipUpdate -= HandleTooltipUpdate;
 			text.text = "";
 		}

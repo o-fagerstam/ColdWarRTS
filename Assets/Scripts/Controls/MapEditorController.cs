@@ -5,20 +5,20 @@ using Sirenix.OdinInspector;
 using UI;
 using UnityEngine;
 namespace Controls {
-	public class MapEditorController : RtsController {
+	public class MapEditorController : ARtsController {
 		[Title("Map Editor Controller")]
 		[SceneObjectsOnly] 
 		[SerializeField] private Map.GameMap map;
 		[Title("Debug")]
-		[ReadOnly] [ShowInInspector] private MapEditorTool currentTool;
+		[ReadOnly] [ShowInInspector] private AMapEditorTool currentTool;
 		
-		public void SelectTool (MapEditorTool tool) {
+		public void SelectTool (AMapEditorTool tool) {
 			currentTool = tool;
 			tool.OnToolFinished += HandleToolFinished;
 			tool.Activate();
 		}
 		
-		private void HandleToolFinished (MapEditorTool tool) {
+		private void HandleToolFinished (AMapEditorTool tool) {
 			ClearTool();
 			tool.OnToolFinished -= HandleToolFinished;
 		}

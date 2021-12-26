@@ -58,4 +58,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   useCullingMasks: 0
-  forestSection: {fileID: -4291172762214712010}
+  staticMapElement: {fileID: -4291172762214712010}

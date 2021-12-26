@@ -4,27 +4,30 @@ using Shapes;
 using UnityEngine;
 namespace Map {
     [ExecuteAlways]
-    public class ForestSectionShapeDrawer : ImmediateModeShapeDrawer {
-        [SerializeField] private ForestSection forestSection;
+    [RequireComponent(typeof(AStaticMapElement))]
+    public class StaticMapElementOutlineDrawer : ImmediateModeShapeDrawer {
+        [SerializeField] private AStaticMapElement staticMapElement;
         private PolylinePath path;
         private bool drawClosed;
         private void Start () {
-            forestSection = GetComponent<ForestSection>();
-            forestSection.OnPolygonChanged += HandleForestSectionChanged;
-            forestSection.OnDestruction += HandleForestSectionDestruction;
+            staticMapElement = GetComponent<ForestSection>();
+            staticMapElement.OnPolygonChanged += HandleStaticMapElementChanged;
+            staticMapElement.OnDestruction += HandleStaticMapElementDestruction;
         }
         
         private void OnDestroy () {
-            forestSection.OnPolygonChanged -= HandleForestSectionChanged;
-            forestSection.OnDestruction -= HandleForestSectionDestruction;
+            staticMapElement.OnPolygonChanged -= HandleStaticMapElementChanged;
+            staticMapElement.OnDestruction -= HandleStaticMapElementDestruction;
         }
 
-        private void HandleForestSectionChanged () {
-            path = GeneratePathFromPoints(forestSection.Points);
-            drawClosed = forestSection.IsClosed;
+        private void HandleStaticMapElementChanged (AStaticMapElement element, bool isClosed) {
+            path = GeneratePathFromPoints(staticMapElement.Points);
+            if (isClosed) {
+                enabled=false;
+            }
         }
         
-        private void HandleForestSectionDestruction (AStaticMapElement element) {
+        private void HandleStaticMapElementDestruction (AStaticMapElement element) {
             Destroy(this);
         }
 

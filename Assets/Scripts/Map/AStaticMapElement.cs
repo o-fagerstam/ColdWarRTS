@@ -18,7 +18,15 @@ namespace Map {
 			}
 		}
 		
-		public event Action OnPolygonChanged;
+		/// <summary>
+		/// Triggers when the polygon changes (or is closed).
+		/// Args: This component, isClosed
+		/// </summary>
+		public event Action<AStaticMapElement, bool> OnPolygonChanged;
+		
+		/// <summary>
+		/// Triggers on component destruction. Args: This object
+		/// </summary>
 		public event Action<AStaticMapElement> OnDestruction;
 
 		private void OnDestroy () {
@@ -33,7 +41,7 @@ namespace Map {
 		public bool AddPoint (Vector3 point) {
 			bool result = polygon.AddPoint(WorldVec3ToLocalVec2(point));
 			if (result) {
-				OnPolygonChanged?.Invoke();
+				OnPolygonChanged?.Invoke(this, IsClosed);
 			}
 			return result;
 		}
@@ -45,7 +53,7 @@ namespace Map {
 		public virtual bool Close () {
 			bool result = polygon.ClosePolygon();
 			if (result) {
-				OnPolygonChanged?.Invoke();
+				OnPolygonChanged?.Invoke(this, true);
 				SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
 			}
 			return result;

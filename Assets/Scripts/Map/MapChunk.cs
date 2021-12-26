@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Constants;
 using Math;
 using Sirenix.OdinInspector;
 using UnityEngine;
@@ -127,13 +128,12 @@ namespace Map {
 				float distance = Mathf.Sqrt(sqrDistance);
 				float centerPointCloseness = 1f - distance/radius;
 				AnimationCurve curve = AnimationCurve.EaseInOut(0f,0f,1f,1f);
-				vertices[i].y += magnitude*curve.Evaluate(centerPointCloseness);
+				float newHeight = vertices[i].y + magnitude*curve.Evaluate(centerPointCloseness);
+				newHeight = Mathf.Clamp(newHeight, GeographyConstants.MIN_ELEVATION, GeographyConstants.MAX_ELEVATION);
+				vertices[i].y = newHeight;
 			}
 
-			RecalculateMesh(
-				vertices,
-				meshFilter.sharedMesh.uv
-			);
+			RecalculateMesh(vertices, meshFilter.sharedMesh.uv);
 
 			foreach (AStaticMapElement staticMapElement in staticMapElements) {
 				staticMapElement.NotifyUpdateNeeded();

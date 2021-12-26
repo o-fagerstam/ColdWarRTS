@@ -14,12 +14,12 @@ namespace UI {
 			}
 		}
 
-		private void HandleToolSelected (MapEditorTool tool) {
+		private void HandleToolSelected (AMapEditorTool tool) {
 			tooltip.Subscribe(tool);
 			tool.OnToolFinished += HandleToolFinished;
 			mapEditorController.SelectTool(tool);
 		}
-		private void HandleToolFinished (MapEditorTool tool) {
+		private void HandleToolFinished (AMapEditorTool tool) {
 			tooltip.Unsubscribe(tool);
 			tool.OnToolFinished -= HandleToolFinished;
 		}

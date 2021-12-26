@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using Math;
 using Singleton;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {

@@ -1,16 +1,11 @@
 ﻿using Constants;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls {
-	public abstract class RtsController : MonoBehaviour {
+	public abstract class ARtsController : MonoBehaviour {
 
 		private float scrollSpeed = 5f;
-		private Transform cameraFollowTransform;
-		protected virtual void Start () {
-			cameraFollowTransform = transform;
-		}
 		protected virtual void Update()
 		{
 			UpdateKeyboardControl();
