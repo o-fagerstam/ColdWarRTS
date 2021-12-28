@@ -57,7 +57,8 @@ namespace Map {
 			}
 			Vector3 newPosition = new Vector3(instance.position.x, hit.point.y, instance.position.z);
 			float angle = Vector3.Angle(Vector3.up, hit.normal);
-			bool enabled = angle < GeographyConstants.TREE_SLOPE_ANGLE_MAX;
+			bool enabled = angle < GeographyConstants.TREE_SLOPE_ANGLE_MAX &&
+			               newPosition.y > GeographyConstants.TREE_ELEVATION_OVER_WATER_MIN;
 			return new GpuInstance(
 				newPosition,
 				instance.scale,

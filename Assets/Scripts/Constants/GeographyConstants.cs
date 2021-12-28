@@ -2,7 +2,7 @@
 namespace Constants {
 	public static class GeographyConstants {
 
-		#region Elevation
+		#region Basic
 		/// <summary>
 		/// Maximum permissible elevation
 		/// </summary>
@@ -14,7 +14,7 @@ namespace Constants {
 		/// <summary>
 		///  Water level of the map
 		/// </summary>
-		public static readonly float MAP_WATER_LEVEL = ScaleUtil.GameToUnity(-20f);
+		public static readonly float MAP_WATER_LEVEL = ScaleUtil.GameToUnity(-50f);
 		#endregion
 
 
@@ -23,6 +23,10 @@ namespace Constants {
 		/// Maximum angle at which trees will appear on a slope
 		/// </summary>
 		public static readonly float TREE_SLOPE_ANGLE_MAX = 63f;
+		/// <summary>
+		/// Minimum height over water that trees will grow
+		/// </summary>
+		public static readonly float TREE_ELEVATION_OVER_WATER_MIN = MAP_WATER_LEVEL + ScaleUtil.GameToUnity(3f);
 		#endregion
 	}
 }

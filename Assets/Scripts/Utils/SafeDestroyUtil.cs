@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 namespace Utils {
 	public static class SafeDestroyUtil {
-		private static T SafeDestroy<T> (T obj) where T : Object {
+		public static T SafeDestroy<T> (T obj) where T : Object {
 			if (Application.isEditor) {
 				Object.DestroyImmediate(obj);
 			} else {

@@ -10,10 +10,13 @@ namespace Map {
 	public class MapChunk : MonoBehaviour {
 		[SerializeField] private MeshFilter meshFilter;
 		[SerializeField] private MeshCollider meshCollider;
-		[SerializeField][ReadOnly] private List<AStaticMapElement> staticMapElements;
+		[SerializeField][Required] private GameObject waterPrefab;
+		[ShowInInspector] private GameObject water;
+		[ShowInInspector][ReadOnly] private List<AStaticMapElement> staticMapElements = new List<AStaticMapElement>();
+
 		private int squaresPerSide;
-		private float visibleChunkSideDimension ;
-		[ShowInInspector] [ReadOnly] public GameMap Map { get; private set; }
+		private float visibleChunkSideDimension;
+		[ShowInInspector][ReadOnly] public GameMap Map { get; private set; }
 		public Rectangle worldRectangle {
 			get {
 				Vector2 size = new Vector2(visibleChunkSideDimension, visibleChunkSideDimension);
@@ -48,11 +51,21 @@ namespace Map {
 					int vertIndex = x + y*realPointsPerSide;
 					vertices[vertIndex] = new Vector3(x*dstBetweenPoints + startSideOffset, 0f, y*dstBetweenPoints + startSideOffset);
 					uvs[vertIndex] = new Vector2(
-						Mathf.Clamp01((x -.5f)/visiblePointsPerSide), 
-						Mathf.Clamp01((y-.5f)/visiblePointsPerSide));
+						Mathf.Clamp01((x - .5f)/visiblePointsPerSide),
+						Mathf.Clamp01((y - .5f)/visiblePointsPerSide));
 				}
 			}
 			RecalculateMesh(vertices, uvs);
+			GenerateWater();
+		}
+		private void GenerateWater () {
+			if (water != null) { SafeDestroyUtil.SafeDestroy(water); }
+			Vector3 waterPosition = transform.TransformPoint(0f, GeographyConstants.MAP_WATER_LEVEL, 0f);
+			water = Instantiate(waterPrefab,
+				waterPosition,
+				Quaternion.identity,
+				transform);
+			water.transform.localScale = Vector3.one*0.1f*visibleChunkSideDimension;
 		}
 
 		private int CalculateVisiblePointsPerSide (int squaresPerSide) => squaresPerSide + 1;
@@ -61,9 +74,9 @@ namespace Map {
 		private void RecalculateMesh (Vector3[] vertices, Vector2[] uvs) {
 			int visiblePointsPerSide = CalculateVisiblePointsPerSide(squaresPerSide);
 			int realPointsPerSide = CalculateRealPointsPerSide(squaresPerSide);
-			int[] triangles = new int[(realPointsPerSide-1) * (realPointsPerSide-1) * 6];
-			for (int y = 0, triangleIndex = 0; y < realPointsPerSide-1; y++) {
-				for (int x = 0; x < realPointsPerSide-1; x++) {
+			int[] triangles = new int[(realPointsPerSide - 1)*(realPointsPerSide - 1)*6];
+			for (int y = 0, triangleIndex = 0; y < realPointsPerSide - 1; y++) {
+				for (int x = 0; x < realPointsPerSide - 1; x++) {
 					int a = x + y*realPointsPerSide;
 					int b = x + 1 + y*realPointsPerSide;
 					int c = x + (y + 1)*realPointsPerSide;
@@ -72,13 +85,13 @@ namespace Map {
 					triangles[triangleIndex++] = a;
 					triangles[triangleIndex++] = c;
 					triangles[triangleIndex++] = d;
-					
+
 					triangles[triangleIndex++] = a;
 					triangles[triangleIndex++] = d;
 					triangles[triangleIndex++] = b;
 				}
 			}
-			
+
 			Mesh mesh = new Mesh {
 				name = "ChunkMesh"
 			};
@@ -86,24 +99,24 @@ namespace Map {
 			mesh.vertices = vertices;
 			mesh.triangles = triangles;
 			mesh.uv = uvs;
-			
+
 			meshFilter.sharedMesh = mesh;
 			meshFilter.sharedMesh.RecalculateBounds();
 			meshFilter.sharedMesh.RecalculateNormals();
 			meshFilter.sharedMesh.RecalculateTangents();
 
 			int[] visibleTriangles = new int[(visiblePointsPerSide - 1)*(visiblePointsPerSide - 1)*6];
-			for (int y = 0, triangleIndex = 0; y < visiblePointsPerSide-1; y++) {
-				for (int x = 0; x < visiblePointsPerSide-1; x++) {
-					int a = x+1 + (y+1)*realPointsPerSide;
-					int b = x + 2 + (y+1)*realPointsPerSide;
+			for (int y = 0, triangleIndex = 0; y < visiblePointsPerSide - 1; y++) {
+				for (int x = 0; x < visiblePointsPerSide - 1; x++) {
+					int a = x + 1 + (y + 1)*realPointsPerSide;
+					int b = x + 2 + (y + 1)*realPointsPerSide;
 					int c = x + 1 + (y + 2)*realPointsPerSide;
 					int d = x + 2 + (y + 2)*realPointsPerSide;
 
 					visibleTriangles[triangleIndex++] = a;
 					visibleTriangles[triangleIndex++] = c;
 					visibleTriangles[triangleIndex++] = d;
-					
+
 					visibleTriangles[triangleIndex++] = a;
 					visibleTriangles[triangleIndex++] = d;
 					visibleTriangles[triangleIndex++] = b;
@@ -118,16 +131,16 @@ namespace Map {
 
 		public void EditElevation (Vector3 hitPointWorld, float radius, float magnitude) {
 			Vector3 hitPointLocal = VectorUtil.WorldPos2Local(hitPointWorld, transform.position);
-			Vector3[] vertices = (Vector3[]) meshFilter.mesh.vertices.Clone();
+			Vector3[] vertices = (Vector3[])meshFilter.mesh.vertices.Clone();
 			float sqrRadius = radius*radius;
-			for (int i = 0; i < vertices.Length; i++ ) {
+			for (int i = 0; i < vertices.Length; i++) {
 				float sqrDistance = (VectorUtil.Flatten(hitPointLocal) - VectorUtil.Flatten(vertices[i])).sqrMagnitude;
 				if (sqrDistance > sqrRadius) {
 					continue;
 				}
 				float distance = Mathf.Sqrt(sqrDistance);
 				float centerPointCloseness = 1f - distance/radius;
-				AnimationCurve curve = AnimationCurve.EaseInOut(0f,0f,1f,1f);
+				AnimationCurve curve = AnimationCurve.EaseInOut(0f, 0f, 1f, 1f);
 				float newHeight = vertices[i].y + magnitude*curve.Evaluate(centerPointCloseness);
 				newHeight = Mathf.Clamp(newHeight, GeographyConstants.MAP_ELEVATION_MIN, GeographyConstants.MAP_ELEVATION_MAX);
 				vertices[i].y = newHeight;
