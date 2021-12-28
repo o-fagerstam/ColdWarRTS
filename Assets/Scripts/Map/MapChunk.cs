@@ -129,7 +129,7 @@ namespace Map {
 				float centerPointCloseness = 1f - distance/radius;
 				AnimationCurve curve = AnimationCurve.EaseInOut(0f,0f,1f,1f);
 				float newHeight = vertices[i].y + magnitude*curve.Evaluate(centerPointCloseness);
-				newHeight = Mathf.Clamp(newHeight, GeographyConstants.MIN_ELEVATION, GeographyConstants.MAX_ELEVATION);
+				newHeight = Mathf.Clamp(newHeight, GeographyConstants.MAP_ELEVATION_MIN, GeographyConstants.MAP_ELEVATION_MAX);
 				vertices[i].y = newHeight;
 			}
 

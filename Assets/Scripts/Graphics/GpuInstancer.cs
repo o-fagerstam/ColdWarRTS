@@ -18,6 +18,7 @@ namespace Graphics {
 			batches.Clear();
 			batches.Add(new List<Matrix4x4>());
 			foreach (GpuInstance instance in instances) {
+				if (!instance.enabled) { continue; }
 				if (batchCount == 1000) {
 					batches.Add(new List<Matrix4x4>());
 					batchCount = 0;
