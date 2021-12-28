@@ -34,7 +34,7 @@ namespace Map {
 			OnDestruction?.Invoke(this);
 		}
 
-		private void Update () {
+		protected virtual void Update () {
 			if (elevationUpdateNeeded) { ElevationUpdate(); }
 		}
 		protected abstract void ElevationUpdate ();

@@ -109,7 +109,7 @@ namespace Math {
 		}
 
 		/// <summary>
-		/// Check if it would be valid to add a point to the polygon.
+		/// Validate if a given point can be added to the polygon.
 		/// </summary>
 		public bool ValidateNewPoint (Vector2 point) {
 			if (NumOfVertices < 2) { return true; }

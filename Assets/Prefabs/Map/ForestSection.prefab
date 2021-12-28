@@ -44,7 +44,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25c363181c484bc0955f0a4eabd4ee70, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  treePrefab: {fileID: 168854666805644734, guid: 5bbd5486aa5405740949e93b74dcfc57, type: 3}
+  treePrefab: {fileID: 2616868900842553433, guid: 5bbd5486aa5405740949e93b74dcfc57, type: 3}
 --- !u!114 &8188708964252741011
 MonoBehaviour:
   m_ObjectHideFlags: 0
