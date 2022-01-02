@@ -1,7 +1,9 @@
-﻿using Map;
+﻿using Constants;
+using Map;
 using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using Utils;
 namespace Controls.MapEditorTools {
 	public class PlaceForestSectionTool : AMapEditorTool {
@@ -15,8 +17,21 @@ namespace Controls.MapEditorTools {
 		public override void Activate () {
 			UpdateTooltip(TOOLTIP_BASE);
 		}
-		public override void OnLeftClickGround (RaycastHit hit) {
-			base.OnLeftClickGround(hit);
+		public override void UpdateKeyboard () {
+			if (Keyboard.current.spaceKey.wasPressedThisFrame) { OnSpacePressed();}
+		}
+		public override void UpdateMouse (Ray mouseRay) {
+			if (!Mouse.current.leftButton.isPressed && !Mouse.current.rightButton.isPressed) {return;}
+			if (!Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.ground)) { return; }
+
+			if (Mouse.current.leftButton.wasPressedThisFrame) {
+				OnLeftClickGround(hit);
+			}
+			if (Mouse.current.rightButton.wasPressedThisFrame) {
+				OnRightClickGround(hit);
+			}
+		}
+		public void OnLeftClickGround (RaycastHit hit) {
 			Vector3 point = hit.point;
 			if (currentForestSection == null) {
 				currentForestSection = Instantiate(
@@ -30,16 +45,15 @@ namespace Controls.MapEditorTools {
 			currentForestSection.AddPoint(point);
 		}
 
-		public override void OnRightClickGround (RaycastHit hit) {
-			base.OnRightClickGround(hit);
+		public void OnRightClickGround (RaycastHit hit) {
 			if (currentForestSection != null) {
 				SafeDestroyUtil.SafeDestroyGameObject(currentForestSection);
-				ToolFinished();
+				currentForestSection = null;
+				UpdateTooltip(TOOLTIP_BASE);
 			}
 		}
 
-		public override void OnSpacePressed () {
-			base.OnSpacePressed();
+		public void OnSpacePressed () {
 			if (currentForestSection != null) {
 				if (!currentForestSection.Close()) {
 					return;

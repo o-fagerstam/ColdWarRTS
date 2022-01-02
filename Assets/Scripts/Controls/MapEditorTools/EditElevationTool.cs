@@ -1,19 +1,32 @@
-﻿using Map;
+﻿using Constants;
+using Map;
 using UnityEngine;
+using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public class EditElevationTool : AMapEditorTool {
 		private const string TOOLTIP_BASE = "Left click: Raise, Right click: Lower, Scroll: Change brush size, Space: Exit";
 		public override void Activate () {
 			UpdateTooltip(TOOLTIP_BASE);
 		}
+		public override void UpdateKeyboard () {}
+		public override void UpdateMouse (Ray mouseRay) {
+			if (!Mouse.current.leftButton.isPressed && !Mouse.current.rightButton.isPressed) {return;}
+			if (!Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.ground)) { return; }
 
-		public override void OnLeftClickGround (RaycastHit hit) {
-			base.OnLeftClickGround(hit);
+			if (Mouse.current.leftButton.wasPressedThisFrame) {
+				OnLeftClickGround(hit);
+			}
+			if (Mouse.current.rightButton.wasPressedThisFrame) {
+				OnRightClickGround(hit);
+			}
+
+		}
+
+		public void OnLeftClickGround (RaycastHit hit) {
 			EditMapElevation(hit, 2f);
 		}
 
-		public override void OnRightClickGround (RaycastHit hit) {
-			base.OnRightClickGround(hit);
+		public void OnRightClickGround (RaycastHit hit) {
 			EditMapElevation(hit, -2f);
 		}
 
