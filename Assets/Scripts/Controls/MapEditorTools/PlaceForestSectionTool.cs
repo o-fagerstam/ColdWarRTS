@@ -3,6 +3,7 @@ using Map;
 using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 using Utils;
 namespace Controls.MapEditorTools {
@@ -22,6 +23,7 @@ namespace Controls.MapEditorTools {
 		}
 		public override void UpdateMouse (Ray mouseRay) {
 			if (!Mouse.current.leftButton.isPressed && !Mouse.current.rightButton.isPressed) {return;}
+			if (EventSystem.current.IsPointerOverGameObject()) { return; }
 			if (!Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.ground)) { return; }
 
 			if (Mouse.current.leftButton.wasPressedThisFrame) {

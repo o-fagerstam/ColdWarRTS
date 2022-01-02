@@ -3,6 +3,7 @@ using Map;
 using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public class PlaceRoadTool : AMapEditorTool {
@@ -29,6 +30,7 @@ namespace Controls.MapEditorTools {
 				return;
 			}
 			
+			if (EventSystem.current.IsPointerOverGameObject()) { return; }
 			if (!Physics.Raycast(mouseRay, out RaycastHit clickHit, Mathf.Infinity, LayerMasks.anythingClickable)) { return; }
 			int hitLayer = 1 << clickHit.transform.gameObject.layer;
 			if (Mouse.current.leftButton.wasPressedThisFrame) {

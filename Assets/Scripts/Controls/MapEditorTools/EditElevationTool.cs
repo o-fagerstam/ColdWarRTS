@@ -1,6 +1,7 @@
 ﻿using Constants;
 using Map;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public class EditElevationTool : AMapEditorTool {
@@ -11,6 +12,7 @@ namespace Controls.MapEditorTools {
 		public override void UpdateKeyboard () {}
 		public override void UpdateMouse (Ray mouseRay) {
 			if (!Mouse.current.leftButton.isPressed && !Mouse.current.rightButton.isPressed) {return;}
+			if (EventSystem.current.IsPointerOverGameObject()) { return; }
 			if (!Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.ground)) { return; }
 
 			if (Mouse.current.leftButton.wasPressedThisFrame) {
