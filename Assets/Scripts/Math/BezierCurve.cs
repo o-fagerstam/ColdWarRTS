@@ -58,11 +58,11 @@ namespace Math {
             int numSubdivisions = subdivisionsPerPoint*numPoints;
             int pointIndex = 0;
             int subdivisionIndex = 1;
-            float dstBetweenPoints = ApproximateLength/numPoints;
+            float dstBetweenPoints = ApproximateLength/(numPoints - 1);
             float targetDst = 0f;
             Vector2 a = anchor1;
             float dstA = 0f;
-            while (pointIndex < numPoints) {
+            while (pointIndex < numPoints-1) {
                 Vector2 b = CubicLerp(subdivisionIndex/(float)numSubdivisions);
                 float dstB = dstA + (a - b).magnitude;
                 while (targetDst - dstA < dstB - targetDst) {
@@ -74,6 +74,7 @@ namespace Math {
                 dstA = dstB;
                 subdivisionIndex++;
             }
+            yield return anchor2;
         }
 
         private static Vector2 QuadraticLerp (Vector2 p1, Vector2 p2, Vector2 p3, float t) {
