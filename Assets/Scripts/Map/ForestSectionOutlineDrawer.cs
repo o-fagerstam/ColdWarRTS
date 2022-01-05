@@ -5,29 +5,29 @@ using UnityEngine;
 namespace Map {
     [ExecuteAlways]
     [RequireComponent(typeof(AStaticMapElement))]
-    public class StaticMapElementOutlineDrawer : ImmediateModeShapeDrawer {
-        [SerializeField] private AStaticMapElement staticMapElement;
+    public class ForestSectionOutlineDrawer : ImmediateModeShapeDrawer {
+        [SerializeField] private ForestSection forestSection;
         private PolylinePath path;
         private bool drawClosed;
         private void Start () {
-            staticMapElement = GetComponent<ForestSection>();
-            staticMapElement.OnPolygonChanged += HandleStaticMapElementChanged;
-            staticMapElement.OnDestruction += HandleStaticMapElementDestruction;
+            forestSection = GetComponent<ForestSection>();
+            forestSection.OnPolygonChanged += HandleForestChanged;
+            forestSection.OnDestruction += HandleForestDestruction;
         }
         
         private void OnDestroy () {
-            staticMapElement.OnPolygonChanged -= HandleStaticMapElementChanged;
-            staticMapElement.OnDestruction -= HandleStaticMapElementDestruction;
+            forestSection.OnPolygonChanged -= HandleForestChanged;
+            forestSection.OnDestruction -= HandleForestDestruction;
         }
 
-        private void HandleStaticMapElementChanged (AStaticMapElement element, bool isClosed) {
-            path = GeneratePathFromPoints(staticMapElement.Points);
+        private void HandleForestChanged (ForestSection element, bool isClosed) {
+            path = GeneratePathFromPoints(forestSection.Points);
             if (isClosed) {
                 enabled=false;
             }
         }
         
-        private void HandleStaticMapElementDestruction (AStaticMapElement element) {
+        private void HandleForestDestruction (AStaticMapElement element) {
             Destroy(this);
         }
 
@@ -44,7 +44,6 @@ namespace Map {
                 Draw.LineGeometry = LineGeometry.Volumetric3D;
                 Draw.ThicknessSpace = ThicknessSpace.Noots;
                 Draw.Thickness = 1f;
-                
                 Draw.Polyline(path, drawClosed, Color.white);
             }
         }

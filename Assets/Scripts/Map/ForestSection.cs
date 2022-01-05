@@ -3,30 +3,72 @@ using System.Collections.Generic;
 using Constants;
 using Graphics;
 using Math;
+using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 using Random = UnityEngine.Random;
 namespace Map {
 	public class ForestSection : AStaticMapElement {
+		private readonly Polygon localSpacePolygon = new Polygon();
 		[ShowInInspector] private readonly List<GpuInstance> treeInstances = new List<GpuInstance>();
 		[AssetsOnly][Required][SerializeField] private GameObject treePrefab;
 		[Range(2f, 10f)]
 		[ShowInInspector] private static readonly float TreeRadiusMeters = 10f;
 		private GpuInstancer gpuInstancer;
 
-		public override bool Close () {
-			bool result = base.Close();
-			if (result) {
-				GenerateTrees();
-				return true;
+		public IEnumerable<Vector3> Points {
+			get {
+				List<Vector3> points = new List<Vector3>();
+				foreach (Vector2 vertex in localSpacePolygon.Vertices) {
+					points.Add(LocalVec2ToWorldVec3(vertex));
+				}
+				return points;
 			}
-			return false;
+		}
+		
+		/// <summary>
+		/// Triggers when the polygon changes (or is closed).
+		/// Args: This component, isClosed
+		/// </summary>
+		public event Action<ForestSection, bool> OnPolygonChanged;
+		
+		public bool AddPoint (Vector3 point) {
+			bool result = localSpacePolygon.AddVertex(WorldVec3ToLocalVec2(point));
+			if (result) {
+				OnPolygonChanged?.Invoke(this, localSpacePolygon.IsClosed);
+			}
+			return result;
+		}
+
+		public bool ValidateAddPoint (Vector3 point) {
+			return localSpacePolygon.ValidateNewPoint(WorldVec3ToLocalVec2(point));
+		}
+		
+		public bool Close () {
+			bool result = localSpacePolygon.ClosePolygon();
+			if (!result) {
+				return false;
+			}
+			OnPolygonChanged?.Invoke(this, true);
+			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
+			GenerateTrees();
+			return true;
 		}
 
 		protected override void Update () {
 			base.Update();
 			gpuInstancer?.RenderBatches();
+		}
+		
+		public bool PointInsideSection (Vector3 point) {
+			return localSpacePolygon.PointInPolygon(WorldVec3ToLocalVec2(point));
+		}
+		
+		public override bool Overlaps (Rectangle worldRectangle) {
+			return localSpacePolygon
+				.ToWorldPolygon(VectorUtil.Flatten(transform.position))
+				.Overlaps(worldRectangle);
 		}
 
 		private void GenerateTrees () {
@@ -65,6 +107,16 @@ namespace Map {
 				instance.rotation,
 				enabled
 			);
+		}
+
+		private Vector2 WorldVec3ToLocalVec2 (Vector3 point) {
+			Vector3 position = transform.position;
+			return new Vector2(point.x - position.x, point.z - position.z);
+		}
+
+		private Vector3 LocalVec2ToWorldVec3 (Vector2 point) {
+			Vector3 position = transform.position;
+			return new Vector3(point.x + position.x, position.y, point.y + position.z);
 		}
 	}
 }
