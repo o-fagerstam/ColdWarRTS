@@ -32,6 +32,8 @@ namespace Map {
 			foreach (MapChunk mapChunk in chunks) {
 				if (element.Overlaps(mapChunk.worldRectangle)) {
 					mapChunk.AddStaticMapElement(element);
+				} else {
+					mapChunk.TryRemoveStaticMapElement(element);
 				}
 			}
 		}

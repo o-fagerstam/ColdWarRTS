@@ -158,6 +158,12 @@ namespace Map {
 			element.OnDestruction += HandleStaticMapElementDestroyed;
 		}
 
+		public void TryRemoveStaticMapElement (AStaticMapElement element) {
+			if (staticMapElements.Remove(element)) {
+				element.OnDestruction -= HandleStaticMapElementDestroyed;
+			}
+		}
+
 		public void HandleStaticMapElementDestroyed (AStaticMapElement element) {
 			element.OnDestruction -= HandleStaticMapElementDestroyed;
 			staticMapElements.Remove(element);

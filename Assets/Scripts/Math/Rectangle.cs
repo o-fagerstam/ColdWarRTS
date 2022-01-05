@@ -36,5 +36,10 @@ namespace Math {
 		public bool Overlaps (Polygon other) {
 			return other.Overlaps(this);
 		}
+
+		public bool ContainsPoint (Vector2 point) {
+			return point.x >= xMin && point.x <= xMax &&
+			       point.y >= yMin && point.y <= yMax;
+		}
 	}
 }

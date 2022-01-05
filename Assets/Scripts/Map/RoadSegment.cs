@@ -2,20 +2,19 @@
 using System.Collections.Generic;
 using System.Linq;
 using Controls;
-using Controls.MapEditorTools;
 using Math;
+using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {
-	public class RoadSegment : MonoBehaviour {
+	public class RoadSegment : AStaticMapElement {
 		[SerializeField][AssetsOnly][Required] private GroundDraggable handlePrefab;
 		private static readonly float RoadWidth = ScaleUtil.GameToUnity(8f);
 		private static readonly float RoadSegmentLength = ScaleUtil.GameToUnity(8f) / 4;
 		private BezierCurve curve;
 		private Dictionary<GroundDraggable, BezierPoint> handles; // Order: Anchor1, Anchor2, Control1, Control2;
-
-
+		
 		public void Initialize (Vector3 worldAnchor1, Vector3 worldAnchor2) {
 			Vector3 position = transform.position;
 			Vector3 localAnchor1 = worldAnchor1 - position;
@@ -47,6 +46,7 @@ namespace Map {
 			}
 
 			RecalculateMesh();
+			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
 		}
 		private void HandleHandlePositionChanged (GroundDraggable obj, Vector3 newWorldPos) {
 			curve.MovePoint(handles[obj], VectorUtil.Flatten(newWorldPos - transform.position));
@@ -127,8 +127,19 @@ namespace Map {
 			if (!RaycastUtil.ElevationRaycast(worldPoint, out RaycastHit hit)) {
 				throw new Exception($"Failed to find land over point {worldPoint}.");
 			}
-			Vector3 localPoint = hit.point - transform.position + new Vector3(0f, 0.001f, 0f);
+			Vector3 localPoint = hit.point - transform.position + new Vector3(0f, 0.02f, 0f);
 			return localPoint;
+		}
+		protected override void ElevationUpdate () {
+			RecalculateMesh();
+		}
+		public override bool Overlaps (Rectangle worldRectangle) {
+			Vector2 transformPosition2D = transform.position.Flatten();
+			foreach (Vector2 point in curve.GetEquidistantPoints(50)) {
+				Vector2 worldPoint = point + transformPosition2D;
+				if (worldRectangle.ContainsPoint(worldPoint)) { return true; }
+			}
+			return false;
 		}
 	}
 }
