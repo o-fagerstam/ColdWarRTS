@@ -1,12 +1,15 @@
 ﻿using System.Collections.Generic;
 using Math;
 using Singleton;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {
 	public class GameMap : ASingleton {
 		[SerializeField] private List<MapChunk> chunks = new List<MapChunk>();
 		[SerializeField] private MapChunk mapChunkPrefab;
+		[ShowInInspector] [Unity.Collections.ReadOnly] private HashSet<ForestSection> allForests = new HashSet<ForestSection>();
+		public IEnumerable<ForestSection> AllForests => allForests;
 
 		protected override void Start () {
 			base.Start();
@@ -24,16 +27,6 @@ namespace Map {
 					MapChunk newChunk = Instantiate(mapChunkPrefab, newChunkPosition, Quaternion.identity, transform);
 					newChunk.GenerateFlatChunk(chunkResolution, chunkSize);
 					chunks.Add(newChunk);
-				}
-			}
-		}
-
-		public void RegisterStaticMapElement (AStaticMapElement element) {
-			foreach (MapChunk mapChunk in chunks) {
-				if (element.Overlaps(mapChunk.worldRectangle)) {
-					mapChunk.AddStaticMapElement(element);
-				} else {
-					mapChunk.TryRemoveStaticMapElement(element);
 				}
 			}
 		}
@@ -69,6 +62,37 @@ namespace Map {
 					yield return chunk;
 				}
 			}
+		}
+		
+		public void RegisterStaticMapElement (AStaticMapElement element) {
+			element.OnShapeChanged += HandleStaticElementShapeChanged;
+			element.OnDestruction += HandleStaticElementDestroyed;
+			if (element is ForestSection forestSection) {
+				allForests.Add(forestSection);
+			}
+			ReevaluateStaticElementChunks(element);
+		}
+
+		private void ReevaluateStaticElementChunks (AStaticMapElement element) {
+			foreach (MapChunk mapChunk in chunks) {
+				if (element.Overlaps(mapChunk.worldRectangle)) {
+					mapChunk.TryAddStaticMapElement(element);
+				} else {
+					mapChunk.TryRemoveStaticMapElement(element);
+				}
+			}
+		}
+
+		private void HandleStaticElementShapeChanged (AStaticMapElement element) {
+			ReevaluateStaticElementChunks(element);
+		}
+		private void HandleStaticElementDestroyed (AStaticMapElement element) {
+			element.OnDestruction -= HandleStaticElementDestroyed;
+			element.OnShapeChanged -= HandleStaticElementShapeChanged;
+			if (element is ForestSection forestSection) {
+				allForests.Remove(forestSection);
+			}
+
 		}
 	}
 }

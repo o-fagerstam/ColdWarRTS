@@ -8,13 +8,16 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {
+	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 	public class RoadSegment : AStaticMapElement {
 		[SerializeField][AssetsOnly][Required] private GroundDraggable handlePrefab;
+		private static readonly float RoadHeightOverGround = ScaleUtil.GameToUnity(.5f);
 		private static readonly float RoadWidth = ScaleUtil.GameToUnity(8f);
-		private static readonly float RoadSegmentLength = ScaleUtil.GameToUnity(8f) / 4;
+		private static readonly float RoadSegmentLength = ScaleUtil.GameToUnity(2f);
 		private BezierCurve curve;
 		private Dictionary<GroundDraggable, BezierPoint> handles; // Order: Anchor1, Anchor2, Control1, Control2;
-		
+		[ShowInInspector] [ReadOnly] private List<(Vector3 left, Vector3 right)> meshPoints = new List<(Vector3 left, Vector3 right)>();
+
 		public void Initialize (Vector3 worldAnchor1, Vector3 worldAnchor2) {
 			Vector3 position = transform.position;
 			Vector3 localAnchor1 = worldAnchor1 - position;
@@ -44,13 +47,15 @@ namespace Map {
 				handle.transform.localScale = Vector3.one*0.2f;
 				handle.OnPositionChanged += HandleHandlePositionChanged;
 			}
-
+			
 			RecalculateMesh();
 			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
+			InvokeShapeChanged();
 		}
 		private void HandleHandlePositionChanged (GroundDraggable obj, Vector3 newWorldPos) {
-			curve.MovePoint(handles[obj], VectorUtil.Flatten(newWorldPos - transform.position));
+			curve.MovePoint(handles[obj], (newWorldPos - transform.position).Flatten());
 			RecalculateMesh();
+			InvokeShapeChanged();
 		}
 
 		private void RecalculateMesh () {
@@ -59,28 +64,15 @@ namespace Map {
 			if (numSegments % segmentsPerUvLoop != 0) {numSegments += segmentsPerUvLoop - numSegments%segmentsPerUvLoop;}
 
 			Vector3[] vertices = new Vector3[2*(numSegments + 1)];
+			int vertIndex = 0;
+			meshPoints = CreateMeshPoints(numSegments);
+			foreach ((Vector3 left, Vector3 right) in meshPoints) {
+				vertices[vertIndex++] = left;
+				vertices[vertIndex++] = right;
+			}
 			int[] triangles = new int[numSegments*6];
 			Vector2[] uvs = new Vector2[vertices.Length];
-			
-			// vertices
-			List<Vector2> twoDimPoints = curve.GetEquidistantPoints(numSegments + 1).ToList();
-			Vector2 aCenter = twoDimPoints[0];
-			for (int i = 0, vertIndex = 0; i < numSegments; i++) {
-				Vector2 bCenter = twoDimPoints[i + 1];
-				Vector2 dir = (bCenter - aCenter).normalized;
-				Vector2 aLeft = aCenter + dir.Rotate(-90f)*RoadWidth;
-				Vector2 aRight = aCenter + dir.Rotate(90f)*RoadWidth;
-				vertices[vertIndex++] = Generate3DMeshPoint(aLeft);
-				vertices[vertIndex++] = Generate3DMeshPoint(aRight);
-				aCenter = bCenter;
-				if (i == numSegments - 1) {
-					Vector2 bLeft = bCenter + dir.Rotate(-90f)*RoadWidth;
-					Vector2 bRight = bCenter + dir.Rotate(90f)*RoadWidth;
-					vertices[vertIndex++] = Generate3DMeshPoint(bLeft);
-					vertices[vertIndex++] = Generate3DMeshPoint(bRight);
-				}
-			}
-			
+
 			// triangles
 			for (int i = 0, triangleIndex = 0; i < numSegments; i++) {
 				int a = i*2;
@@ -121,23 +113,59 @@ namespace Map {
 			mesh.RecalculateBounds();
 			mesh.RecalculateTangents();
 			GetComponent<MeshFilter>().mesh = mesh;
+			GetComponent<MeshCollider>().sharedMesh = mesh;
+		}
+
+		private List<(Vector3, Vector3)> CreateMeshPoints (int numSegments) {
+			List<Vector2> twoDimPoints = curve.GetEquidistantPoints(numSegments + 1).ToList();
+			List<(Vector3, Vector3)> meshPoints = new List<(Vector3, Vector3)>();
+			
+			Vector2 aCenter = twoDimPoints[0];
+			for (int i = 0; i < numSegments; i++) {
+				Vector2 bCenter = twoDimPoints[i + 1];
+				Vector2 dir = (bCenter - aCenter).normalized;
+				Vector2 aLeft = aCenter + dir.Rotate(-90f)*RoadWidth;
+				Vector2 aRight = aCenter + dir.Rotate(90f)*RoadWidth;
+				meshPoints.Add(GenerateMeshPointPair(aLeft, aRight));
+				aCenter = bCenter;
+				if (i == numSegments - 1) {
+					Vector2 bLeft = bCenter + dir.Rotate(-90f)*RoadWidth;
+					Vector2 bRight = bCenter + dir.Rotate(90f)*RoadWidth;
+					meshPoints.Add(GenerateMeshPointPair(bLeft, bRight));
+				}
+			}
+			return meshPoints;
 		}
 		private Vector3 Generate3DMeshPoint (Vector2 vec2) {
 			Vector3 worldPoint = vec2.AddY(0f) + transform.position;
-			if (!RaycastUtil.ElevationRaycast(worldPoint, out RaycastHit hit)) {
+			if (!RaycastUtil.GroundLayerOnlyElevationRaycast(worldPoint, out RaycastHit hit)) {
 				throw new Exception($"Failed to find land over point {worldPoint}.");
 			}
-			Vector3 localPoint = hit.point - transform.position + new Vector3(0f, 0.02f, 0f);
+			Vector3 localPoint = hit.point - transform.position + new Vector3(0f, RoadHeightOverGround, 0f);
 			return localPoint;
 		}
-		protected override void ElevationUpdate () {
+
+		private (Vector3 pointLeft, Vector3 pointRight) GenerateMeshPointPair (Vector2 flatPosLeft, Vector2 flatPosRight) {
+			Vector3 pointLeft = Generate3DMeshPoint(flatPosLeft);
+			Vector3 pointRight = Generate3DMeshPoint(flatPosRight);
+			if (pointLeft.y > pointRight.y) {
+				pointRight.y = pointLeft.y;
+			} else {
+				pointLeft.y = pointRight.y;
+			}
+			return (pointLeft, pointRight);
+		}
+		protected override void UpdateElementVisuals () {
 			RecalculateMesh();
 		}
 		public override bool Overlaps (Rectangle worldRectangle) {
-			Vector2 transformPosition2D = transform.position.Flatten();
-			foreach (Vector2 point in curve.GetEquidistantPoints(50)) {
-				Vector2 worldPoint = point + transformPosition2D;
-				if (worldRectangle.ContainsPoint(worldPoint)) { return true; }
+			Vector2 localOffset = transform.position.Flatten();
+			Rectangle localRectangle = new Rectangle(worldRectangle.Center - localOffset, worldRectangle.Dimension);
+
+			foreach ((Vector3 left, Vector3 right) in meshPoints) {
+				if (localRectangle.ContainsPoint(left.Flatten()) || localRectangle.ContainsPoint(right.Flatten())) {
+					return true;
+				}
 			}
 			return false;
 		}

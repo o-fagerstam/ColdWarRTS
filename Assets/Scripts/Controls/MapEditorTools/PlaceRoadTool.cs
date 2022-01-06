@@ -25,7 +25,7 @@ namespace Controls.MapEditorTools {
 			}
 
 			if (Mouse.current.leftButton.isPressed && draggedObject != null) {
-				if (!Physics.Raycast(mouseRay, out RaycastHit dragHit, Mathf.Infinity, LayerMasks.ground)) { return; }
+				if (!Physics.Raycast(mouseRay, out RaycastHit dragHit, Mathf.Infinity, LayerMasks.bareGround)) { return; }
 				draggedObject.UpdatePosition(dragHit.point);
 				return;
 			}
@@ -34,7 +34,7 @@ namespace Controls.MapEditorTools {
 			if (!Physics.Raycast(mouseRay, out RaycastHit clickHit, Mathf.Infinity, LayerMasks.anythingClickable)) { return; }
 			int hitLayer = 1 << clickHit.transform.gameObject.layer;
 			if (Mouse.current.leftButton.wasPressedThisFrame) {
-				if (hitLayer == LayerMasks.ground) {
+				if (hitLayer == LayerMasks.bareGround) {
 					OnLeftClickGround(clickHit);
 				} else if (hitLayer == LayerMasks.mouseDraggable) {
 					draggedObject = clickHit.transform.GetComponent<IMouseDraggable>();

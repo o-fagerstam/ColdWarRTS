@@ -12,7 +12,7 @@ namespace Map {
 		[SerializeField] private MeshCollider meshCollider;
 		[SerializeField][Required] private GameObject waterPrefab;
 		[ShowInInspector] private GameObject water;
-		[ShowInInspector][ReadOnly] private List<AStaticMapElement> staticMapElements = new List<AStaticMapElement>();
+		[ShowInInspector][ReadOnly] private HashSet<AStaticMapElement> staticMapElements = new HashSet<AStaticMapElement>();
 
 		private int squaresPerSide;
 		private float visibleChunkSideDimension;
@@ -149,24 +149,38 @@ namespace Map {
 			RecalculateMesh(vertices, meshFilter.sharedMesh.uv);
 
 			foreach (AStaticMapElement staticMapElement in staticMapElements) {
-				staticMapElement.NotifyUpdateNeeded();
+				staticMapElement.NotifyVisualUpdateNeeded();
 			}
 		}
 
-		public void AddStaticMapElement (AStaticMapElement element) {
-			staticMapElements.Add(element);
-			element.OnDestruction += HandleStaticMapElementDestroyed;
+		public void TryAddStaticMapElement (AStaticMapElement element) {
+			if (staticMapElements.Add(element)) {
+				element.OnDestruction += HandleStaticMapElementDestroyed;
+				element.OnShapeChanged += HandleStaticMapElementShapeChanged;
+			}
 		}
 
 		public void TryRemoveStaticMapElement (AStaticMapElement element) {
 			if (staticMapElements.Remove(element)) {
 				element.OnDestruction -= HandleStaticMapElementDestroyed;
+				element.OnShapeChanged -= HandleStaticMapElementShapeChanged;
 			}
 		}
 
-		public void HandleStaticMapElementDestroyed (AStaticMapElement element) {
+		private void HandleStaticMapElementDestroyed (AStaticMapElement element) {
 			element.OnDestruction -= HandleStaticMapElementDestroyed;
+			element.OnShapeChanged -= HandleStaticMapElementShapeChanged;
 			staticMapElements.Remove(element);
+		}
+		
+		private void HandleStaticMapElementShapeChanged (AStaticMapElement element) {
+			if (element is RoadSegment) {
+				foreach (AStaticMapElement aStaticMapElement in staticMapElements) {
+					if (aStaticMapElement is ForestSection forestSection) {
+						forestSection.NotifyVisualUpdateNeeded();
+					}
+				}
+			}
 		}
 	}
 }

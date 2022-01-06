@@ -71,7 +71,7 @@ namespace Controls {
 		private void UpdateMouseDrag (Ray mouseRay) {
 			if (!Mouse.current.leftButton.isPressed) { return; }
 			if (currentDraggedObject == null) { return; }
-			if (!Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.ground)) { return; }
+			if (!Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.bareGround)) { return; }
 			currentDraggedObject.UpdatePosition(hit.point);
 		}
 

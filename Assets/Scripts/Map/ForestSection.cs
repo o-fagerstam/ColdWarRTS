@@ -86,7 +86,7 @@ namespace Map {
 			gpuInstancer.SetInstances(treeInstances);
 		}
 
-		protected override void ElevationUpdate () {
+		protected override void UpdateElementVisuals () {
 			for (int i = 0; i < treeInstances.Count; i++) {
 				treeInstances[i] = RaycastTree(treeInstances[i]);
 			}
@@ -94,13 +94,15 @@ namespace Map {
 		}
 
 		private static GpuInstance RaycastTree (GpuInstance instance) {
-			if (!RaycastUtil.ElevationRaycast(instance.position, out RaycastHit hit)) {
+			if (!RaycastUtil.GroundLayerOnlyElevationRaycast(instance.position, out RaycastHit hit)) {
 				throw new Exception("Failed to raycast new tree position: No ground below?");
 			}
+			bool treeOnRoad = RaycastUtil.RoadLayerOnlyElevationRaycast(instance.position, out RaycastHit roadHit);
 			Vector3 newPosition = new Vector3(instance.position.x, hit.point.y, instance.position.z);
 			float angle = Vector3.Angle(Vector3.up, hit.normal);
 			bool enabled = angle < GeographyConstants.TREE_SLOPE_ANGLE_MAX &&
-			               newPosition.y > GeographyConstants.TREE_ELEVATION_OVER_WATER_MIN;
+			               newPosition.y > GeographyConstants.TREE_ELEVATION_OVER_WATER_MIN &&
+			               !treeOnRoad;
 			return new GpuInstance(
 				newPosition,
 				instance.scale,

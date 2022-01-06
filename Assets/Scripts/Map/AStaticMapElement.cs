@@ -6,24 +6,28 @@ using UnityEngine;
 using Utils;
 namespace Map {
 	public abstract class AStaticMapElement : MonoBehaviour {
-		private bool elevationUpdateNeeded;
+		private bool updateNeeded;
 		
 		/// <summary>
 		/// Triggers on component destruction. Args: This object
 		/// </summary>
 		public event Action<AStaticMapElement> OnDestruction;
+		public event Action<AStaticMapElement> OnShapeChanged;
 
 		private void OnDestroy () {
 			OnDestruction?.Invoke(this);
 		}
 
 		protected virtual void Update () {
-			if (elevationUpdateNeeded) { ElevationUpdate(); }
+			if (updateNeeded) { UpdateElementVisuals(); }
 		}
-		protected abstract void ElevationUpdate ();
+		protected abstract void UpdateElementVisuals ();
 		public abstract bool Overlaps (Rectangle worldRectangle);
-		public void NotifyUpdateNeeded () {
-			elevationUpdateNeeded = true;
+		public void NotifyVisualUpdateNeeded () {
+			updateNeeded = true;
+		}
+		protected void InvokeShapeChanged () {
+			OnShapeChanged?.Invoke(this);
 		}
 
 
