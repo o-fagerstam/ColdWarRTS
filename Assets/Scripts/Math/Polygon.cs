@@ -9,7 +9,7 @@ namespace Math {
 		public int NumOfVertices => vertices.Count;
 		public bool IsClosed => isClosed;
 		public IEnumerable<Vector2> Vertices => vertices;
-		public IEnumerable<Tuple<Vector2, Vector2>> Lines {
+		private IEnumerable<Tuple<Vector2, Vector2>> Lines {
 			get {
 				int i = 0;
 				int stoppingPoint = isClosed ? 0 : NumOfVertices - 1;
@@ -17,7 +17,7 @@ namespace Math {
 					int next = (i + 1)%NumOfVertices;
 					yield return new Tuple<Vector2, Vector2>(vertices[i], vertices[next]);
 					i = next;
-				} while (i != 0);
+				} while (i != stoppingPoint);
 			}
 		}
 
@@ -76,6 +76,10 @@ namespace Math {
 			return true;
 		}
 
+		public void RemoveLastVertex () {
+			vertices.RemoveAt(vertices.Count-1);
+		}
+
 		public bool ClosePolygon () {
 			if (!ValidateClosePolygon()) {
 				return false;
@@ -85,7 +89,7 @@ namespace Math {
 		}
 
 		public bool PointInPolygon (Vector2 point) {
-			if (NumOfVertices < 3) {
+			if (NumOfVertices < 3 || !isClosed) {
 				return false;
 			}
 

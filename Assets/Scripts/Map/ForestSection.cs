@@ -26,17 +26,35 @@ namespace Map {
 				return points;
 			}
 		}
+
+		public bool IsClosed => localSpacePolygon.IsClosed;
+
+		public Polygon WorldPolygon => localSpacePolygon.ToWorldPolygon(transform.position.Flatten());
 		
 		/// <summary>
 		/// Triggers when the polygon changes (or is closed).
 		/// Args: This component, isClosed
 		/// </summary>
-		public event Action<ForestSection, bool> OnPolygonChanged;
-		
+
 		public bool AddPoint (Vector3 point) {
-			bool result = localSpacePolygon.AddVertex(WorldVec3ToLocalVec2(point));
+			bool couldAddToPolygon = localSpacePolygon.AddVertex(WorldVec3ToLocalVec2(point));
+			bool overlapsOtherForest = false;
+			if (couldAddToPolygon) {
+				foreach (ForestSection forestSection in SingletonManager.Retrieve<GameMap>().AllForests) {
+					if (forestSection == this) {
+						continue;
+					}
+					if (Overlaps(forestSection)) {
+						overlapsOtherForest = true;
+						localSpacePolygon.RemoveLastVertex();
+						break;
+					}
+				}
+			}
+
+			bool result = couldAddToPolygon && !overlapsOtherForest;
 			if (result) {
-				OnPolygonChanged?.Invoke(this, localSpacePolygon.IsClosed);
+				InvokeShapeChanged();
 			}
 			return result;
 		}
@@ -44,13 +62,13 @@ namespace Map {
 		public bool ValidateAddPoint (Vector3 point) {
 			return localSpacePolygon.ValidateNewPoint(WorldVec3ToLocalVec2(point));
 		}
-		
+
 		public bool Close () {
 			bool result = localSpacePolygon.ClosePolygon();
 			if (!result) {
 				return false;
 			}
-			OnPolygonChanged?.Invoke(this, true);
+			InvokeShapeChanged();
 			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
 			GenerateTrees();
 			return true;
@@ -65,11 +83,7 @@ namespace Map {
 			return localSpacePolygon.PointInPolygon(WorldVec3ToLocalVec2(point));
 		}
 		
-		public override bool Overlaps (Rectangle worldRectangle) {
-			return localSpacePolygon
-				.ToWorldPolygon(VectorUtil.Flatten(transform.position))
-				.Overlaps(worldRectangle);
-		}
+
 
 		private void GenerateTrees () {
 			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(ScaleUtil.GameToUnity(TreeRadiusMeters), localSpacePolygon);
@@ -109,6 +123,14 @@ namespace Map {
 				instance.rotation,
 				enabled
 			);
+		}
+
+		public bool Overlaps (ForestSection other) {
+			return WorldPolygon.Overlaps(other.WorldPolygon);
+		}
+		
+		public override bool Overlaps (Rectangle worldRectangle) {
+			return WorldPolygon.Overlaps(worldRectangle);
 		}
 
 		private Vector2 WorldVec3ToLocalVec2 (Vector3 point) {
