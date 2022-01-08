@@ -15,6 +15,7 @@ namespace Controls.MapEditorTools {
 		public override void Activate () {
 			UpdateTooltip(TOOLTIP_BASE);
 			draggedObject = null;
+			hasStartPoint = false;
 		}
 		
 		public override void UpdateKeyboard () {}
