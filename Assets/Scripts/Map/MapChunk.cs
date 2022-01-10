@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using Constants;
 using Math;
+using PlasticPipe.Server;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
@@ -58,6 +59,14 @@ namespace Map {
 			RecalculateMesh(vertices, uvs);
 			GenerateWater();
 		}
+		
+		public void GenerateFromChunkData (MapChunkData mapChunkData) {
+			squaresPerSide = mapChunkData.squaresPerSide;
+			visibleChunkSideDimension = mapChunkData.visibleChunkSideDimension;
+			RecalculateMesh(mapChunkData.vertices, mapChunkData.uvs);
+			GenerateWater();
+		}
+		
 		private void GenerateWater () {
 			if (water != null) { SafeDestroyUtil.SafeDestroy(water); }
 			Vector3 waterPosition = transform.TransformPoint(0f, GeographyConstants.MAP_WATER_LEVEL, 0f);
@@ -180,6 +189,28 @@ namespace Map {
 						forestSection.NotifyVisualUpdateNeeded();
 					}
 				}
+			}
+		}
+
+		public MapChunkData CreateChunkData () {
+			return new MapChunkData(
+				squaresPerSide,
+				visibleChunkSideDimension,
+				(Vector3[]) meshFilter.mesh.vertices.Clone(),
+				(Vector2[]) meshFilter.mesh.uv.Clone());
+		}
+		
+		[Serializable]
+		public class MapChunkData {
+			public int squaresPerSide;
+			public float visibleChunkSideDimension;
+			public Vector3[] vertices;
+			public Vector2[] uvs;
+			public MapChunkData (int squaresPerSide, float visibleChunkSideDimension, Vector3[] vertices, Vector2[] uvs) {
+				this.squaresPerSide = squaresPerSide;
+				this.visibleChunkSideDimension = visibleChunkSideDimension;
+				this.vertices = vertices;
+				this.uvs = uvs;
 			}
 		}
 	}

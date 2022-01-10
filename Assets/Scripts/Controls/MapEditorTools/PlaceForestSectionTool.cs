@@ -60,6 +60,7 @@ namespace Controls.MapEditorTools {
 				if (!currentForestSection.Close()) {
 					return;
 				}
+				SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(currentForestSection);
 				UpdateTooltip(TOOLTIP_BASE);
 				currentForestSection = null;
 			}

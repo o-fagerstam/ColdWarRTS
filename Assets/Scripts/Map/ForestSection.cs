@@ -59,10 +59,6 @@ namespace Map {
 			return result;
 		}
 
-		public bool ValidateAddPoint (Vector3 point) {
-			return localSpacePolygon.ValidateNewPoint(WorldVec3ToLocalVec2(point));
-		}
-
 		public bool Close () {
 			bool result = localSpacePolygon.ClosePolygon();
 			if (!result) {
@@ -79,12 +75,6 @@ namespace Map {
 			gpuInstancer?.RenderBatches();
 		}
 		
-		public bool PointInsideSection (Vector3 point) {
-			return localSpacePolygon.PointInPolygon(WorldVec3ToLocalVec2(point));
-		}
-		
-
-
 		private void GenerateTrees () {
 			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(ScaleUtil.GameToUnity(TreeRadiusMeters), localSpacePolygon);
 			gpuInstancer = new GpuInstancer(treePrefab);

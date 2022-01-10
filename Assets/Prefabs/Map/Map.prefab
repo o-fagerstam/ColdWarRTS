@@ -43,4 +43,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 458cf06ae3094189b79554ae210e0385, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chunks: []
   mapChunkPrefab: {fileID: -1279206610592063365, guid: 8ec56ca023c03344a9b7ca864f054a10, type: 3}
+  chunksPerSide: 20
+  chunkResolution: 20
+  mapSize: 100

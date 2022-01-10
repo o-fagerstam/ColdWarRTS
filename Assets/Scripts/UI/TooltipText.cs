@@ -1,5 +1,4 @@
-﻿using System;
-using Controls.MapEditorTools;
+﻿using Controls.MapEditorTools;
 using TMPro;
 using UnityEngine;
 namespace UI {
