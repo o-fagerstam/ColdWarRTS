@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Constants;
 using Math;
 using PlasticPipe.Server;
@@ -33,7 +34,7 @@ namespace Map {
 				throw new MissingComponentException($"Failed to find {nameof(GameMap)} in parent. Did you parent this chunk to a {nameof(GameMap)} on instancing?");
 			}
 		}
-		public void GenerateFlatChunk (int squaresPerSide, float chunkSize) {
+		public void GenerateChunk (int squaresPerSide, float chunkSize, List<float> heights = null) {
 			this.squaresPerSide = squaresPerSide;
 			int visiblePointsPerSide = CalculateVisiblePointsPerSide(squaresPerSide);
 			int realPointsPerSide = CalculateRealPointsPerSide(squaresPerSide);
@@ -50,7 +51,8 @@ namespace Map {
 			for (int y = 0; y < realPointsPerSide; y++) {
 				for (int x = 0; x < realPointsPerSide; x++) {
 					int vertIndex = x + y*realPointsPerSide;
-					vertices[vertIndex] = new Vector3(x*dstBetweenPoints + startSideOffset, 0f, y*dstBetweenPoints + startSideOffset);
+					float heightValue = heights == null ? 0f : heights[vertIndex];
+					vertices[vertIndex] = new Vector3(x*dstBetweenPoints + startSideOffset, heightValue, y*dstBetweenPoints + startSideOffset);
 					uvs[vertIndex] = new Vector2(
 						Mathf.Clamp01((x - .5f)/visiblePointsPerSide),
 						Mathf.Clamp01((y - .5f)/visiblePointsPerSide));
@@ -61,9 +63,7 @@ namespace Map {
 		}
 		
 		public void GenerateFromChunkData (MapChunkSaveData mapChunkSaveData) {
-			squaresPerSide = mapChunkSaveData.squaresPerSide;
-			visibleChunkSideDimension = mapChunkSaveData.visibleChunkSideDimension;
-			RecalculateMesh(mapChunkSaveData.vertices, mapChunkSaveData.uvs);
+			GenerateChunk(mapChunkSaveData.squaresPerSide, mapChunkSaveData.visibleChunkSideDimension, mapChunkSaveData.heights);
 			GenerateWater();
 		}
 		
@@ -210,21 +210,18 @@ namespace Map {
 			return new MapChunkSaveData(
 				squaresPerSide,
 				visibleChunkSideDimension,
-				(Vector3[]) meshFilter.mesh.vertices.Clone(),
-				(Vector2[]) meshFilter.mesh.uv.Clone());
+				meshFilter.mesh.vertices.Select(v => v.y).ToList());
 		}
 		
 		[Serializable]
 		public class MapChunkSaveData {
 			public int squaresPerSide;
 			public float visibleChunkSideDimension;
-			public Vector3[] vertices;
-			public Vector2[] uvs;
-			public MapChunkSaveData (int squaresPerSide, float visibleChunkSideDimension, Vector3[] vertices, Vector2[] uvs) {
+			public List<float> heights;
+			public MapChunkSaveData (int squaresPerSide, float visibleChunkSideDimension, List<float> heights) {
 				this.squaresPerSide = squaresPerSide;
 				this.visibleChunkSideDimension = visibleChunkSideDimension;
-				this.vertices = vertices;
-				this.uvs = uvs;
+				this.heights = heights;
 			}
 		}
 	}

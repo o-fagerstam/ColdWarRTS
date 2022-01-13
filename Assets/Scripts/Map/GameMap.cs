@@ -28,7 +28,7 @@ namespace Map {
 				for (int x = 0; x < chunksPerSide; x++) {
 					Vector3 newChunkPosition = new Vector3(x*chunkSize, 0f, y*chunkSize) + chunkBaseWorldOffset;
 					MapChunk newChunk = Instantiate(mapChunkPrefab, newChunkPosition, Quaternion.identity, transform);
-					newChunk.GenerateFlatChunk(chunkResolution, chunkSize);
+					newChunk.GenerateChunk(chunkResolution, chunkSize);
 					chunks.Add(newChunk);
 				}
 			}
