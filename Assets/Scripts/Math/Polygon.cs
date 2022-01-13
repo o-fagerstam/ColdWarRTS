@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 namespace Math {
+	
 	public class Polygon {
 		private readonly List<Vector2> vertices = new List<Vector2>();
 		private bool isClosed;
@@ -66,6 +67,13 @@ namespace Math {
 				this.vertices.Add(vertex);
 			}
 			this.isClosed = isClosed;
+		}
+
+		public Polygon (PolygonSaveData data) {
+			foreach (Vector2 vertex in data.vertices) {
+				vertices.Add(vertex);
+			}
+			isClosed = data.isClosed;
 		}
 
 		public bool AddVertex (Vector2 point) {
@@ -235,6 +243,21 @@ namespace Math {
 		
 		private enum Orientation {
 			Clockwise, CounterClockwise, Collinear
+		}
+
+		public PolygonSaveData CreateSaveData () {
+			return new PolygonSaveData(vertices, isClosed);
+		}
+
+		[Serializable]
+		public class PolygonSaveData {
+			public List<Vector2> vertices;
+			public bool isClosed;
+
+			public PolygonSaveData (List<Vector2> vertices, bool isClosed) {
+				this.vertices = vertices;
+				this.isClosed = isClosed;
+			}
 		}
 	}
 

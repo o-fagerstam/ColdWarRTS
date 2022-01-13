@@ -10,12 +10,21 @@ using Utils;
 using Random = UnityEngine.Random;
 namespace Map {
 	public class ForestSection : AStaticMapElement {
-		private readonly Polygon localSpacePolygon = new Polygon();
-		[ShowInInspector] private readonly List<GpuInstance> treeInstances = new List<GpuInstance>();
+		private Polygon localSpacePolygon = new Polygon();
+		[ShowInInspector] private List<GpuInstance> treeInstances = new List<GpuInstance>();
 		[AssetsOnly][Required][SerializeField] private GameObject treePrefab;
 		[Range(2f, 10f)]
 		[ShowInInspector] private static readonly float TreeRadiusMeters = 10f;
 		private GpuInstancer gpuInstancer;
+
+		private void Awake() {
+			gpuInstancer = new GpuInstancer(treePrefab);
+		}
+		
+		protected override void Update () {
+			base.Update();
+			gpuInstancer?.RenderBatches();
+		}
 
 		public IEnumerable<Vector3> Points {
 			get {
@@ -27,14 +36,16 @@ namespace Map {
 			}
 		}
 
+		public void CreateFromSaveData (ForestSectionData data) {
+			localSpacePolygon = new Polygon(data.polygon);
+			treeInstances.Clear();
+			treeInstances = data.treeInstances;
+			gpuInstancer.SetInstances(treeInstances);
+		}
+
 		public bool IsClosed => localSpacePolygon.IsClosed;
 
 		public Polygon WorldPolygon => localSpacePolygon.ToWorldPolygon(transform.position.Flatten());
-		
-		/// <summary>
-		/// Triggers when the polygon changes (or is closed).
-		/// Args: This component, isClosed
-		/// </summary>
 
 		public bool AddPoint (Vector3 point) {
 			bool couldAddToPolygon = localSpacePolygon.AddVertex(WorldVec3ToLocalVec2(point));
@@ -70,14 +81,10 @@ namespace Map {
 			return true;
 		}
 
-		protected override void Update () {
-			base.Update();
-			gpuInstancer?.RenderBatches();
-		}
+
 		
 		private void GenerateTrees () {
 			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(ScaleUtil.GameToUnity(TreeRadiusMeters), localSpacePolygon);
-			gpuInstancer = new GpuInstancer(treePrefab);
 			treeInstances.Clear();
 			foreach (Vector2 point in polygonPoints) {
 				Vector3 worldPoint = LocalVec2ToWorldVec3(point);
@@ -131,6 +138,23 @@ namespace Map {
 		private Vector3 LocalVec2ToWorldVec3 (Vector2 point) {
 			Vector3 position = transform.position;
 			return new Vector3(point.x + position.x, position.y, point.y + position.z);
+		}
+
+		public ForestSectionData CreateSaveData () {
+			return new ForestSectionData(transform.position, localSpacePolygon.CreateSaveData(), treeInstances);
+		}
+
+		[Serializable]
+		public class ForestSectionData {
+			public Vector3 worldPosition;
+			public Polygon.PolygonSaveData polygon;
+			public List<GpuInstance> treeInstances;
+
+			public ForestSectionData (Vector3 worldPosition, Polygon.PolygonSaveData polygon, List<GpuInstance> treeInstances) {
+				this.worldPosition = worldPosition;
+				this.polygon = polygon;
+				this.treeInstances = treeInstances;
+			}
 		}
 	}
 }

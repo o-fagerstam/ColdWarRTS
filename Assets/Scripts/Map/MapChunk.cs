@@ -60,10 +60,10 @@ namespace Map {
 			GenerateWater();
 		}
 		
-		public void GenerateFromChunkData (MapChunkData mapChunkData) {
-			squaresPerSide = mapChunkData.squaresPerSide;
-			visibleChunkSideDimension = mapChunkData.visibleChunkSideDimension;
-			RecalculateMesh(mapChunkData.vertices, mapChunkData.uvs);
+		public void GenerateFromChunkData (MapChunkSaveData mapChunkSaveData) {
+			squaresPerSide = mapChunkSaveData.squaresPerSide;
+			visibleChunkSideDimension = mapChunkSaveData.visibleChunkSideDimension;
+			RecalculateMesh(mapChunkSaveData.vertices, mapChunkSaveData.uvs);
 			GenerateWater();
 		}
 		
@@ -192,8 +192,22 @@ namespace Map {
 			}
 		}
 
-		public MapChunkData CreateChunkData () {
-			return new MapChunkData(
+		private void OnEnable () {
+			foreach (AStaticMapElement element in staticMapElements) {
+				element.OnShapeChanged += HandleStaticMapElementShapeChanged;
+				element.OnDestruction += HandleStaticMapElementDestroyed;
+			}
+		}
+
+		private void OnDisable () {
+			foreach (AStaticMapElement element in staticMapElements) {
+				element.OnShapeChanged -= HandleStaticMapElementShapeChanged;
+				element.OnDestruction -= HandleStaticMapElementDestroyed;
+			}
+		}
+
+		public MapChunkSaveData CreateChunkData () {
+			return new MapChunkSaveData(
 				squaresPerSide,
 				visibleChunkSideDimension,
 				(Vector3[]) meshFilter.mesh.vertices.Clone(),
@@ -201,12 +215,12 @@ namespace Map {
 		}
 		
 		[Serializable]
-		public class MapChunkData {
+		public class MapChunkSaveData {
 			public int squaresPerSide;
 			public float visibleChunkSideDimension;
 			public Vector3[] vertices;
 			public Vector2[] uvs;
-			public MapChunkData (int squaresPerSide, float visibleChunkSideDimension, Vector3[] vertices, Vector2[] uvs) {
+			public MapChunkSaveData (int squaresPerSide, float visibleChunkSideDimension, Vector3[] vertices, Vector2[] uvs) {
 				this.squaresPerSide = squaresPerSide;
 				this.visibleChunkSideDimension = visibleChunkSideDimension;
 				this.vertices = vertices;

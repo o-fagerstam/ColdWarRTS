@@ -1,12 +1,20 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using Map;
+using Singleton;
 using UnityEngine;
+using Utils;
 namespace Persistence {
-	public static class MapSaveSystem {
-		private static readonly string path = Application.persistentDataPath + "/maptest.json";
-		public static void SaveMap (GameMap map) {
-			GameMap.GameMapData mapData = map.CreateMapData();
-			string saveData = JsonUtility.ToJson(mapData, true);
+	public class MapSaveSystem : MonoBehaviour {
+		private string path;
+		[SerializeField] private GameMap gameMapPrefab;
+
+		private void Start () {
+			path = Application.persistentDataPath + "/maptest.json";
+		}
+		public void SaveMap () {
+			GameMap.GameMapSaveData mapSaveData = SingletonManager.Retrieve<GameMap>().CreateSaveData();
+			string saveData = JsonUtility.ToJson(mapSaveData, true);
 			
 			UnityEngine.Debug.Log($"Saving to {path}");
 			using FileStream stream = new FileStream(path, FileMode.Create);
@@ -15,12 +23,28 @@ namespace Persistence {
 			UnityEngine.Debug.Log("Finished saving");
 		}
 
-		public static void LoadMap (GameMap map) {
+		public void LoadMap () {
 			using FileStream stream = new FileStream(path, FileMode.Open);
 			StreamReader reader = new StreamReader(stream);
 			string saveData = reader.ReadToEnd();
-			GameMap.GameMapData mapData = JsonUtility.FromJson<GameMap.GameMapData>(saveData);
-			map.GenerateFromMapData(mapData);
+			GameMap.GameMapSaveData mapSaveData = JsonUtility.FromJson<GameMap.GameMapSaveData>(saveData);
+			RecreateMap();
+			SingletonManager.Retrieve<GameMap>().GenerateFromMapData(mapSaveData);
+		}
+
+		public void NewMap () {
+			RecreateMap();
+			SingletonManager.Retrieve<GameMap>().GenerateFlatMap();
+		}
+
+		private void RecreateMap () {
+			if (SingletonManager.IsRegistered<GameMap>()) {
+				GameMap oldMap = SingletonManager.Retrieve<GameMap>();
+				SingletonManager.Unregister(oldMap);
+				SafeDestroyUtil.SafeDestroyGameObject(oldMap);
+			}
+			GameMap newMap = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
+			SingletonManager.Register(newMap);
 		}
 	}
 }
