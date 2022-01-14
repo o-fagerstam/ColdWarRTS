@@ -16,6 +16,7 @@ namespace Map {
 		[SerializeField] private List<MapChunk> chunks = new List<MapChunk>();
 		[SerializeField] private MapChunk mapChunkPrefab;
 		[SerializeField] private ForestSection forestSectionPrefab;
+		[SerializeField] private RoadSegment roadSegmentPrefab;
 		[ShowInInspector][ReadOnly] private List<AStaticMapElement> allStaticMapElements = new List<AStaticMapElement>();
 		public IEnumerable<ForestSection> AllForests => allStaticMapElements.OfType<ForestSection>();
 
@@ -57,6 +58,11 @@ namespace Map {
 				ForestSection newForestSection = Instantiate(forestSectionPrefab, forestSectionData.worldPosition, Quaternion.identity, transform);
 				newForestSection.CreateFromSaveData(forestSectionData);
 				RegisterStaticMapElement(newForestSection);
+			}
+			foreach (RoadSegment.RoadSegmentSaveData roadSegmentSaveData in saveData.roadSegmentData) {
+				RoadSegment newRoadSegment = Instantiate(roadSegmentPrefab, roadSegmentSaveData.position, Quaternion.identity, transform);
+				newRoadSegment.CreateFromSaveData(roadSegmentSaveData);
+				RegisterStaticMapElement(newRoadSegment);
 			}
 		}
 
@@ -124,9 +130,12 @@ namespace Map {
 
 		public GameMapSaveData CreateSaveData () {
 			List<ForestSection> forestSections = new List<ForestSection>();
+			List<RoadSegment> roadSegments = new List<RoadSegment>();
 			foreach (AStaticMapElement staticMapElement in allStaticMapElements) {
 				if (staticMapElement is ForestSection f) {
 					forestSections.Add(f);
+				} else if (staticMapElement is RoadSegment rs) {
+					roadSegments.Add(rs);
 				}
 			}
 			return new GameMapSaveData(
@@ -134,7 +143,8 @@ namespace Map {
 				chunkResolution,
 				mapSize,
 				chunks.Select(c => c.CreateChunkData()).ToList(),
-				forestSections.Select(f => f.CreateSaveData()).ToList()
+				(from fs in forestSections select fs.CreateSaveData()).ToList(),
+				(from rs in roadSegments select rs.CreateSaveData()).ToList()
 			);
 		}
 
@@ -145,19 +155,22 @@ namespace Map {
 			public float mapSize;
 			public List<MapChunk.MapChunkSaveData> chunkData;
 			public List<ForestSection.ForestSectionData> forestSectionData;
+			public List<RoadSegment.RoadSegmentSaveData> roadSegmentData;
 
 			public GameMapSaveData (
 				int chunksPerSide,
 				int chunkResolution,
 				float mapSize,
 				List<MapChunk.MapChunkSaveData> chunkData,
-				List<ForestSection.ForestSectionData> forestSectionData
+				List<ForestSection.ForestSectionData> forestSectionData,
+				List<RoadSegment.RoadSegmentSaveData> roadSegmentData
 			) {
 				this.chunksPerSide = chunksPerSide;
 				this.chunkResolution = chunkResolution;
 				this.mapSize = mapSize;
 				this.chunkData = chunkData;
 				this.forestSectionData = forestSectionData;
+				this.roadSegmentData = roadSegmentData;
 			}
 		}
 	}
