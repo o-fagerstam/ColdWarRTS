@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Constants;
 using Math;
+using PlasticPipe.Server;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
@@ -32,7 +34,7 @@ namespace Map {
 				throw new MissingComponentException($"Failed to find {nameof(GameMap)} in parent. Did you parent this chunk to a {nameof(GameMap)} on instancing?");
 			}
 		}
-		public void GenerateFlatChunk (int squaresPerSide, float chunkSize) {
+		public void GenerateChunk (int squaresPerSide, float chunkSize, List<float> heights = null) {
 			this.squaresPerSide = squaresPerSide;
 			int visiblePointsPerSide = CalculateVisiblePointsPerSide(squaresPerSide);
 			int realPointsPerSide = CalculateRealPointsPerSide(squaresPerSide);
@@ -49,7 +51,8 @@ namespace Map {
 			for (int y = 0; y < realPointsPerSide; y++) {
 				for (int x = 0; x < realPointsPerSide; x++) {
 					int vertIndex = x + y*realPointsPerSide;
-					vertices[vertIndex] = new Vector3(x*dstBetweenPoints + startSideOffset, 0f, y*dstBetweenPoints + startSideOffset);
+					float heightValue = heights == null ? 0f : heights[vertIndex];
+					vertices[vertIndex] = new Vector3(x*dstBetweenPoints + startSideOffset, heightValue, y*dstBetweenPoints + startSideOffset);
 					uvs[vertIndex] = new Vector2(
 						Mathf.Clamp01((x - .5f)/visiblePointsPerSide),
 						Mathf.Clamp01((y - .5f)/visiblePointsPerSide));
@@ -58,6 +61,12 @@ namespace Map {
 			RecalculateMesh(vertices, uvs);
 			GenerateWater();
 		}
+		
+		public void GenerateFromChunkData (MapChunkSaveData mapChunkSaveData) {
+			GenerateChunk(mapChunkSaveData.squaresPerSide, mapChunkSaveData.visibleChunkSideDimension, mapChunkSaveData.heights);
+			GenerateWater();
+		}
+		
 		private void GenerateWater () {
 			if (water != null) { SafeDestroyUtil.SafeDestroy(water); }
 			Vector3 waterPosition = transform.TransformPoint(0f, GeographyConstants.MAP_WATER_LEVEL, 0f);
@@ -180,6 +189,39 @@ namespace Map {
 						forestSection.NotifyVisualUpdateNeeded();
 					}
 				}
+			}
+		}
+
+		private void OnEnable () {
+			foreach (AStaticMapElement element in staticMapElements) {
+				element.OnShapeChanged += HandleStaticMapElementShapeChanged;
+				element.OnDestruction += HandleStaticMapElementDestroyed;
+			}
+		}
+
+		private void OnDisable () {
+			foreach (AStaticMapElement element in staticMapElements) {
+				element.OnShapeChanged -= HandleStaticMapElementShapeChanged;
+				element.OnDestruction -= HandleStaticMapElementDestroyed;
+			}
+		}
+
+		public MapChunkSaveData CreateChunkData () {
+			return new MapChunkSaveData(
+				squaresPerSide,
+				visibleChunkSideDimension,
+				meshFilter.mesh.vertices.Select(v => v.y).ToList());
+		}
+		
+		[Serializable]
+		public class MapChunkSaveData {
+			public int squaresPerSide;
+			public float visibleChunkSideDimension;
+			public List<float> heights;
+			public MapChunkSaveData (int squaresPerSide, float visibleChunkSideDimension, List<float> heights) {
+				this.squaresPerSide = squaresPerSide;
+				this.visibleChunkSideDimension = visibleChunkSideDimension;
+				this.heights = heights;
 			}
 		}
 	}

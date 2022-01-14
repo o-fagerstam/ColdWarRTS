@@ -1,10 +1,12 @@
-﻿using UnityEngine;
+﻿using System;
+using UnityEngine;
 namespace Graphics {
+	[Serializable]
 	public struct GpuInstance {
-		public Vector3 position { get; }
-		public Vector3 scale { get; }
-		public Quaternion rotation { get;}
-		public bool enabled { get; }
+		public Vector3 position;
+		public Vector3 scale;
+		public Quaternion rotation;
+		public bool enabled;
 
 		public GpuInstance (Vector3 position, Vector3 scale, Quaternion rotation, bool enabled = true) {
 			this.position = position;

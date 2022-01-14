@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4790713791548984624}
   - component: {fileID: 6955029135892152875}
   m_Layer: 3
-  m_Name: Map
+  m_Name: GameMap
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -43,4 +43,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 458cf06ae3094189b79554ae210e0385, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  chunksPerSide: 20
+  chunkResolution: 20
+  mapSize: 100
+  chunks: []
   mapChunkPrefab: {fileID: -1279206610592063365, guid: 8ec56ca023c03344a9b7ca864f054a10, type: 3}
+  forestSectionPrefab: {fileID: -4291172762214712010, guid: 4feec96ffd9e4774c905d4742bbbdee6, type: 3}
+  roadSegmentPrefab: {fileID: -6440006881211199864, guid: 932bb55d4ab0f9441a7d8e209cd1c16c, type: 3}

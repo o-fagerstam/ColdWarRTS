@@ -8,8 +8,6 @@ using UnityEngine.InputSystem;
 namespace Controls {
 	public class MapEditorController : ARtsController {
 		[Title("Map Editor Controller")]
-		[SceneObjectsOnly]
-		[SerializeField] private GameMap map;
 		[SerializeField] private float scrollSpeed = 5f;
 		[Title("Debug")]
 		[ReadOnly][ShowInInspector] private AMapEditorTool currentTool;

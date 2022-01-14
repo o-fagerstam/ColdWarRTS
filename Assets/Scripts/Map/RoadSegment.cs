@@ -25,6 +25,14 @@ namespace Map {
 			Vector3 dir = localAnchor2 - localAnchor1;
 			Vector3 localControl1 = localAnchor1 + dir*0.33f;
 			Vector3 localControl2 = localAnchor2 - dir*0.33f;
+			GenerateCurve(localAnchor1, localAnchor2, localControl1, localControl2, position);
+		}
+
+		public void CreateFromSaveData (RoadSegmentSaveData data) {
+			transform.position = data.position;
+			GenerateCurve(data.anchor1, data.anchor2, data.control1, data.control2, data.position);
+		}
+		private void GenerateCurve (Vector3 localAnchor1, Vector3 localAnchor2, Vector3 localControl1, Vector3 localControl2, Vector3 position) {
 			curve = new BezierCurve(
 				VectorUtil.Flatten(localAnchor1),
 				VectorUtil.Flatten(localAnchor2),
@@ -33,6 +41,8 @@ namespace Map {
 
 			Vector3 worldControl1 = localControl1 + position;
 			Vector3 worldControl2 = localControl2 + position;
+			Vector3 worldAnchor1 = localAnchor1 + position;
+			Vector3 worldAnchor2 = localAnchor2 + position;
 			GroundDraggable anchor1Handle = Instantiate(handlePrefab, worldAnchor1, Quaternion.identity, transform);
 			GroundDraggable anchor2Handle = Instantiate(handlePrefab, worldAnchor2, Quaternion.identity, transform);
 			GroundDraggable control1Handle = Instantiate(handlePrefab, worldControl1, Quaternion.identity, transform);
@@ -47,7 +57,7 @@ namespace Map {
 				handle.transform.localScale = Vector3.one*0.2f;
 				handle.OnPositionChanged += HandleHandlePositionChanged;
 			}
-			
+
 			RecalculateMesh();
 			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
 			InvokeShapeChanged();
@@ -168,6 +178,33 @@ namespace Map {
 				}
 			}
 			return false;
+		}
+
+		public RoadSegmentSaveData CreateSaveData () {
+			return new RoadSegmentSaveData(
+				transform.position,
+				curve.anchor1.AddY(),
+				curve.anchor2.AddY(),
+				curve.control1.AddY(),
+				curve.control2.AddY()
+			);
+		}
+
+		[Serializable]
+		public class RoadSegmentSaveData {
+			public Vector3 position;
+			public Vector3 anchor1;
+			public Vector3 anchor2;
+			public Vector3 control1;
+			public Vector3 control2;
+			
+			public RoadSegmentSaveData (Vector3 position, Vector3 anchor1, Vector3 anchor2, Vector3 control1, Vector3 control2) {
+				this.position = position;
+				this.anchor1 = anchor1;
+				this.anchor2 = anchor2;
+				this.control1 = control1;
+				this.control2 = control2;
+			}
 		}
 	}
 }

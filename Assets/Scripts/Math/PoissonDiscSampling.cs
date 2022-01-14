@@ -2,10 +2,9 @@
 using UnityEngine;
 namespace Math {
 	public static class PoissonDiscSampling {
-
-		public static List<Vector2> GeneratePointsFromPolygon (float radius, Polygon polygon) {
+		public static List<Vector2> GeneratePointsFromPolygon (float radius, Polygon polygon, int seed) {
 			// Get square poisson sample
-			List<Vector2> pointsInBoundingBox = GeneratePoints(radius, polygon.BoundingBoxSize);
+			List<Vector2> pointsInBoundingBox = GeneratePoints(radius, polygon.BoundingBoxSize, seed);
 			// Remove points outside polygon
 			List<Vector2> pointsInPolygon = new List<Vector2>();
 			Vector2 polyOriginRelativeToBoundingBoxOrigin = polygon.PolyOriginRelativeToBoundingBoxOrigin;
@@ -16,8 +15,9 @@ namespace Math {
 			return pointsInPolygon;
 		}
 		
-		public static List<Vector2> GeneratePoints (float radius, Vector2 sampleRegionSize, int numSamplesBeforeRejection = 30) {
+		public static List<Vector2> GeneratePoints (float radius, Vector2 sampleRegionSize, int seed, int numSamplesBeforeRejection = 30) {
 			float cellSize = radius/Mathf.Sqrt(2);
+			MersenneTwister twister = new MersenneTwister(seed);
 
 			// Array with index of the point that lies in the corresponding cell
 			// 0 = no point, 1 = point with an index of 0, 2 = index 1, and so on...
@@ -27,14 +27,14 @@ namespace Math {
 
 			spawnPoints.Add(sampleRegionSize/2);
 			while (spawnPoints.Count > 0) {
-				int spawnIndex = Random.Range(0, spawnPoints.Count);
+				int spawnIndex = twister.Next(0, spawnPoints.Count-1);
 				Vector2 spawnCenter = spawnPoints[spawnIndex];
 
 				bool candidateAccepted = false;
 				for (int i = 0; i < numSamplesBeforeRejection; i++) {
 					float angle = Random.value*Mathf.PI * 2;
 					Vector2 dir = new Vector2(Mathf.Sin(angle), Mathf.Cos(angle));
-					Vector2 candidate = spawnCenter + dir*Random.Range(radius, radius*2);
+					Vector2 candidate = spawnCenter + dir*Mathf.Lerp(radius, radius*2, twister.NextFloatPositive());
 					if (IsValid(candidate, sampleRegionSize, cellSize, radius, points, grid)) {
 						points.Add(candidate);
 						spawnPoints.Add(candidate);
