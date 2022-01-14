@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 using Constants;
 using Graphics;
 using Math;
@@ -10,12 +11,15 @@ using Utils;
 using Random = UnityEngine.Random;
 namespace Map {
 	public class ForestSection : AStaticMapElement {
-		private Polygon localSpacePolygon = new Polygon();
+
 		[ShowInInspector] private List<GpuInstance> treeInstances = new List<GpuInstance>();
 		[AssetsOnly][Required][SerializeField] private GameObject treePrefab;
 		[Range(2f, 10f)]
 		[ShowInInspector] private static readonly float TreeRadiusMeters = 10f;
+		
+		private Polygon localSpacePolygon = new Polygon();
 		private GpuInstancer gpuInstancer;
+		private int treeGenSeed;
 
 		private void Awake() {
 			gpuInstancer = new GpuInstancer(treePrefab);
@@ -38,9 +42,7 @@ namespace Map {
 
 		public void CreateFromSaveData (ForestSectionData data) {
 			localSpacePolygon = new Polygon(data.polygon);
-			treeInstances.Clear();
-			treeInstances = data.treeInstances;
-			gpuInstancer.SetInstances(treeInstances);
+			GenerateTrees(data.seed);
 		}
 
 		public bool IsClosed => localSpacePolygon.IsClosed;
@@ -77,14 +79,15 @@ namespace Map {
 			}
 			InvokeShapeChanged();
 			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
-			GenerateTrees();
+			GenerateTrees(Random.Range(int.MinValue, int.MaxValue));
 			return true;
 		}
 
 
 		
-		private void GenerateTrees () {
-			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(ScaleUtil.GameToUnity(TreeRadiusMeters), localSpacePolygon);
+		private void GenerateTrees (int seed) {
+			treeGenSeed = seed;
+			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(ScaleUtil.GameToUnity(TreeRadiusMeters), localSpacePolygon, seed);
 			treeInstances.Clear();
 			foreach (Vector2 point in polygonPoints) {
 				Vector3 worldPoint = LocalVec2ToWorldVec3(point);
@@ -141,19 +144,19 @@ namespace Map {
 		}
 
 		public ForestSectionData CreateSaveData () {
-			return new ForestSectionData(transform.position, localSpacePolygon.CreateSaveData(), treeInstances);
+			return new ForestSectionData(transform.position, localSpacePolygon.CreateSaveData(), treeGenSeed);
 		}
 
 		[Serializable]
 		public class ForestSectionData {
 			public Vector3 worldPosition;
 			public Polygon.PolygonSaveData polygon;
-			public List<GpuInstance> treeInstances;
+			public int seed;
 
-			public ForestSectionData (Vector3 worldPosition, Polygon.PolygonSaveData polygon, List<GpuInstance> treeInstances) {
+			public ForestSectionData (Vector3 worldPosition, Polygon.PolygonSaveData polygon, int seed) {
 				this.worldPosition = worldPosition;
 				this.polygon = polygon;
-				this.treeInstances = treeInstances;
+				this.seed = seed;
 			}
 		}
 	}

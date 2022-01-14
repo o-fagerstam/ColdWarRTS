@@ -19,7 +19,10 @@ namespace Map {
 		}
 
 		protected virtual void Update () {
-			if (updateNeeded) { UpdateElementVisuals(); }
+			if (updateNeeded) {
+				UpdateElementVisuals();
+				updateNeeded = false;
+			}
 		}
 		protected abstract void UpdateElementVisuals ();
 		public abstract bool Overlaps (Rectangle worldRectangle);
@@ -29,7 +32,5 @@ namespace Map {
 		protected void InvokeShapeChanged () {
 			OnShapeChanged?.Invoke(this);
 		}
-
-
 	}
 }
