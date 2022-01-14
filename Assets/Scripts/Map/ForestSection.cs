@@ -89,11 +89,12 @@ namespace Map {
 			treeGenSeed = seed;
 			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(ScaleUtil.GameToUnity(TreeRadiusMeters), localSpacePolygon, seed);
 			treeInstances.Clear();
+			MersenneTwister twister = new MersenneTwister(seed);
 			foreach (Vector2 point in polygonPoints) {
 				Vector3 worldPoint = LocalVec2ToWorldVec3(point);
-				Vector3 rotation = new Vector3(0f, Random.value*360, 0f);
+				Vector3 rotation = new Vector3(0f, twister.NextFloatPositive()*360f, 0f);
 				Quaternion quatRotation = Quaternion.Euler(rotation);
-				GpuInstance newTree = new GpuInstance(worldPoint, Vector3.one, quatRotation, false);
+				GpuInstance newTree = new GpuInstance(worldPoint, Vector3.one * Mathf.Lerp(0.8f, 1.2f, twister.NextFloatPositive()), quatRotation, false);
 				newTree = RaycastTree(newTree);
 				treeInstances.Add(newTree);
 			}
