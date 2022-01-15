@@ -11,23 +11,26 @@ namespace Controls.MapEditorTools {
 		[SerializeField][AssetsOnly] RoadSegment roadPrefab;
 		[ShowInInspector] [ReadOnly] private bool hasStartPoint;
 		[ShowInInspector] [ReadOnly] private Vector3 startPoint;
-		[ShowInInspector][ReadOnly] private IMouseDraggable draggedObject;
 		public override void Activate () {
 			UpdateTooltip(TOOLTIP_BASE);
-			draggedObject = null;
+			SingletonManager.Retrieve<GroundDragManager>().CancelDragging();
 			hasStartPoint = false;
 		}
 		
 		public override void UpdateKeyboard () {}
 		public override void UpdateMouse (Ray mouseRay) {
-			if (Mouse.current.leftButton.wasReleasedThisFrame && draggedObject != null) {
-				draggedObject = null;
+			GroundDragManager groundDragManager = SingletonManager.Retrieve<GroundDragManager>();
+			if (Mouse.current.leftButton.wasReleasedThisFrame && groundDragManager.IsDragging) {
+				groundDragManager.FinishDragging();
+				return;
+			}
+			if (Mouse.current.rightButton.wasPressedThisFrame && groundDragManager.IsDragging) {
+				groundDragManager.CancelDragging();
 				return;
 			}
 
-			if (Mouse.current.leftButton.isPressed && draggedObject != null) {
-				if (!Physics.Raycast(mouseRay, out RaycastHit dragHit, Mathf.Infinity, LayerMasks.bareGround)) { return; }
-				draggedObject.UpdatePosition(dragHit.point);
+			if (Mouse.current.leftButton.isPressed && groundDragManager.IsDragging) {
+				groundDragManager.HandleUpdate(mouseRay);
 				return;
 			}
 			
@@ -38,7 +41,8 @@ namespace Controls.MapEditorTools {
 				if (hitLayer == LayerMasks.bareGround) {
 					OnLeftClickGround(clickHit);
 				} else if (hitLayer == LayerMasks.mouseDraggable) {
-					draggedObject = clickHit.transform.GetComponent<IMouseDraggable>();
+					GroundDraggable draggedObject = clickHit.transform.GetComponent<GroundDraggable>();
+					groundDragManager.SelectForDragging(draggedObject);
 				}
 			}
 		}

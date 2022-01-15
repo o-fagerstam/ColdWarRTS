@@ -132,8 +132,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 104541512}
-  - component: {fileID: 104541511}
+  - component: {fileID: 104541513}
   - component: {fileID: 104541510}
+  - component: {fileID: 104541511}
   m_Layer: 0
   m_Name: MapEditorController
   m_TagString: Untagged
@@ -163,10 +164,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 104541509}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ffe9b7cf66f1426cbd9f38d1e5954710, type: 3}
+  m_Script: {fileID: 11500000, guid: 1092cd04e3574b2fa2158875df9a9096, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  scrollSpeed: 5
 --- !u!4 &104541512
 Transform:
   m_ObjectHideFlags: 0
@@ -184,6 +184,19 @@ Transform:
   m_Father: {fileID: 0}
   m_RootOrder: 6
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &104541513
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 104541509}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4b0eeefd6354848af4cd2af64e39aa2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrollSpeed: 5
 --- !u!1 &189855177
 GameObject:
   m_ObjectHideFlags: 0
@@ -766,7 +779,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 470c739a224244e8a646895dc97b1a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  mapEditorController: {fileID: 104541511}
+  mapEditorController: {fileID: 0}
 --- !u!1 &638110363
 GameObject:
   m_ObjectHideFlags: 0

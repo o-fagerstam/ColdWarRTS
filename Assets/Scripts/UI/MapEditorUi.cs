@@ -1,11 +1,10 @@
 ﻿using Controls;
 using Controls.MapEditorTools;
+using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 namespace UI {
 	public class MapEditorUi : MonoBehaviour {
-		[Required][SceneObjectsOnly][SerializeField]
-		private MapEditorController mapEditorController;
 		[ReadOnly][ShowInInspector] private TooltipText tooltip;
 		private void Start () {
 			tooltip = GetComponentInChildren<TooltipText>();
@@ -17,7 +16,7 @@ namespace UI {
 		private void HandleToolSelected (AMapEditorTool tool) {
 			tooltip.Subscribe(tool);
 			tool.OnToolFinished += HandleToolFinished;
-			mapEditorController.SelectTool(tool);
+			SingletonManager.Retrieve<MapEditorController>().SelectTool(tool);
 		}
 		private void HandleToolFinished (AMapEditorTool tool) {
 			tooltip.Unsubscribe(tool);

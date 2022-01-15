@@ -1,6 +1,9 @@
-﻿using Constants;
+﻿using System;
+using System.Collections.Generic;
+using Constants;
 using Controls.MapEditorTools;
 using Map;
+using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -11,11 +14,19 @@ namespace Controls {
 		[SerializeField] private float scrollSpeed = 5f;
 		[Title("Debug")]
 		[ReadOnly][ShowInInspector] private AMapEditorTool currentTool;
-		[ReadOnly][ShowInInspector] private IMouseDraggable currentDraggedObject;
+
 
 		public void SelectTool (AMapEditorTool tool) {
 			currentTool = tool;
 			tool.Activate();
+		}
+
+		private void OnEnable () {
+			SingletonManager.Register(this);
+		}
+
+		private void OnDisable () {
+			SingletonManager.Unregister(this);
 		}
 
 		protected virtual void Update () {
@@ -57,41 +68,8 @@ namespace Controls {
 				currentTool.UpdateMouse(mouseRay);
 				return;
 			}
-			
-			UpdateMouseRelease();
-			UpdateMouseDrag(mouseRay);
-			UpdateMouseDown(mouseRay);
-		}
-		private void UpdateMouseRelease () {
-			if (!Mouse.current.leftButton.wasReleasedThisFrame) { return; }
-			currentDraggedObject = null;
-		}
-		private void UpdateMouseDrag (Ray mouseRay) {
-			if (!Mouse.current.leftButton.isPressed) { return; }
-			if (currentDraggedObject == null) { return; }
-			if (!Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.bareGround)) { return; }
-			currentDraggedObject.UpdatePosition(hit.point);
 		}
 
-		private void UpdateMouseDown (Ray mouseRay) {
-			if (!Mouse.current.leftButton.wasPressedThisFrame &&
-			    !Mouse.current.rightButton.wasPressedThisFrame) { return; }
-
-			if (EventSystem.current.IsPointerOverGameObject()) { return; }
-
-			if (!Physics.Raycast(mouseRay, out RaycastHit raycastHit, Mathf.Infinity, LayerMasks.anythingClickable)) { return; }
-
-			if (1 << raycastHit.transform.gameObject.layer == LayerMasks.mouseDraggable) {
-				if (Mouse.current.leftButton.wasPressedThisFrame) {
-					bool found = raycastHit.transform.TryGetComponent(out IMouseDraggable draggableComponent);
-					if (!found) {
-						throw new MissingComponentException(
-							$"Object {raycastHit.transform.gameObject} is has no {nameof(IMouseDraggable)} component.");
-					}
-					currentDraggedObject = draggableComponent;
-				}
-			}
-		}
 		public void ClearTool () {
 			currentTool.Deactivate();
 			currentTool = null;

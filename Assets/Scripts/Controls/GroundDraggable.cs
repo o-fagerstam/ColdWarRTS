@@ -1,13 +1,24 @@
 ﻿using System;
+using Singleton;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Controls {
-	public class GroundDraggable : MonoBehaviour, IMouseDraggable {
+	public class GroundDraggable : MonoBehaviour {
+		[ReadOnly][ShowInInspector] public string snapTag;
+		[ReadOnly][ShowInInspector] public string snapFilterTag;
 
 		/// <summary>
 		/// Args: This Object, new position
 		/// </summary>
 		public event Action<GroundDraggable, Vector3> OnPositionChanged;
+
+		private void OnEnable () {
+			SingletonManager.Retrieve<GroundDragManager>().Register(this);
+		}
+		private void OnDisable () {
+			SingletonManager.Retrieve<GroundDragManager>().Deregister(this);
+		}
 
 		private void Update () {
 			RecalculateHeight();

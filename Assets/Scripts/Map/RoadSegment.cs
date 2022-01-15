@@ -17,6 +17,7 @@ namespace Map {
 		private BezierCurve curve;
 		private Dictionary<GroundDraggable, BezierPoint> handles; // Order: Anchor1, Anchor2, Control1, Control2;
 		[ShowInInspector] [ReadOnly] private List<(Vector3 left, Vector3 right)> meshPoints = new List<(Vector3 left, Vector3 right)>();
+		private const string ANCHOR_TAG = "RoadAnchor";
 
 		public void Initialize (Vector3 worldAnchor1, Vector3 worldAnchor2) {
 			Vector3 position = transform.position;
@@ -44,7 +45,11 @@ namespace Map {
 			Vector3 worldAnchor1 = localAnchor1 + position;
 			Vector3 worldAnchor2 = localAnchor2 + position;
 			GroundDraggable anchor1Handle = Instantiate(handlePrefab, worldAnchor1, Quaternion.identity, transform);
+			anchor1Handle.snapTag = ANCHOR_TAG;
+			anchor1Handle.snapFilterTag = gameObject.GetInstanceID().ToString();
 			GroundDraggable anchor2Handle = Instantiate(handlePrefab, worldAnchor2, Quaternion.identity, transform);
+			anchor2Handle.snapTag = ANCHOR_TAG;
+			anchor2Handle.snapFilterTag = gameObject.GetInstanceID().ToString();
 			GroundDraggable control1Handle = Instantiate(handlePrefab, worldControl1, Quaternion.identity, transform);
 			GroundDraggable control2Handle = Instantiate(handlePrefab, worldControl2, Quaternion.identity, transform);
 			handles = new Dictionary<GroundDraggable, BezierPoint> {
