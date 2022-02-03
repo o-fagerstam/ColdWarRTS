@@ -19,7 +19,7 @@ namespace Map {
 		[SerializeField] private RoadSegment roadSegmentPrefab;
 		[ShowInInspector][ReadOnly] private List<AStaticMapElement> allStaticMapElements = new List<AStaticMapElement>();
 		public IEnumerable<ForestSection> AllForests => allStaticMapElements.OfType<ForestSection>();
-
+		public IEnumerable<RoadSegment> AllRoadSegments => allStaticMapElements.OfType<RoadSegment>();
 		public void GenerateFlatMap () {
 			ClearMap();
 

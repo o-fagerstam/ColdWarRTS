@@ -2,62 +2,107 @@
 using Map;
 using Singleton;
 using Sirenix.OdinInspector;
+using Sirenix.Utilities;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public class PlaceRoadTool : AMapEditorTool {
-		private const string TOOLTIP_BASE = "Not implemented";
 		[SerializeField][AssetsOnly] RoadSegment roadPrefab;
-		[ShowInInspector] [ReadOnly] private bool hasStartPoint;
-		[ShowInInspector] [ReadOnly] private Vector3 startPoint;
+		[ShowInInspector] [ReadOnly] private Vector3 roadStartPoint;
+		private IRoadToolState state;
 		public override void Activate () {
-			UpdateTooltip(TOOLTIP_BASE);
-			SingletonManager.Retrieve<GroundDragManager>().CancelDragging();
-			hasStartPoint = false;
+			SwitchToState(new BaseState(this));
+		}
+
+		private void SwitchToState (IRoadToolState newState) {
+			state?.OnExitState();
+			state = newState;
+			state.OnEnterState();
 		}
 		
 		public override void UpdateKeyboard () {}
 		public override void UpdateMouse (Ray mouseRay) {
-			GroundDragManager groundDragManager = SingletonManager.Retrieve<GroundDragManager>();
-			if (Mouse.current.leftButton.wasReleasedThisFrame && groundDragManager.IsDragging) {
-				groundDragManager.FinishDragging();
-				return;
-			}
-			if (Mouse.current.rightButton.wasPressedThisFrame && groundDragManager.IsDragging) {
-				groundDragManager.CancelDragging();
-				return;
-			}
+			state.UpdateMouse(mouseRay);
+		}
 
-			if (Mouse.current.leftButton.isPressed && groundDragManager.IsDragging) {
-				groundDragManager.HandleUpdate(mouseRay);
-				return;
+		private interface IRoadToolState {
+			public void OnEnterState ();
+			public void UpdateMouse (Ray mouseRay);
+
+			public void OnExitState ();
+		}
+
+		private class BaseState : IRoadToolState {
+			private const string TOOLTIP_BASE = "Shift-click to start placing road";
+			private PlaceRoadTool tool;
+			public BaseState (PlaceRoadTool tool) {
+				this.tool = tool;
 			}
-			
-			if (EventSystem.current.IsPointerOverGameObject()) { return; }
-			if (!Physics.Raycast(mouseRay, out RaycastHit clickHit, Mathf.Infinity, LayerMasks.anythingClickable)) { return; }
-			int hitLayer = 1 << clickHit.transform.gameObject.layer;
-			if (Mouse.current.leftButton.wasPressedThisFrame) {
-				if (hitLayer == LayerMasks.bareGround) {
-					OnLeftClickGround(clickHit);
-				} else if (hitLayer == LayerMasks.mouseDraggable) {
-					GroundDraggable draggedObject = clickHit.transform.GetComponent<GroundDraggable>();
-					groundDragManager.SelectForDragging(draggedObject);
+			public void OnEnterState () {
+				tool.UpdateTooltip(TOOLTIP_BASE);
+				SingletonManager.Retrieve<GroundDragManager>().CancelDragging();
+				foreach (RoadSegment roadSegment in SingletonManager.Retrieve<GameMap>().AllRoadSegments) {
+					roadSegment.EnableAnchors();
+				}
+			}
+			public void UpdateMouse (Ray mouseRay) {
+				GroundDragManager groundDragManager = SingletonManager.Retrieve<GroundDragManager>();
+				if (Mouse.current.leftButton.wasReleasedThisFrame && groundDragManager.IsDragging) {
+					groundDragManager.FinishDragging();
+					return;
+				}
+				if (Mouse.current.rightButton.wasPressedThisFrame && groundDragManager.IsDragging) {
+					groundDragManager.CancelDragging();
+					return;
+				}
+
+				if (Mouse.current.leftButton.isPressed && groundDragManager.IsDragging) {
+					groundDragManager.HandleUpdate(mouseRay);
+					return;
+				}
+
+				if (EventSystem.current.IsPointerOverGameObject()) { return; }
+				if (Mouse.current.leftButton.wasPressedThisFrame) {
+					if (Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.anyLand)) {
+						tool.roadStartPoint = hit.point;
+						tool.SwitchToState(new PlacingRoadState(tool));
+					} else if (!Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out hit, Mathf.Infinity, LayerMasks.mouseDraggable)) {
+						GroundDraggable draggedObject = hit.transform.GetComponent<GroundDraggable>();
+						groundDragManager.SelectForDragging(draggedObject);
+					}
+				}
+			}
+			public void OnExitState () {
+				foreach (RoadSegment roadSegment in SingletonManager.Retrieve<GameMap>().AllRoadSegments) {
+					roadSegment.DisableAnchors();
 				}
 			}
 		}
 
-		private void OnLeftClickGround (RaycastHit hit) {
-			if (!hasStartPoint) {
-				hasStartPoint = true;
-				startPoint = hit.point;
-			} else {
-				hasStartPoint = false;
-				GameMap map = SingletonManager.Retrieve<GameMap>();
-				RoadSegment newRoadSegment = Instantiate(roadPrefab, startPoint, Quaternion.identity, map.transform);
-				newRoadSegment.Initialize(startPoint, hit.point);
+		private class PlacingRoadState : IRoadToolState {
+			private const string TOOLTIP_PLACING_ROAD = "Click to place road";
+			private PlaceRoadTool tool;
+			public PlacingRoadState (PlaceRoadTool tool) {
+				this.tool = tool;
 			}
-		}
 
+			public void OnEnterState () {
+				tool.UpdateTooltip(TOOLTIP_PLACING_ROAD);
+			}
+			public void UpdateMouse (Ray mouseRay) {
+				if (EventSystem.current.IsPointerOverGameObject()) { return; }
+				if (!Physics.Raycast(mouseRay, out RaycastHit clickHit, Mathf.Infinity, LayerMasks.anyLand)) { return; }
+
+				if (Mouse.current.leftButton.wasPressedThisFrame) {
+					GameMap map = SingletonManager.Retrieve<GameMap>();
+					RoadSegment newRoadSegment = Instantiate(tool.roadPrefab, tool.roadStartPoint, Quaternion.identity, map.transform);
+					newRoadSegment.Initialize(tool.roadStartPoint, clickHit.point);
+					newRoadSegment.EnableAnchors();
+					tool.SwitchToState(new BaseState(tool));
+				}
+			}
+			public void OnExitState () {}
+		}
 	}
 }

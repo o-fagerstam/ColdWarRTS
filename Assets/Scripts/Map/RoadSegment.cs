@@ -14,6 +14,7 @@ namespace Map {
 		private static readonly float RoadHeightOverGround = ScaleUtil.GameToUnity(.5f);
 		private static readonly float RoadWidth = ScaleUtil.GameToUnity(8f);
 		private static readonly float RoadSegmentLength = ScaleUtil.GameToUnity(2f);
+		private static readonly int NumRoadEndSubDivisions = 20;
 		private BezierCurve curve;
 		private Dictionary<GroundDraggable, BezierPoint> handles; // Order: Anchor1, Anchor2, Control1, Control2;
 		[ShowInInspector] [ReadOnly] private List<(Vector3 left, Vector3 right)> meshPoints = new List<(Vector3 left, Vector3 right)>();
@@ -65,8 +66,22 @@ namespace Map {
 
 			RecalculateMesh();
 			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
+			DisableAnchors();
 			InvokeShapeChanged();
 		}
+
+		public void EnableAnchors () {
+			foreach (GroundDraggable handle in handles.Keys) {
+				handle.gameObject.SetActive(true);
+			}
+		}
+
+		public void DisableAnchors () {
+			foreach (GroundDraggable handle in handles.Keys) {
+				handle.gameObject.SetActive(false);
+			}
+		}
+		
 		private void HandleHandlePositionChanged (GroundDraggable obj, Vector3 newWorldPos) {
 			curve.MovePoint(handles[obj], (newWorldPos - transform.position).Flatten());
 			RecalculateMesh();
@@ -78,18 +93,46 @@ namespace Map {
 			int numSegments = Mathf.CeilToInt(curve.ApproximateLength/RoadSegmentLength);
 			if (numSegments % segmentsPerUvLoop != 0) {numSegments += segmentsPerUvLoop - numSegments%segmentsPerUvLoop;}
 
-			Vector3[] vertices = new Vector3[2*(numSegments + 1)];
+			//vertices
+			int numSegmentVertices = 2*(numSegments + 1);
+			int numRoadEndVertices = (NumRoadEndSubDivisions - 1) *2;
+			Vector3[] vertices = new Vector3[numSegmentVertices + numRoadEndVertices];
 			int vertIndex = 0;
 			meshPoints = CreateMeshPoints(numSegments);
 			foreach ((Vector3 left, Vector3 right) in meshPoints) {
 				vertices[vertIndex++] = left;
 				vertices[vertIndex++] = right;
 			}
-			int[] triangles = new int[numSegments*6];
-			Vector2[] uvs = new Vector2[vertices.Length];
+			Vector3 roadEndMiddle1 = (meshPoints[0].left + meshPoints[0].right) / 2f;
+			int centerPointIndex1 = vertIndex++;
+			vertices[centerPointIndex1] = roadEndMiddle1;
+			Vector3 dir1 = (meshPoints[1].left + meshPoints[1].right)/2f - roadEndMiddle1;
+			Vector3 dir2D1 = new Vector3(-dir1.x, 0f, -dir1.z).normalized;
+			for (int i = 1; i < NumRoadEndSubDivisions-1; i++) {
+				float t = (i/(NumRoadEndSubDivisions - 1f))*2f- 1f;
+				Vector3 offsetDir = Quaternion.Euler(0f, t * 90f, 0f)*dir2D1;
+				Vector3 newPoint = Generate3DMeshPoint((roadEndMiddle1 + offsetDir*RoadWidth).Flatten());
+				vertices[vertIndex++] = newPoint;
+			}
+			Vector3 roadEndMiddle2 = (meshPoints[meshPoints.Count-1].left + meshPoints[meshPoints.Count-1].right) / 2f;
+			int centerPointIndex2 = vertIndex++;
+			vertices[centerPointIndex2] = roadEndMiddle2;
+			Vector3 dir2 = (meshPoints[meshPoints.Count-2].left + meshPoints[meshPoints.Count-2].right)/2f - roadEndMiddle2;
+			Vector3 dir2D2 = new Vector3(-dir2.x, 0f, -dir2.z).normalized;
+			for (int i = 1; i < NumRoadEndSubDivisions-1; i++) {
+				float t = (i/(NumRoadEndSubDivisions - 1f))*2f- 1f;
+				Vector3 offsetDir = Quaternion.Euler(0f, t * 90f, 0f)*dir2D2;
+				Vector3 newPoint = Generate3DMeshPoint((roadEndMiddle2 + offsetDir*RoadWidth).Flatten());
+				vertices[vertIndex++] = newPoint;
+			}
+
 
 			// triangles
-			for (int i = 0, triangleIndex = 0; i < numSegments; i++) {
+			int numSegmentTriangles = numSegments*2;
+			int numRoadEndTriangles = NumRoadEndSubDivisions*2;
+			int[] triangles = new int[3 * (numSegmentTriangles + numRoadEndTriangles)];
+			int triangleIndex = 0;
+			for (int i = 0; i < numSegments; i++) {
 				int a = i*2;
 				int b = i*2 + 1;
 				int c = (i + 1)*2;
@@ -103,8 +146,19 @@ namespace Map {
 				triangles[triangleIndex++] = d;
 				triangles[triangleIndex++] = c;
 			}
+			for (int i = 0; i < NumRoadEndSubDivisions-1; i++) {
+				triangles[triangleIndex++] = centerPointIndex1;
+				triangles[triangleIndex++] = i == 0 ? 0 : centerPointIndex1 + i;
+				triangles[triangleIndex++] = i == NumRoadEndSubDivisions - 2 ? 1 : centerPointIndex1 + i + 1;
+			}
+			for (int i = 0; i < NumRoadEndSubDivisions-1; i++) {
+				triangles[triangleIndex++] = centerPointIndex2;
+				triangles[triangleIndex++] = i == 0 ? centerPointIndex1-1 : centerPointIndex2 + i;
+				triangles[triangleIndex++] = i == NumRoadEndSubDivisions - 2 ? centerPointIndex1-2 : centerPointIndex2 + i + 1;
+			}
 
 			// uvs
+			Vector2[] uvs = new Vector2[vertices.Length];
 			float uvStepLength = 1f/segmentsPerUvLoop;
 			for (int i = 0, uvIndex = 0; i < numSegments; i++) {
 				float uvFactor = (i%(segmentsPerUvLoop)) * uvStepLength;
