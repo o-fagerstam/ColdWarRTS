@@ -8,7 +8,8 @@
         "ShapesEditor",
         "Unity.RenderPipelines.Universal.Runtime",
         "Unity.TextMeshPro",
-        "Cinemachine"
+        "Cinemachine",
+        "AstarPathfindingProject"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using Math;
+using Pathfinding;
 using Persistence;
 using Singleton;
 using Sirenix.OdinInspector;
+using UnityEditor.Graphs;
 using UnityEngine;
 using Utils;
+using Polygon = Math.Polygon;
 namespace Map {
 	public class GameMap : ASingletonMonoBehaviour {
 		[SerializeField] private int chunksPerSide;
@@ -20,11 +23,18 @@ namespace Map {
 		[ShowInInspector][ReadOnly] private List<AStaticMapElement> allStaticMapElements = new List<AStaticMapElement>();
 		public IEnumerable<ForestSection> AllForests => allStaticMapElements.OfType<ForestSection>();
 		public IEnumerable<RoadSegment> AllRoadSegments => allStaticMapElements.OfType<RoadSegment>();
+
+		private void Start () {
+			float nodeSize = AstarPath.active.data.gridGraph.nodeSize;
+			AstarPath.active.data.gridGraph.SetDimensions(Mathf.RoundToInt(mapSize/nodeSize), Mathf.RoundToInt(mapSize/nodeSize), nodeSize);
+			UnityEngine.Debug.Log("Set map size to " + mapSize);
+			AstarPath.active.Scan();
+		}
 		public void GenerateFlatMap () {
 			ClearMap();
 
 			float chunkSize = mapSize/chunksPerSide;
-			Vector3 chunkBaseWorldOffset = transform.position + new Vector3(-(mapSize/2f), 0f, -(mapSize/2f));
+			Vector3 chunkBaseWorldOffset = transform.position + new Vector3(-(mapSize/2f) + chunkSize/2f, 0f, (chunkSize - mapSize)/2f);
 			for (int y = 0; y < chunksPerSide; y++) {
 				for (int x = 0; x < chunksPerSide; x++) {
 					Vector3 newChunkPosition = new Vector3(x*chunkSize, 0f, y*chunkSize) + chunkBaseWorldOffset;
@@ -33,6 +43,7 @@ namespace Map {
 					chunks.Add(newChunk);
 				}
 			}
+			RecalculateAstarGraph();
 		}
 
 		public void GenerateFromMapData (GameMapSaveData saveData) {
@@ -64,6 +75,7 @@ namespace Map {
 				newRoadSegment.CreateFromSaveData(roadSegmentSaveData);
 				RegisterStaticMapElement(newRoadSegment);
 			}
+			RecalculateAstarGraph();
 		}
 
 		private void ClearMap () {
@@ -78,6 +90,12 @@ namespace Map {
 			}
 			allStaticMapElements.Clear();
 		}
+
+		private void RecalculateAstarGraph () {
+			GridGraph graph = AstarPath.active.data.gridGraph;
+			graph.Scan();
+		}
+		
 		public void EditElevation (Vector3 hitPoint, float radius, float magnitude) {
 			Vector2 rectangleSize = new Vector2(radius*2, radius*2);
 			Rectangle hitRectangle = new Rectangle(VectorUtil.Flatten(hitPoint), rectangleSize);
@@ -85,6 +103,7 @@ namespace Map {
 			foreach (MapChunk chunk in GetOverlappingChunks(hitRectangle)) {
 				chunk.EditElevation(hitPoint, radius, magnitude);
 			}
+			RecalculateAstarGraph();
 		}
 
 		public IEnumerable<MapChunk> GetOverlappingChunks (Rectangle worldSpaceRectangle) {
