@@ -2657,12 +2657,8 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2050311223609370136, guid: 861883713e7be724a84833c024c8fc36, type: 3}
       propertyPath: m_Name
-      value: Controfller Follow Cam
+      value: Controller Follow Cam
       objectReference: {fileID: 0}
-    - target: {fileID: 2050311223609370137, guid: 861883713e7be724a84833c024c8fc36, type: 3}
-      propertyPath: m_Follow
-      value: 
-      objectReference: {fileID: 104541512}
     - target: {fileID: 2050311223609370150, guid: 861883713e7be724a84833c024c8fc36, type: 3}
       propertyPath: m_RootOrder
       value: 3

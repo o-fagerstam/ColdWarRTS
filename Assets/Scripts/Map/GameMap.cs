@@ -8,7 +8,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {
-	public class GameMap : MonoBehaviour, ISingleton {
+	public class GameMap : ASingletonMonoBehaviour {
 		[SerializeField] private int chunksPerSide;
 		[SerializeField] private int chunkResolution;
 		[SerializeField] private float mapSize;

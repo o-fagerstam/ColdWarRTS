@@ -11,6 +11,7 @@ GameObject:
   - component: {fileID: 7597575830533065824}
   - component: {fileID: -8831444911347136529}
   - component: {fileID: -5404860478784118919}
+  - component: {fileID: -4725403117021179166}
   m_Layer: 0
   m_Name: RTSPlayerPrefab
   m_TagString: Untagged
@@ -63,3 +64,16 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+--- !u!114 &-4725403117021179166
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5242224988884441124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f31a12f6822645d4ae0cc031c9e079a2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  scrollSpeed: 5

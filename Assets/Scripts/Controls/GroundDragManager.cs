@@ -6,21 +6,13 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
-	public class GroundDragManager : MonoBehaviour, ISingleton {
+	public class GroundDragManager : ASingletonMonoBehaviour {
 		[ReadOnly][ShowInInspector] private HashSet<GroundDraggable> allGroundDraggables = new HashSet<GroundDraggable>();
 		[ReadOnly][ShowInInspector] private GroundDraggable currentDraggedObject;
 		[ReadOnly][ShowInInspector] private Vector3 startDragPosition;
 		private const float DRAG_SNAP_DISTANCE = 0.3f;
 
 		public bool IsDragging => currentDraggedObject != null;
-
-		private void OnEnable () {
-			SingletonManager.Register(this);
-		}
-
-		private void OnDisable () {
-			SingletonManager.Unregister(this);
-		}
 
 		public void HandleUpdate (Ray mouseRay) {
 			if (currentDraggedObject == null) {

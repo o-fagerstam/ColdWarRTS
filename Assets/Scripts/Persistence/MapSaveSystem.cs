@@ -5,11 +5,11 @@ using Singleton;
 using UnityEngine;
 using Utils;
 namespace Persistence {
-	public class MapSaveSystem : MonoBehaviour {
+	public class MapSaveSystem : ASingletonMonoBehaviour {
 		private string path;
 		[SerializeField] private GameMap gameMapPrefab;
 
-		private void Start () {
+		private void Awake () {
 			path = Application.persistentDataPath + "/maptest.json";
 		}
 		public void SaveMap () {
@@ -40,11 +40,9 @@ namespace Persistence {
 		private void RecreateMap () {
 			if (SingletonManager.IsRegistered<GameMap>()) {
 				GameMap oldMap = SingletonManager.Retrieve<GameMap>();
-				SingletonManager.Unregister(oldMap);
 				SafeDestroyUtil.SafeDestroyGameObject(oldMap);
 			}
 			GameMap newMap = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
-			SingletonManager.Register(newMap);
 		}
 	}
 }

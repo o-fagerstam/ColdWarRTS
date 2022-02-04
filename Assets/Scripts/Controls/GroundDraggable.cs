@@ -14,10 +14,14 @@ namespace Controls {
 		public event Action<GroundDraggable, Vector3> OnPositionChanged;
 
 		private void OnEnable () {
-			SingletonManager.Retrieve<GroundDragManager>().Register(this);
+			if (SingletonManager.TryRetrieve(out GroundDragManager groundDragManager)) {
+				groundDragManager.Register(this);
+			}
 		}
 		private void OnDisable () {
-			SingletonManager.Retrieve<GroundDragManager>().Deregister(this);
+			if (SingletonManager.TryRetrieve(out GroundDragManager groundDragManager)) {
+				groundDragManager.Deregister(this);
+			}
 		}
 
 		private void Update () {
