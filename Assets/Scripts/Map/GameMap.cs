@@ -92,10 +92,13 @@ namespace Map {
 		}
 
 		private void RecalculateAstarGraph () {
-			GridGraph graph = AstarPath.active.data.gridGraph;
-			graph.Scan();
+			AstarPath.active.Scan();
 		}
-		
+
+		private void RecalculateAstarGraph (Bounds bounds) {
+			AstarPath.active.UpdateGraphs(bounds);
+		}
+
 		public void EditElevation (Vector3 hitPoint, float radius, float magnitude) {
 			Vector2 rectangleSize = new Vector2(radius*2, radius*2);
 			Rectangle hitRectangle = new Rectangle(VectorUtil.Flatten(hitPoint), rectangleSize);
@@ -103,7 +106,8 @@ namespace Map {
 			foreach (MapChunk chunk in GetOverlappingChunks(hitRectangle)) {
 				chunk.EditElevation(hitPoint, radius, magnitude);
 			}
-			RecalculateAstarGraph();
+			Bounds astarUpdateBounds = new Bounds(hitPoint, new Vector3(radius*2 + 2f, 30f, radius*2 + 2f));
+			RecalculateAstarGraph(astarUpdateBounds);
 		}
 
 		public IEnumerable<MapChunk> GetOverlappingChunks (Rectangle worldSpaceRectangle) {
