@@ -2,10 +2,10 @@
 using UnityEngine;
 namespace Singleton {
 	public class ASingletonMonoBehaviour : MonoBehaviour {
-		private void OnEnable () {
+		protected virtual void OnEnable () {
 			SingletonManager.Register(this);
 		}
-		private void OnDisable () {
+		protected virtual void OnDisable () {
 			SingletonManager.Unregister(this);
 		}
 	}

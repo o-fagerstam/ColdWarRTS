@@ -2,14 +2,10 @@
 using System.Collections.Generic;
 using System.Linq;
 using Math;
-using Pathfinding;
-using Persistence;
 using Singleton;
 using Sirenix.OdinInspector;
-using UnityEditor.Graphs;
 using UnityEngine;
 using Utils;
-using Polygon = Math.Polygon;
 namespace Map {
 	public class GameMap : ASingletonMonoBehaviour {
 		[SerializeField] private int chunksPerSide;
