@@ -54,7 +54,7 @@ namespace Map {
 			mapSize = saveData.mapSize;
 
 			float chunkSize = mapSize/chunksPerSide;
-			Vector3 chunkBaseWorldOffset = transform.position + new Vector3(-(mapSize/2f), 0f, -(mapSize/2f));
+			Vector3 chunkBaseWorldOffset = transform.position + new Vector3(-(mapSize/2f) + chunkSize/2f, 0f, (chunkSize - mapSize)/2f);
 			int chunkIndex = 0;
 			for (int y = 0; y < chunksPerSide; y++) {
 				for (int x = 0; x < chunksPerSide; x++) {
