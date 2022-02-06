@@ -3,18 +3,18 @@ namespace Controls {
 	[RequireComponent(typeof(UnitCommandGiver), typeof(UnitSelector))]
 	public class IngamePlayerController : ARtsController {
 
-		private UnitSelector unitSelector;
-		private UnitCommandGiver unitCommandGiver;
+		private UnitSelector _unitSelector;
+		private UnitCommandGiver _unitCommandGiver;
 
 		protected override void OnEnable () {
 			base.OnEnable();
-			unitSelector = GetComponent<UnitSelector>();
-			unitCommandGiver = GetComponent<UnitCommandGiver>();
+			_unitSelector = GetComponent<UnitSelector>();
+			_unitCommandGiver = GetComponent<UnitCommandGiver>();
 		}
 
 		protected override void UpdateMouseControl () {
-			unitSelector.UpdateSelection();
-			unitCommandGiver.UpdateUnitCommands();
+			_unitSelector.UpdateSelection();
+			_unitCommandGiver.UpdateUnitCommands();
 		}
 	}
 }

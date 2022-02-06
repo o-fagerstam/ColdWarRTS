@@ -12,15 +12,15 @@ namespace Map {
 		[SerializeField] private MeshFilter meshFilter;
 		[SerializeField] private MeshCollider meshCollider;
 		[SerializeField][Required] private GameObject waterPrefab;
-		[ShowInInspector] private GameObject water;
-		[ShowInInspector][ReadOnly] private HashSet<AStaticMapElement> staticMapElements = new HashSet<AStaticMapElement>();
+		[ShowInInspector] private GameObject _water;
+		[ShowInInspector][ReadOnly] private HashSet<AStaticMapElement> _staticMapElements = new HashSet<AStaticMapElement>();
 
-		private int squaresPerSide;
-		private float visibleChunkSideDimension;
+		private int _squaresPerSide;
+		private float _visibleChunkSideDimension;
 		[ShowInInspector][ReadOnly] public GameMap Map { get; private set; }
 		public Rectangle worldRectangle {
 			get {
-				Vector2 size = new Vector2(visibleChunkSideDimension, visibleChunkSideDimension);
+				Vector2 size = new Vector2(_visibleChunkSideDimension, _visibleChunkSideDimension);
 				Vector2 pos2d = VectorUtil.Flatten(transform.position);
 				return new Rectangle(pos2d, size);
 			}
@@ -34,18 +34,18 @@ namespace Map {
 			}
 		}
 		public void GenerateChunk (int squaresPerSide, float chunkSize, List<float> heights = null) {
-			this.squaresPerSide = squaresPerSide;
+			this._squaresPerSide = squaresPerSide;
 			int visiblePointsPerSide = CalculateVisiblePointsPerSide(squaresPerSide);
 			int realPointsPerSide = CalculateRealPointsPerSide(squaresPerSide);
 
-			visibleChunkSideDimension = chunkSize;
+			_visibleChunkSideDimension = chunkSize;
 			float realChunkSideDimension = chunkSize*((float)realPointsPerSide/visiblePointsPerSide);
 
 			Vector3[] vertices = new Vector3[realPointsPerSide*realPointsPerSide];
 			Vector2[] uvs = new Vector2[realPointsPerSide*realPointsPerSide];
 
 			float startSideOffset = -(realChunkSideDimension/2);
-			float dstBetweenPoints = visibleChunkSideDimension/squaresPerSide;
+			float dstBetweenPoints = _visibleChunkSideDimension/squaresPerSide;
 
 			for (int y = 0; y < realPointsPerSide; y++) {
 				for (int x = 0; x < realPointsPerSide; x++) {
@@ -67,21 +67,21 @@ namespace Map {
 		}
 		
 		private void GenerateWater () {
-			if (water != null) { SafeDestroyUtil.SafeDestroy(water); }
+			if (_water != null) { SafeDestroyUtil.SafeDestroy(_water); }
 			Vector3 waterPosition = transform.TransformPoint(0f, GeographyConstants.MAP_WATER_LEVEL, 0f);
-			water = Instantiate(waterPrefab,
+			_water = Instantiate(waterPrefab,
 				waterPosition,
 				Quaternion.identity,
 				transform);
-			water.transform.localScale = Vector3.one*0.1f*visibleChunkSideDimension;
+			_water.transform.localScale = Vector3.one*0.1f*_visibleChunkSideDimension;
 		}
 
 		private int CalculateVisiblePointsPerSide (int squaresPerSide) => squaresPerSide + 1;
 		private int CalculateRealPointsPerSide (int squaresPerSide) => squaresPerSide + 3;
 
 		private void RecalculateMesh (Vector3[] vertices, Vector2[] uvs) {
-			int visiblePointsPerSide = CalculateVisiblePointsPerSide(squaresPerSide);
-			int realPointsPerSide = CalculateRealPointsPerSide(squaresPerSide);
+			int visiblePointsPerSide = CalculateVisiblePointsPerSide(_squaresPerSide);
+			int realPointsPerSide = CalculateRealPointsPerSide(_squaresPerSide);
 			int[] triangles = new int[(realPointsPerSide - 1)*(realPointsPerSide - 1)*6];
 			for (int y = 0, triangleIndex = 0; y < realPointsPerSide - 1; y++) {
 				for (int x = 0; x < realPointsPerSide - 1; x++) {
@@ -156,20 +156,20 @@ namespace Map {
 
 			RecalculateMesh(vertices, meshFilter.sharedMesh.uv);
 
-			foreach (AStaticMapElement staticMapElement in staticMapElements) {
+			foreach (AStaticMapElement staticMapElement in _staticMapElements) {
 				staticMapElement.NotifyVisualUpdateNeeded();
 			}
 		}
 
 		public void TryAddStaticMapElement (AStaticMapElement element) {
-			if (staticMapElements.Add(element)) {
+			if (_staticMapElements.Add(element)) {
 				element.OnDestruction += HandleStaticMapElementDestroyed;
 				element.OnShapeChanged += HandleStaticMapElementShapeChanged;
 			}
 		}
 
 		public void TryRemoveStaticMapElement (AStaticMapElement element) {
-			if (staticMapElements.Remove(element)) {
+			if (_staticMapElements.Remove(element)) {
 				element.OnDestruction -= HandleStaticMapElementDestroyed;
 				element.OnShapeChanged -= HandleStaticMapElementShapeChanged;
 			}
@@ -178,12 +178,12 @@ namespace Map {
 		private void HandleStaticMapElementDestroyed (AStaticMapElement element) {
 			element.OnDestruction -= HandleStaticMapElementDestroyed;
 			element.OnShapeChanged -= HandleStaticMapElementShapeChanged;
-			staticMapElements.Remove(element);
+			_staticMapElements.Remove(element);
 		}
 		
 		private void HandleStaticMapElementShapeChanged (AStaticMapElement element) {
 			if (element is RoadSegment) {
-				foreach (AStaticMapElement aStaticMapElement in staticMapElements) {
+				foreach (AStaticMapElement aStaticMapElement in _staticMapElements) {
 					if (aStaticMapElement is ForestSection forestSection) {
 						forestSection.NotifyVisualUpdateNeeded();
 					}
@@ -192,14 +192,14 @@ namespace Map {
 		}
 
 		private void OnEnable () {
-			foreach (AStaticMapElement element in staticMapElements) {
+			foreach (AStaticMapElement element in _staticMapElements) {
 				element.OnShapeChanged += HandleStaticMapElementShapeChanged;
 				element.OnDestruction += HandleStaticMapElementDestroyed;
 			}
 		}
 
 		private void OnDisable () {
-			foreach (AStaticMapElement element in staticMapElements) {
+			foreach (AStaticMapElement element in _staticMapElements) {
 				element.OnShapeChanged -= HandleStaticMapElementShapeChanged;
 				element.OnDestruction -= HandleStaticMapElementDestroyed;
 			}
@@ -207,8 +207,8 @@ namespace Map {
 
 		public MapChunkSaveData CreateChunkData () {
 			return new MapChunkSaveData(
-				squaresPerSide,
-				visibleChunkSideDimension,
+				_squaresPerSide,
+				_visibleChunkSideDimension,
 				meshFilter.mesh.vertices.Select(v => v.y).ToList());
 		}
 		

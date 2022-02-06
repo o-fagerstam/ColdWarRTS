@@ -7,7 +7,7 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {
-	public class GameMap : ASingletonMonoBehaviour {
+	public class GameMap : ASingletonMonoBehaviour<GameMap> {
 		[SerializeField] private int chunksPerSide;
 		[SerializeField] private int chunkResolution;
 		[SerializeField] private float mapSize;
@@ -16,9 +16,9 @@ namespace Map {
 		[SerializeField] private MapChunk mapChunkPrefab;
 		[SerializeField] private ForestSection forestSectionPrefab;
 		[SerializeField] private RoadSegment roadSegmentPrefab;
-		[ShowInInspector][ReadOnly] private List<AStaticMapElement> allStaticMapElements = new List<AStaticMapElement>();
-		public IEnumerable<ForestSection> AllForests => allStaticMapElements.OfType<ForestSection>();
-		public IEnumerable<RoadSegment> AllRoadSegments => allStaticMapElements.OfType<RoadSegment>();
+		[ShowInInspector][ReadOnly] private List<AStaticMapElement> _allStaticMapElements = new List<AStaticMapElement>();
+		public IEnumerable<ForestSection> AllForests => _allStaticMapElements.OfType<ForestSection>();
+		public IEnumerable<RoadSegment> AllRoadSegments => _allStaticMapElements.OfType<RoadSegment>();
 
 		private void Start () {
 			float nodeSize = AstarPath.active.data.gridGraph.nodeSize;
@@ -79,12 +79,12 @@ namespace Map {
 				SafeDestroyUtil.SafeDestroyGameObject(chunk);
 			}
 			chunks.Clear();
-			foreach (AStaticMapElement staticMapElement in allStaticMapElements) {
+			foreach (AStaticMapElement staticMapElement in _allStaticMapElements) {
 				staticMapElement.OnDestruction -= HandleStaticElementDestroyed;
 				staticMapElement.OnShapeChanged -= HandleStaticElementShapeChanged;
 				SafeDestroyUtil.SafeDestroyGameObject(staticMapElement);
 			}
-			allStaticMapElements.Clear();
+			_allStaticMapElements.Clear();
 		}
 
 		private void RecalculateAstarGraph () {
@@ -124,7 +124,7 @@ namespace Map {
 		public void RegisterStaticMapElement (AStaticMapElement element) {
 			element.OnShapeChanged += HandleStaticElementShapeChanged;
 			element.OnDestruction += HandleStaticElementDestroyed;
-			allStaticMapElements.Add(element);
+			_allStaticMapElements.Add(element);
 			ReevaluateStaticElementChunks(element);
 		}
 
@@ -144,13 +144,13 @@ namespace Map {
 		private void HandleStaticElementDestroyed (AStaticMapElement element) {
 			element.OnDestruction -= HandleStaticElementDestroyed;
 			element.OnShapeChanged -= HandleStaticElementShapeChanged;
-			allStaticMapElements.Remove(element);
+			_allStaticMapElements.Remove(element);
 		}
 
 		public GameMapSaveData CreateSaveData () {
 			List<ForestSection> forestSections = new List<ForestSection>();
 			List<RoadSegment> roadSegments = new List<RoadSegment>();
-			foreach (AStaticMapElement staticMapElement in allStaticMapElements) {
+			foreach (AStaticMapElement staticMapElement in _allStaticMapElements) {
 				if (staticMapElement is ForestSection f) {
 					forestSections.Add(f);
 				} else if (staticMapElement is RoadSegment rs) {

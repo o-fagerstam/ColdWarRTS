@@ -3,10 +3,10 @@ using TMPro;
 using UnityEngine;
 namespace UI {
 	public class TooltipText : MonoBehaviour {
-		private TMP_Text text;
+		private TMP_Text _text;
 
 		private void Start () {
-			text = GetComponent<TMP_Text>();
+			_text = GetComponent<TMP_Text>();
 		}
 
 		public void Subscribe (AMapEditorTool tool) {
@@ -15,11 +15,11 @@ namespace UI {
 
 		public void Unsubscribe (AMapEditorTool tool) {
 			tool.OnTooltipUpdate -= HandleTooltipUpdate;
-			text.text = "";
+			_text.text = "";
 		}
 
 		public void HandleTooltipUpdate (string newText) {
-			text.text = newText;
+			_text.text = newText;
 		}
 	}
 }

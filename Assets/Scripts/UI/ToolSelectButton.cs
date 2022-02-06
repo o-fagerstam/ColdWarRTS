@@ -6,15 +6,15 @@ using UnityEngine.UI;
 namespace UI {
 	public class ToolSelectButton : MonoBehaviour {
 		[SerializeField] [Required] private AMapEditorTool tool;
-		[ShowInInspector] [ReadOnly] private Button button;
+		[ShowInInspector] [ReadOnly] private Button _button;
 		public event Action<AMapEditorTool> OnToolSelected;
 		protected void Start () {
-			button = GetComponent<Button>();
-			button.onClick.AddListener(InvokeToolSelected);
+			_button = GetComponent<Button>();
+			_button.onClick.AddListener(InvokeToolSelected);
 		}
 
 		protected void OnDestroy () {
-			button.onClick.RemoveListener(InvokeToolSelected);
+			_button.onClick.RemoveListener(InvokeToolSelected);
 		}
 
 		private void InvokeToolSelected () {

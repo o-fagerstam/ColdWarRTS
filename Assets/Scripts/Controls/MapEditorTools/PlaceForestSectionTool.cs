@@ -11,7 +11,7 @@ namespace Controls.MapEditorTools {
 		
 		[AssetsOnly] [Required]
 		[SerializeField] private ForestSection forestSectionPrefab;
-		[ShowInInspector] [ReadOnly] private ForestSection currentForestSection;
+		[ShowInInspector] [ReadOnly] private ForestSection _currentForestSection;
 		private const string TOOLTIP_BASE = "Left click on the ground to start placing forest";
 		private const string TOOLTIP_DURING_PLACEMENT = "Left click: Place vertex, Space: Close section, Right click: Stop editing";
 
@@ -35,8 +35,8 @@ namespace Controls.MapEditorTools {
 		}
 		public void OnLeftClickGround (RaycastHit hit) {
 			Vector3 point = hit.point;
-			if (currentForestSection == null) {
-				currentForestSection = Instantiate(
+			if (_currentForestSection == null) {
+				_currentForestSection = Instantiate(
 					forestSectionPrefab, 
 					point, 
 					Quaternion.identity, 
@@ -44,25 +44,25 @@ namespace Controls.MapEditorTools {
 				UpdateTooltip(TOOLTIP_DURING_PLACEMENT);
 			}
 
-			currentForestSection.AddPoint(point);
+			_currentForestSection.AddPoint(point);
 		}
 
 		public void OnRightClickGround (RaycastHit hit) {
-			if (currentForestSection != null) {
-				SafeDestroyUtil.SafeDestroyGameObject(currentForestSection);
-				currentForestSection = null;
+			if (_currentForestSection != null) {
+				SafeDestroyUtil.SafeDestroyGameObject(_currentForestSection);
+				_currentForestSection = null;
 				UpdateTooltip(TOOLTIP_BASE);
 			}
 		}
 
 		public void OnSpacePressed () {
-			if (currentForestSection != null) {
-				if (!currentForestSection.Close()) {
+			if (_currentForestSection != null) {
+				if (!_currentForestSection.Close()) {
 					return;
 				}
-				SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(currentForestSection);
+				SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(_currentForestSection);
 				UpdateTooltip(TOOLTIP_BASE);
-				currentForestSection = null;
+				_currentForestSection = null;
 			}
 		}
 	}

@@ -12,28 +12,28 @@ using Random = UnityEngine.Random;
 namespace Map {
 	public class ForestSection : AStaticMapElement {
 
-		[ShowInInspector] private List<GpuInstance> treeInstances = new List<GpuInstance>();
+		[ShowInInspector] private List<GpuInstance> _treeInstances = new List<GpuInstance>();
 		[AssetsOnly][Required][SerializeField] private GameObject treePrefab;
 		[Range(2f, 10f)]
 		[ShowInInspector] private static readonly float TreeRadiusMeters = 10f;
 		
-		private Polygon localSpacePolygon = new Polygon();
-		private GpuInstancer gpuInstancer;
-		private int treeGenSeed;
+		private Polygon _localSpacePolygon = new Polygon();
+		private GpuInstancer _gpuInstancer;
+		private int _treeGenSeed;
 
 		private void Awake() {
-			gpuInstancer = new GpuInstancer(treePrefab);
+			_gpuInstancer = new GpuInstancer(treePrefab);
 		}
 		
 		protected override void Update () {
 			base.Update();
-			gpuInstancer?.RenderBatches();
+			_gpuInstancer?.RenderBatches();
 		}
 
 		public IEnumerable<Vector3> Points {
 			get {
 				List<Vector3> points = new List<Vector3>();
-				foreach (Vector2 vertex in localSpacePolygon.Vertices) {
+				foreach (Vector2 vertex in _localSpacePolygon.Vertices) {
 					points.Add(LocalVec2ToWorldVec3(vertex));
 				}
 				return points;
@@ -41,16 +41,16 @@ namespace Map {
 		}
 
 		public void CreateFromSaveData (ForestSectionData data) {
-			localSpacePolygon = new Polygon(data.polygon);
+			_localSpacePolygon = new Polygon(data.polygon);
 			GenerateTrees(data.seed);
 		}
 
-		public bool IsClosed => localSpacePolygon.IsClosed;
+		public bool IsClosed => _localSpacePolygon.IsClosed;
 
-		public Polygon WorldPolygon => localSpacePolygon.ToWorldPolygon(transform.position.Flatten());
+		public Polygon WorldPolygon => _localSpacePolygon.ToWorldPolygon(transform.position.Flatten());
 
 		public bool AddPoint (Vector3 point) {
-			bool couldAddToPolygon = localSpacePolygon.AddVertex(WorldVec3ToLocalVec2(point));
+			bool couldAddToPolygon = _localSpacePolygon.AddVertex(WorldVec3ToLocalVec2(point));
 			bool overlapsOtherForest = false;
 			if (couldAddToPolygon) {
 				foreach (ForestSection forestSection in SingletonManager.Retrieve<GameMap>().AllForests) {
@@ -59,7 +59,7 @@ namespace Map {
 					}
 					if (Overlaps(forestSection)) {
 						overlapsOtherForest = true;
-						localSpacePolygon.RemoveLastVertex();
+						_localSpacePolygon.RemoveLastVertex();
 						break;
 					}
 				}
@@ -73,7 +73,7 @@ namespace Map {
 		}
 
 		public bool Close () {
-			bool result = localSpacePolygon.ClosePolygon();
+			bool result = _localSpacePolygon.ClosePolygon();
 			if (!result) {
 				return false;
 			}
@@ -86,9 +86,9 @@ namespace Map {
 
 		
 		private void GenerateTrees (int seed) {
-			treeGenSeed = seed;
-			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(ScaleUtil.GameToUnity(TreeRadiusMeters), localSpacePolygon, seed);
-			treeInstances.Clear();
+			_treeGenSeed = seed;
+			List<Vector2> polygonPoints = PoissonDiscSampling.GeneratePointsFromPolygon(ScaleUtil.GameToUnity(TreeRadiusMeters), _localSpacePolygon, seed);
+			_treeInstances.Clear();
 			MersenneTwister twister = new MersenneTwister(seed);
 			foreach (Vector2 point in polygonPoints) {
 				Vector3 worldPoint = LocalVec2ToWorldVec3(point);
@@ -96,16 +96,16 @@ namespace Map {
 				Quaternion quatRotation = Quaternion.Euler(rotation);
 				GpuInstance newTree = new GpuInstance(worldPoint, Vector3.one * Mathf.Lerp(0.8f, 1.2f, twister.NextFloatPositive()), quatRotation, false);
 				newTree = RaycastTree(newTree);
-				treeInstances.Add(newTree);
+				_treeInstances.Add(newTree);
 			}
-			gpuInstancer.SetInstances(treeInstances);
+			_gpuInstancer.SetInstances(_treeInstances);
 		}
 
 		protected override void UpdateElementVisuals () {
-			for (int i = 0; i < treeInstances.Count; i++) {
-				treeInstances[i] = RaycastTree(treeInstances[i]);
+			for (int i = 0; i < _treeInstances.Count; i++) {
+				_treeInstances[i] = RaycastTree(_treeInstances[i]);
 			}
-			gpuInstancer.SetInstances(treeInstances);
+			_gpuInstancer.SetInstances(_treeInstances);
 		}
 
 		private static GpuInstance RaycastTree (GpuInstance instance) {
@@ -145,7 +145,7 @@ namespace Map {
 		}
 
 		public ForestSectionData CreateSaveData () {
-			return new ForestSectionData(transform.position, localSpacePolygon.CreateSaveData(), treeGenSeed);
+			return new ForestSectionData(transform.position, _localSpacePolygon.CreateSaveData(), _treeGenSeed);
 		}
 
 		[Serializable]

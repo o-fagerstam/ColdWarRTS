@@ -1,11 +1,21 @@
-﻿using System;
-using UnityEngine;
+﻿using UnityEngine;
+using Utils;
 namespace Singleton {
-	public class ASingletonMonoBehaviour : MonoBehaviour {
+	public class ASingletonMonoBehaviour<T> : MonoBehaviour, ISingleton where T : MonoBehaviour {
+		private static T _instance;
 		protected virtual void OnEnable () {
-			SingletonManager.Register(this);
+			if (_instance == null) {
+				_instance = this as T;
+				SingletonManager.Register(this);
+			} else {
+				SafeDestroyUtil.SafeDestroyGameObject(this);
+			}
+
 		}
 		protected virtual void OnDisable () {
+			if (_instance == this) {
+				_instance = null;
+			}
 			SingletonManager.Unregister(this);
 		}
 	}

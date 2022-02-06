@@ -1,9 +1,7 @@
-﻿using System;
-using Persistence;
+﻿using Persistence;
 using Singleton;
-using UnityEngine;
 namespace GameLogic {
-	public class GameManager : ASingletonMonoBehaviour {
+	public class GameManager : ASingletonMonoBehaviour<GameManager> {
 
 		private void Start () {
 			MapSaveSystem mapSaveSystem = SingletonManager.Retrieve<MapSaveSystem>();

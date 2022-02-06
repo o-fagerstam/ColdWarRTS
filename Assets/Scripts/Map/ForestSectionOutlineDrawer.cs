@@ -7,8 +7,8 @@ namespace Map {
 	[RequireComponent(typeof(AStaticMapElement))]
 	public class ForestSectionOutlineDrawer : ImmediateModeShapeDrawer {
 		[SerializeField] private ForestSection forestSection;
-		private PolylinePath path;
-		private bool drawClosed;
+		private PolylinePath _path;
+		private bool _drawClosed;
 		private void Start () {
 			forestSection = GetComponent<ForestSection>();
 			forestSection.OnShapeChanged += HandleShapeChanged;
@@ -21,7 +21,7 @@ namespace Map {
 		}
 
 		private void HandleShapeChanged (AStaticMapElement obj) {
-			path = GeneratePathFromPoints(forestSection.Points);
+			_path = GeneratePathFromPoints(forestSection.Points);
 			if (forestSection.IsClosed) {
 				enabled = false;
 			}
@@ -39,12 +39,12 @@ namespace Map {
 			return p;
 		}
 		public override void DrawShapes (Camera cam) {
-			if (path == null) { return; }
+			if (_path == null) { return; }
 			using (Draw.Command(cam)) {
 				Draw.LineGeometry = LineGeometry.Volumetric3D;
 				Draw.ThicknessSpace = ThicknessSpace.Noots;
 				Draw.Thickness = 1f;
-				Draw.Polyline(path, drawClosed, Color.white);
+				Draw.Polyline(_path, _drawClosed, Color.white);
 			}
 		}
 	}

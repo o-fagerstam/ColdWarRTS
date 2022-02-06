@@ -8,43 +8,43 @@ using Utils;
 namespace Controls {
 	public class UnitSelector : MonoBehaviour {
 
-		private AUnitSelectorState state;
-		private readonly HashSet<Unit> selectedUnits = new HashSet<Unit>();
-		public IEnumerable<Unit> SelectedUnits => selectedUnits;
+		private AUnitSelectorState _state;
+		private readonly HashSet<Unit> _selectedUnits = new HashSet<Unit>();
+		public IEnumerable<Unit> SelectedUnits => _selectedUnits;
 
 		private void OnEnable () {
 			SetState(new BaseSelectorState(this));
 		}
 
 		private void SetState (AUnitSelectorState newState) {
-			state = newState;
+			_state = newState;
 		}
 
 		public void UpdateSelection () {
-			state.UpdateSelection();	
+			_state.UpdateSelection();	
 		}
 
 		private void ClearSelection () {
-			foreach (Unit selectedUnit in selectedUnits) {
+			foreach (Unit selectedUnit in _selectedUnits) {
 				selectedUnit.Deselect();
 			}
-			selectedUnits.Clear();
+			_selectedUnits.Clear();
 		}
 
 		private void Select (Unit unit) {
 			unit.Select();
-			selectedUnits.Add(unit);
+			_selectedUnits.Add(unit);
 		}
 
 		private void Deselect (Unit unit) {
 			unit.Deselect();
-			selectedUnits.Remove(unit);
+			_selectedUnits.Remove(unit);
 		}
 
 		private abstract class AUnitSelectorState {
-			protected readonly UnitSelector outer;
+			protected readonly UnitSelector Outer;
 			protected AUnitSelectorState (UnitSelector outer) {
-				this.outer = outer;
+				this.Outer = outer;
 			}
 			public abstract void UpdateSelection ();
 		}
@@ -57,14 +57,14 @@ namespace Controls {
 				if (Mouse.current.leftButton.wasPressedThisFrame) {
 					// Enter drag box state
 				} else if (Mouse.current.leftButton.wasReleasedThisFrame) {
-					outer.ClearSelection();
+					Outer.ClearSelection();
 
 					Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
 
 					if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMasks.unit)) {return;}
 					if (!hit.collider.TryGetComponentInParent(out Unit unit)) {return;}
 					if (!unit.hasAuthority) {return;}
-					outer.Select(unit);
+					Outer.Select(unit);
 				}
 			}
 		}

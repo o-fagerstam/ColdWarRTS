@@ -6,7 +6,7 @@ using UnityEngine;
 using Utils;
 namespace Map {
 	public abstract class AStaticMapElement : MonoBehaviour {
-		private bool updateNeeded;
+		private bool _updateNeeded;
 		
 		/// <summary>
 		/// Triggers on component destruction. Args: This object
@@ -19,15 +19,15 @@ namespace Map {
 		}
 
 		protected virtual void Update () {
-			if (updateNeeded) {
+			if (_updateNeeded) {
 				UpdateElementVisuals();
-				updateNeeded = false;
+				_updateNeeded = false;
 			}
 		}
 		protected abstract void UpdateElementVisuals ();
 		public abstract bool Overlaps (Rectangle worldRectangle);
 		public void NotifyVisualUpdateNeeded () {
-			updateNeeded = true;
+			_updateNeeded = true;
 		}
 		protected void InvokeShapeChanged () {
 			OnShapeChanged?.Invoke(this);

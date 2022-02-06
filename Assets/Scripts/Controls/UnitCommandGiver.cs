@@ -4,10 +4,10 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
 	public class UnitCommandGiver : MonoBehaviour {
-		private UnitSelector unitSelector;
+		private UnitSelector _unitSelector;
 
 		private void Awake () {
-			unitSelector = GetComponent<UnitSelector>();
+			_unitSelector = GetComponent<UnitSelector>();
 		}
 
 		public void UpdateUnitCommands () {
@@ -22,7 +22,7 @@ namespace Controls {
 		}
 		private void GiveMoveOrders (Vector3 point) {
 
-			foreach (Unit unit in unitSelector.SelectedUnits) {
+			foreach (Unit unit in _unitSelector.SelectedUnits) {
 				unit.unitMovement.CmdMove(point);
 			}
 			

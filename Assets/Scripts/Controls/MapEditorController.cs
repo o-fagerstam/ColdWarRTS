@@ -10,20 +10,20 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls {
 	public class MapEditorController : ARtsController {
-		[ReadOnly][ShowInInspector] private AMapEditorTool currentTool;
+		[ReadOnly][ShowInInspector] private AMapEditorTool _currentTool;
 		
 		public void SelectTool (AMapEditorTool tool) {
-			currentTool = tool;
+			_currentTool = tool;
 			tool.Activate();
 		}
 		
 		protected override void UpdateKeyboardControl () {
 			base.UpdateKeyboardControl();
-			if (currentTool != null) {
+			if (_currentTool != null) {
 				if (Keyboard.current.escapeKey.wasPressedThisFrame) {
 					ClearTool();
 				} else {
-					currentTool.UpdateKeyboard();
+					_currentTool.UpdateKeyboard();
 				}
 			}
 		}
@@ -32,14 +32,14 @@ namespace Controls {
 			Camera mainCamera = Camera.main;
 			Ray mouseRay = mainCamera.ScreenPointToRay(Mouse.current.position.ReadValue());
 
-			if (currentTool != null) {
-				currentTool.UpdateMouse(mouseRay);
+			if (_currentTool != null) {
+				_currentTool.UpdateMouse(mouseRay);
 			}
 		}
 
 		private void ClearTool () {
-			currentTool.Deactivate();
-			currentTool = null;
+			_currentTool.Deactivate();
+			_currentTool = null;
 		}
 	}
 }

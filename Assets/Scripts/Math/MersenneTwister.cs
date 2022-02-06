@@ -12,9 +12,9 @@ namespace Math {
         private const uint UPPER_MASK = 0x80000000U;
         private const uint LOWER_MASK = 0x7fffffffU;
         private const int MAX_RAND_INT = 0x7fffffff;
-        private uint[] mag01 = {0x0U, MATRIX_A};
-        private uint[] mt = new uint[N];
-        private int mti = N+1;
+        private uint[] _mag01 = {0x0U, MATRIX_A};
+        private uint[] _mt = new uint[N];
+        private int _mti = N+1;
         public MersenneTwister()
         { init_genrand( (uint)DateTime.Now.Millisecond); }
         public MersenneTwister( int seed )
@@ -86,61 +86,61 @@ namespace Math {
         }
         private void init_genrand( uint s)
         {
-            mt[0]= s & 0xffffffffU;
-            for (mti=1; mti<N; mti++)
+            _mt[0]= s & 0xffffffffU;
+            for (_mti=1; _mti<N; _mti++)
             {
-                mt[mti] = (uint)(1812433253U*(mt[mti-1]^(mt[mti-1]>>30))+mti);
-                mt[mti] &= 0xffffffffU;
+                _mt[_mti] = (uint)(1812433253U*(_mt[_mti-1]^(_mt[_mti-1]>>30))+_mti);
+                _mt[_mti] &= 0xffffffffU;
             }
         }
-        private void init_by_array(uint[] init_key, uint key_length)
+        private void init_by_array(uint[] initKey, uint keyLength)
         {
             int i, j, k;
             init_genrand(19650218U);
             i=1; j=0;
-            k = (int)(N>key_length ? N : key_length);
+            k = (int)(N>keyLength ? N : keyLength);
             for (; k>0; k--)
             {
-                mt[i] = (uint)((uint)(mt[i]^((mt[i-1]^(mt[i-1]>>30))*1664525U))+init_key[j]+j);
-                mt[i] &= 0xffffffffU;
+                _mt[i] = (uint)((uint)(_mt[i]^((_mt[i-1]^(_mt[i-1]>>30))*1664525U))+initKey[j]+j);
+                _mt[i] &= 0xffffffffU;
                 i++; j++;
-                if (i>=N) { mt[0] = mt[N-1]; i=1; }
-                if (j>=key_length) j=0;
+                if (i>=N) { _mt[0] = _mt[N-1]; i=1; }
+                if (j>=keyLength) j=0;
             }
             for (k=N-1; k>0; k--)
             {
-                mt[i] = (uint)((uint)(mt[i] ^ ((mt[i-1] ^ (mt[i-1] >> 30)) *
+                _mt[i] = (uint)((uint)(_mt[i] ^ ((_mt[i-1] ^ (_mt[i-1] >> 30)) *
                                                1566083941U))- i);
-                mt[i] &= 0xffffffffU;
+                _mt[i] &= 0xffffffffU;
                 i++;
-                if (i>=N) { mt[0] = mt[N-1]; i=1; }
+                if (i>=N) { _mt[0] = _mt[N-1]; i=1; }
             }
-            mt[0] = 0x80000000U;
+            _mt[0] = 0x80000000U;
         }
 
         uint genrand_int32()
         {
             uint y;
-            if (mti >= N)
+            if (_mti >= N)
             {
                 int kk;
-                if (mti == N+1)
+                if (_mti == N+1)
                     init_genrand(5489U);
                 for (kk=0;kk<N-M;kk++)
                 {
-                    y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
-                    mt[kk] = mt[kk+M] ^ (y >> 1) ^ mag01[y & 0x1U];
+                    y = (_mt[kk]&UPPER_MASK)|(_mt[kk+1]&LOWER_MASK);
+                    _mt[kk] = _mt[kk+M] ^ (y >> 1) ^ _mag01[y & 0x1U];
                 }
                 for (;kk<N-1;kk++)
                 {
-                    y = (mt[kk]&UPPER_MASK)|(mt[kk+1]&LOWER_MASK);
-                    mt[kk] = mt[kk+(M-N)] ^ (y >> 1) ^ mag01[y & 0x1U];
+                    y = (_mt[kk]&UPPER_MASK)|(_mt[kk+1]&LOWER_MASK);
+                    _mt[kk] = _mt[kk+(M-N)] ^ (y >> 1) ^ _mag01[y & 0x1U];
                 }
-                y = (mt[N-1]&UPPER_MASK)|(mt[0]&LOWER_MASK);
-                mt[N-1] = mt[M-1] ^ (y >> 1) ^ mag01[y & 0x1U];
-                mti = 0;
+                y = (_mt[N-1]&UPPER_MASK)|(_mt[0]&LOWER_MASK);
+                _mt[N-1] = _mt[M-1] ^ (y >> 1) ^ _mag01[y & 0x1U];
+                _mti = 0;
             }
-            y = mt[mti++];
+            y = _mt[_mti++];
             y ^= (y >> 11);
             y ^= (y << 7) & 0x9d2c5680U;
             y ^= (y << 15) & 0xefc60000U;

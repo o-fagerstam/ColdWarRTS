@@ -3,16 +3,16 @@ using Pathfinding;
 using UnityEngine;
 namespace Units.Movement {
 	public class UnitMovement : NetworkBehaviour {
-		private Seeker seeker;
-		private IAstarAI ai;
+		private Seeker _seeker;
+		private IAstarAI _ai;
 		private void Awake () {
-			seeker = GetComponent<Seeker>();
-			ai = GetComponent<IAstarAI>();
+			_seeker = GetComponent<Seeker>();
+			_ai = GetComponent<IAstarAI>();
 		}
 
 		[Command]
 		public void CmdMove (Vector3 position) {
-			ai.destination = position;
+			_ai.destination = position;
 		}
 	}
 }

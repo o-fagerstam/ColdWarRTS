@@ -5,26 +5,26 @@ using Singleton;
 using UnityEngine;
 using Utils;
 namespace Persistence {
-	public class MapSaveSystem : ASingletonMonoBehaviour {
-		private string path;
+	public class MapSaveSystem : ASingletonMonoBehaviour<MapSaveSystem> {
+		private string _path;
 		[SerializeField] private GameMap gameMapPrefab;
 
 		private void Awake () {
-			path = Application.persistentDataPath + "/maptest.json";
+			_path = Application.persistentDataPath + "/maptest.json";
 		}
 		public void SaveMap () {
 			GameMap.GameMapSaveData mapSaveData = SingletonManager.Retrieve<GameMap>().CreateSaveData();
 			string saveData = JsonUtility.ToJson(mapSaveData, true);
 			
-			UnityEngine.Debug.Log($"Saving to {path}");
-			using FileStream stream = new FileStream(path, FileMode.Create);
+			UnityEngine.Debug.Log($"Saving to {_path}");
+			using FileStream stream = new FileStream(_path, FileMode.Create);
 			using StreamWriter writer = new StreamWriter(stream);
 			writer.Write(saveData);
 			UnityEngine.Debug.Log("Finished saving");
 		}
 
 		public void LoadMap () {
-			using FileStream stream = new FileStream(path, FileMode.Open);
+			using FileStream stream = new FileStream(_path, FileMode.Open);
 			StreamReader reader = new StreamReader(stream);
 			string saveData = reader.ReadToEnd();
 			GameMap.GameMapSaveData mapSaveData = JsonUtility.FromJson<GameMap.GameMapSaveData>(saveData);

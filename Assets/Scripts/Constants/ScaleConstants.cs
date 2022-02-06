@@ -3,6 +3,6 @@
 		/// <summary>
 		/// UnityScale:Ingame Scale is 1:GameScale
 		/// </summary>
-		public const float GameScale = 50f;
+		public const float GAME_SCALE = 50f;
 	}
 }

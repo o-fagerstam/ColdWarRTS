@@ -15,9 +15,9 @@ namespace Map {
 		private static readonly float RoadWidth = ScaleUtil.GameToUnity(8f);
 		private static readonly float RoadSegmentLength = ScaleUtil.GameToUnity(2f);
 		private static readonly int NumRoadEndSubDivisions = 20;
-		private BezierCurve curve;
-		private Dictionary<GroundDraggable, BezierPoint> handles; // Order: Anchor1, Anchor2, Control1, Control2;
-		[ShowInInspector] [ReadOnly] private List<(Vector3 left, Vector3 right)> meshPoints = new List<(Vector3 left, Vector3 right)>();
+		private BezierCurve _curve;
+		private Dictionary<GroundDraggable, BezierPoint> _handles; // Order: Anchor1, Anchor2, Control1, Control2;
+		[ShowInInspector] [ReadOnly] private List<(Vector3 left, Vector3 right)> _meshPoints = new List<(Vector3 left, Vector3 right)>();
 		private const string ANCHOR_TAG = "RoadAnchor";
 
 		public void Initialize (Vector3 worldAnchor1, Vector3 worldAnchor2) {
@@ -35,7 +35,7 @@ namespace Map {
 			GenerateCurve(data.anchor1, data.anchor2, data.control1, data.control2, data.position);
 		}
 		private void GenerateCurve (Vector3 localAnchor1, Vector3 localAnchor2, Vector3 localControl1, Vector3 localControl2, Vector3 position) {
-			curve = new BezierCurve(
+			_curve = new BezierCurve(
 				VectorUtil.Flatten(localAnchor1),
 				VectorUtil.Flatten(localAnchor2),
 				VectorUtil.Flatten(localControl1),
@@ -53,13 +53,13 @@ namespace Map {
 			anchor2Handle.snapFilterTag = gameObject.GetInstanceID().ToString();
 			GroundDraggable control1Handle = Instantiate(handlePrefab, worldControl1, Quaternion.identity, transform);
 			GroundDraggable control2Handle = Instantiate(handlePrefab, worldControl2, Quaternion.identity, transform);
-			handles = new Dictionary<GroundDraggable, BezierPoint> {
+			_handles = new Dictionary<GroundDraggable, BezierPoint> {
 				[anchor1Handle] = BezierPoint.Anchor1,
 				[anchor2Handle] = BezierPoint.Anchor2,
 				[control1Handle] = BezierPoint.Control1,
 				[control2Handle] = BezierPoint.Control2
 			};
-			foreach (GroundDraggable handle in handles.Keys) {
+			foreach (GroundDraggable handle in _handles.Keys) {
 				handle.transform.localScale = Vector3.one*0.2f;
 				handle.OnPositionChanged += HandleHandlePositionChanged;
 			}
@@ -71,26 +71,26 @@ namespace Map {
 		}
 
 		public void EnableAnchors () {
-			foreach (GroundDraggable handle in handles.Keys) {
+			foreach (GroundDraggable handle in _handles.Keys) {
 				handle.gameObject.SetActive(true);
 			}
 		}
 
 		public void DisableAnchors () {
-			foreach (GroundDraggable handle in handles.Keys) {
+			foreach (GroundDraggable handle in _handles.Keys) {
 				handle.gameObject.SetActive(false);
 			}
 		}
 		
 		private void HandleHandlePositionChanged (GroundDraggable obj, Vector3 newWorldPos) {
-			curve.MovePoint(handles[obj], (newWorldPos - transform.position).Flatten());
+			_curve.MovePoint(_handles[obj], (newWorldPos - transform.position).Flatten());
 			RecalculateMesh();
 			InvokeShapeChanged();
 		}
 
 		private void RecalculateMesh () {
 			int segmentsPerUvLoop = Mathf.RoundToInt(RoadWidth/RoadSegmentLength);
-			int numSegments = Mathf.CeilToInt(curve.ApproximateLength/RoadSegmentLength);
+			int numSegments = Mathf.CeilToInt(_curve.ApproximateLength/RoadSegmentLength);
 			if (numSegments % segmentsPerUvLoop != 0) {numSegments += segmentsPerUvLoop - numSegments%segmentsPerUvLoop;}
 
 			//vertices
@@ -98,15 +98,15 @@ namespace Map {
 			int numRoadEndVertices = (NumRoadEndSubDivisions - 1) *2;
 			Vector3[] vertices = new Vector3[numSegmentVertices + numRoadEndVertices];
 			int vertIndex = 0;
-			meshPoints = CreateMeshPoints(numSegments);
-			foreach ((Vector3 left, Vector3 right) in meshPoints) {
+			_meshPoints = CreateMeshPoints(numSegments);
+			foreach ((Vector3 left, Vector3 right) in _meshPoints) {
 				vertices[vertIndex++] = left;
 				vertices[vertIndex++] = right;
 			}
-			Vector3 roadEndMiddle1 = (meshPoints[0].left + meshPoints[0].right) / 2f;
+			Vector3 roadEndMiddle1 = (_meshPoints[0].left + _meshPoints[0].right) / 2f;
 			int centerPointIndex1 = vertIndex++;
 			vertices[centerPointIndex1] = roadEndMiddle1;
-			Vector3 dir1 = (meshPoints[1].left + meshPoints[1].right)/2f - roadEndMiddle1;
+			Vector3 dir1 = (_meshPoints[1].left + _meshPoints[1].right)/2f - roadEndMiddle1;
 			Vector3 dir2D1 = new Vector3(-dir1.x, 0f, -dir1.z).normalized;
 			for (int i = 1; i < NumRoadEndSubDivisions-1; i++) {
 				float t = (i/(NumRoadEndSubDivisions - 1f))*2f- 1f;
@@ -114,10 +114,10 @@ namespace Map {
 				Vector3 newPoint = Generate3DMeshPoint((roadEndMiddle1 + offsetDir*RoadWidth).Flatten());
 				vertices[vertIndex++] = newPoint;
 			}
-			Vector3 roadEndMiddle2 = (meshPoints[meshPoints.Count-1].left + meshPoints[meshPoints.Count-1].right) / 2f;
+			Vector3 roadEndMiddle2 = (_meshPoints[_meshPoints.Count-1].left + _meshPoints[_meshPoints.Count-1].right) / 2f;
 			int centerPointIndex2 = vertIndex++;
 			vertices[centerPointIndex2] = roadEndMiddle2;
-			Vector3 dir2 = (meshPoints[meshPoints.Count-2].left + meshPoints[meshPoints.Count-2].right)/2f - roadEndMiddle2;
+			Vector3 dir2 = (_meshPoints[_meshPoints.Count-2].left + _meshPoints[_meshPoints.Count-2].right)/2f - roadEndMiddle2;
 			Vector3 dir2D2 = new Vector3(-dir2.x, 0f, -dir2.z).normalized;
 			for (int i = 1; i < NumRoadEndSubDivisions-1; i++) {
 				float t = (i/(NumRoadEndSubDivisions - 1f))*2f- 1f;
@@ -186,7 +186,7 @@ namespace Map {
 		}
 
 		private List<(Vector3, Vector3)> CreateMeshPoints (int numSegments) {
-			List<Vector2> twoDimPoints = curve.GetEquidistantPoints(numSegments + 1).ToList();
+			List<Vector2> twoDimPoints = _curve.GetEquidistantPoints(numSegments + 1).ToList();
 			List<(Vector3, Vector3)> meshPoints = new List<(Vector3, Vector3)>();
 			
 			Vector2 aCenter = twoDimPoints[0];
@@ -231,7 +231,7 @@ namespace Map {
 			Vector2 localOffset = transform.position.Flatten();
 			Rectangle localRectangle = new Rectangle(worldRectangle.Center - localOffset, worldRectangle.Dimension);
 
-			foreach ((Vector3 left, Vector3 right) in meshPoints) {
+			foreach ((Vector3 left, Vector3 right) in _meshPoints) {
 				if (localRectangle.ContainsPoint(left.Flatten()) || localRectangle.ContainsPoint(right.Flatten())) {
 					return true;
 				}
@@ -242,10 +242,10 @@ namespace Map {
 		public RoadSegmentSaveData CreateSaveData () {
 			return new RoadSegmentSaveData(
 				transform.position,
-				curve.anchor1.AddY(),
-				curve.anchor2.AddY(),
-				curve.control1.AddY(),
-				curve.control2.AddY()
+				_curve.anchor1.AddY(),
+				_curve.anchor2.AddY(),
+				_curve.control1.AddY(),
+				_curve.control2.AddY()
 			);
 		}
 

@@ -6,35 +6,35 @@ using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
-	public class GroundDragManager : ASingletonMonoBehaviour {
-		[ReadOnly][ShowInInspector] private HashSet<GroundDraggable> allGroundDraggables = new HashSet<GroundDraggable>();
-		[ReadOnly][ShowInInspector] private GroundDraggable currentDraggedObject;
-		[ReadOnly][ShowInInspector] private Vector3 startDragPosition;
+	public class GroundDragManager : ASingletonMonoBehaviour<GroundDragManager> {
+		[ReadOnly][ShowInInspector] private HashSet<GroundDraggable> _allGroundDraggables = new HashSet<GroundDraggable>();
+		[ReadOnly][ShowInInspector] private GroundDraggable _currentDraggedObject;
+		[ReadOnly][ShowInInspector] private Vector3 _startDragPosition;
 		private const float DRAG_SNAP_DISTANCE = 0.3f;
 
-		public bool IsDragging => currentDraggedObject != null;
+		public bool IsDragging => _currentDraggedObject != null;
 
 		public void HandleUpdate (Ray mouseRay) {
-			if (currentDraggedObject == null) {
+			if (_currentDraggedObject == null) {
 				return;
 			}
 			if (!Mouse.current.leftButton.isPressed) {
-				currentDraggedObject = null;
+				_currentDraggedObject = null;
 				return;
 			}
 			if (!Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.nonRoadSurface)) { return; }
 
-			if (currentDraggedObject.snapTag != null) {
+			if (_currentDraggedObject.snapTag != null) {
 				float closestSqrDst = float.MaxValue;
 				GroundDraggable closest = null;
-				foreach (GroundDraggable draggable in allGroundDraggables) {
-					if (draggable == currentDraggedObject) {
+				foreach (GroundDraggable draggable in _allGroundDraggables) {
+					if (draggable == _currentDraggedObject) {
 						continue;
 					}
-					if (currentDraggedObject.snapTag != null && currentDraggedObject.snapTag != draggable.snapTag) {
+					if (_currentDraggedObject.snapTag != null && _currentDraggedObject.snapTag != draggable.snapTag) {
 						continue;
 					}
-					if (currentDraggedObject.snapFilterTag != null && currentDraggedObject.snapFilterTag == draggable.snapFilterTag) {
+					if (_currentDraggedObject.snapFilterTag != null && _currentDraggedObject.snapFilterTag == draggable.snapFilterTag) {
 						continue;
 					}
 					float sqrDst = (draggable.transform.position - hit.point).sqrMagnitude;
@@ -44,40 +44,40 @@ namespace Controls {
 					}
 				}
 				if (closest != null && closestSqrDst <= DRAG_SNAP_DISTANCE*DRAG_SNAP_DISTANCE) {
-					currentDraggedObject.UpdatePosition(closest.transform.position);
+					_currentDraggedObject.UpdatePosition(closest.transform.position);
 				} else {
-					currentDraggedObject.UpdatePosition(hit.point);
+					_currentDraggedObject.UpdatePosition(hit.point);
 				}
 			} else {
-				currentDraggedObject.UpdatePosition(hit.point);
+				_currentDraggedObject.UpdatePosition(hit.point);
 			}
 			
 		}
 
 		public void SelectForDragging (GroundDraggable draggable) {
-			if (currentDraggedObject != null) {
+			if (_currentDraggedObject != null) {
 				throw new ArgumentException("An object is already selected for dragging");
 			}
-			currentDraggedObject = draggable;
-			startDragPosition = currentDraggedObject.transform.position;
+			_currentDraggedObject = draggable;
+			_startDragPosition = _currentDraggedObject.transform.position;
 		}
 
 		public void FinishDragging () {
-			currentDraggedObject = null;
+			_currentDraggedObject = null;
 		}
 
 		public void CancelDragging () {
-			if (currentDraggedObject == null) {return; }
-			currentDraggedObject.transform.position = startDragPosition;
-			currentDraggedObject = null;
+			if (_currentDraggedObject == null) {return; }
+			_currentDraggedObject.transform.position = _startDragPosition;
+			_currentDraggedObject = null;
 		}
 
 		public void Register (GroundDraggable draggable) {
-			allGroundDraggables.Add(draggable);
+			_allGroundDraggables.Add(draggable);
 		}
 
 		public void Deregister (GroundDraggable draggable) {
-			allGroundDraggables.Remove(draggable);
+			_allGroundDraggables.Remove(draggable);
 		}
 	}
 }

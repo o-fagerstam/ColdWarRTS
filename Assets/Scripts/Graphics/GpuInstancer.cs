@@ -2,37 +2,37 @@
 using UnityEngine;
 namespace Graphics {
 	public class GpuInstancer {
-		private int numInstances;
-		private readonly Mesh mesh;
-		private readonly Material[] materials;
-		private List<List<Matrix4x4>> batches = new List<List<Matrix4x4>>();
+		private int _numInstances;
+		private readonly Mesh _mesh;
+		private readonly Material[] _materials;
+		private List<List<Matrix4x4>> _batches = new List<List<Matrix4x4>>();
 
 		public GpuInstancer (GameObject prefab) {
-			mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
-			materials = new []{prefab.GetComponent<MeshRenderer>().sharedMaterial};
+			_mesh = prefab.GetComponent<MeshFilter>().sharedMesh;
+			_materials = new []{prefab.GetComponent<MeshRenderer>().sharedMaterial};
 		}
 
 		public void SetInstances (IEnumerable<GpuInstance> instances) {
 			int batchCount = 0;
-			numInstances = 0;
-			batches.Clear();
-			batches.Add(new List<Matrix4x4>());
+			_numInstances = 0;
+			_batches.Clear();
+			_batches.Add(new List<Matrix4x4>());
 			foreach (GpuInstance instance in instances) {
 				if (!instance.enabled) { continue; }
 				if (batchCount == 1000) {
-					batches.Add(new List<Matrix4x4>());
+					_batches.Add(new List<Matrix4x4>());
 					batchCount = 0;
 				}
-				batches[batches.Count-1].Add(instance.ToMatrix());
+				_batches[_batches.Count-1].Add(instance.ToMatrix());
 				batchCount++;
-				numInstances++;
+				_numInstances++;
 			}
 		}
 		
 		public void RenderBatches () {
-			foreach (List<Matrix4x4> batch in batches) {
-				for (int i = 0; i < mesh.subMeshCount; i++) {
-					UnityEngine.Graphics.DrawMeshInstanced(mesh, i, materials[i], batch);
+			foreach (List<Matrix4x4> batch in _batches) {
+				for (int i = 0; i < _mesh.subMeshCount; i++) {
+					UnityEngine.Graphics.DrawMeshInstanced(_mesh, i, _materials[i], batch);
 				}
 			}
 		}

@@ -2,25 +2,25 @@
 using UnityEngine;
 namespace Math {
 	public readonly struct Rectangle {
-		private readonly Vector2 center; //Position of center
-		private readonly Vector2 dimension; //Length of sides
+		private readonly Vector2 _center; //Position of center
+		private readonly Vector2 _dimension; //Length of sides
 
-		public Vector2 Center => center;
-		public Vector2 Dimension => dimension;
+		public Vector2 Center => _center;
+		public Vector2 Dimension => _dimension;
 		public IEnumerable<Vector2> GetCorners () {
 			yield return new Vector2(xMin, yMin);
 			yield return new Vector2(xMin, yMax);
 			yield return new Vector2(xMax, yMax);
 			yield return new Vector2(xMax, yMin);
 		}
-		public float xMin => center.x - dimension.x/2f;
-		public float xMax => center.x + dimension.x/2f;
-		public float yMin => center.y - dimension.y/2f;
-		public float yMax => center.y + dimension.y/2f;
+		public float xMin => _center.x - _dimension.x/2f;
+		public float xMax => _center.x + _dimension.x/2f;
+		public float yMin => _center.y - _dimension.y/2f;
+		public float yMax => _center.y + _dimension.y/2f;
 		
 		public Rectangle (Vector2 center, Vector2 dimension) {
-			this.center = center;
-			this.dimension = dimension;
+			this._center = center;
+			this._dimension = dimension;
 		}
 
 		public bool Overlaps (Rectangle other) {

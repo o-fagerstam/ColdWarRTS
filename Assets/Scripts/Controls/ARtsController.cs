@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.InputSystem;
 
 namespace Controls {
-	public abstract class ARtsController : ASingletonMonoBehaviour {
+	public abstract class ARtsController : ASingletonMonoBehaviour<ARtsController> {
 		[SerializeField] private float scrollSpeed = 5f;
 
 		protected virtual void Update () {

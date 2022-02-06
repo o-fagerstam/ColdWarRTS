@@ -12,7 +12,7 @@ namespace Controls {
 			}
 		}
 		private void HandleOnSingletonRegistered (object sender, SingletonManager.OnSingletonRegisteredArgs e) {
-			if (e.registeredType.IsSubclassOf(typeof(ARtsController))) {
+			if (e.RegisteredType.IsSubclassOf(typeof(ARtsController))) {
 				SingletonManager.TryRetrieveAnySubclass(out ARtsController playerController);
 				GetComponent<CinemachineVirtualCamera>().Follow = playerController.transform;
 				SingletonManager.OnSingletonRegistered -= HandleOnSingletonRegistered;

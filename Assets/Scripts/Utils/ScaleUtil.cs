@@ -4,10 +4,10 @@ namespace Utils {
 		/// <summary>
 		/// Convert game scale to Unity Scale
 		/// </summary>
-		public static float GameToUnity (float meters) => meters/ScaleConstants.GameScale;
+		public static float GameToUnity (float meters) => meters/ScaleConstants.GAME_SCALE;
 		/// <summary>
 		/// Convert Unity scale to game scale
 		/// </summary>
-		public static float UnityToGame (float units) => units*ScaleConstants.GameScale;
+		public static float UnityToGame (float units) => units*ScaleConstants.GAME_SCALE;
 	}
 }

@@ -5,18 +5,18 @@ using UnityEngine;
 namespace Math {
 	
 	public class Polygon {
-		private readonly List<Vector2> vertices = new List<Vector2>();
-		private bool isClosed;
-		public int NumOfVertices => vertices.Count;
-		public bool IsClosed => isClosed;
-		public IEnumerable<Vector2> Vertices => vertices;
+		private readonly List<Vector2> _vertices = new List<Vector2>();
+		private bool _isClosed;
+		public int NumOfVertices => _vertices.Count;
+		public bool IsClosed => _isClosed;
+		public IEnumerable<Vector2> Vertices => _vertices;
 		private IEnumerable<Tuple<Vector2, Vector2>> Lines {
 			get {
 				int i = 0;
-				int stoppingPoint = isClosed ? 0 : NumOfVertices - 1;
+				int stoppingPoint = _isClosed ? 0 : NumOfVertices - 1;
 				do {
 					int next = (i + 1)%NumOfVertices;
-					yield return new Tuple<Vector2, Vector2>(vertices[i], vertices[next]);
+					yield return new Tuple<Vector2, Vector2>(_vertices[i], _vertices[next]);
 					i = next;
 				} while (i != stoppingPoint);
 			}
@@ -24,7 +24,7 @@ namespace Math {
 
 		public Vector2 BoundingBoxSize {
 			get {
-				if (vertices.Count == 0) {
+				if (_vertices.Count == 0) {
 					throw new Exception("Cannot find bounding box of empty polygon");
 				}
 				float xMin = float.MaxValue;
@@ -32,7 +32,7 @@ namespace Math {
 				float xMax = float.MinValue;
 				float yMax = float.MinValue;
 
-				foreach (Vector2 vertex in vertices) {
+				foreach (Vector2 vertex in _vertices) {
 					xMin = Mathf.Min(xMin, vertex.x);
 					xMax = Mathf.Max(xMax, vertex.x);
 					yMin = Mathf.Min(yMin, vertex.y);
@@ -45,13 +45,13 @@ namespace Math {
 
 		public Vector2 PolyOriginRelativeToBoundingBoxOrigin {
 			get {
-				if (vertices.Count == 0) {
+				if (_vertices.Count == 0) {
 					throw new Exception("Cannot find bounding box of empty polygon");
 				}
 				float xMin = float.MaxValue;
 				float yMin = float.MaxValue;
 
-				foreach (Vector2 vertex in vertices) {
+				foreach (Vector2 vertex in _vertices) {
 					xMin = Mathf.Min(xMin, vertex.x);
 					yMin = Mathf.Min(yMin, vertex.y);
 				}
@@ -64,40 +64,40 @@ namespace Math {
 		public Polygon (Rectangle rectangle) : this(rectangle.GetCorners().ToList(), true) {}
 		private Polygon (List<Vector2> vertices, bool isClosed = false) {
 			foreach (Vector2 vertex in vertices) {
-				this.vertices.Add(vertex);
+				this._vertices.Add(vertex);
 			}
-			this.isClosed = isClosed;
+			this._isClosed = isClosed;
 		}
 
 		public Polygon (PolygonSaveData data) {
 			foreach (Vector2 vertex in data.vertices) {
-				vertices.Add(vertex);
+				_vertices.Add(vertex);
 			}
-			isClosed = data.isClosed;
+			_isClosed = data.isClosed;
 		}
 
 		public bool AddVertex (Vector2 point) {
 			if (!ValidateNewPoint(point)) {
 				return false;
 			}
-			vertices.Add(point);
+			_vertices.Add(point);
 			return true;
 		}
 
 		public void RemoveLastVertex () {
-			vertices.RemoveAt(vertices.Count-1);
+			_vertices.RemoveAt(_vertices.Count-1);
 		}
 
 		public bool ClosePolygon () {
 			if (!ValidateClosePolygon()) {
 				return false;
 			}
-			isClosed = true;
+			_isClosed = true;
 			return true;
 		}
 
 		public bool PointInPolygon (Vector2 point) {
-			if (NumOfVertices < 3 || !isClosed) {
+			if (NumOfVertices < 3 || !_isClosed) {
 				return false;
 			}
 
@@ -107,9 +107,9 @@ namespace Math {
 			do {
 				int next = (i + 1)%NumOfVertices;
 
-				if (LinesIntersect(vertices[i], vertices[next], point, extremePoint)) {
-					if (GetThreePointOrientation(vertices[i], point, vertices[next]) == Orientation.Collinear) {
-						return OnCollinearSegment(vertices[i], point, vertices[next]);
+				if (LinesIntersect(_vertices[i], _vertices[next], point, extremePoint)) {
+					if (GetThreePointOrientation(_vertices[i], point, _vertices[next]) == Orientation.Collinear) {
+						return OnCollinearSegment(_vertices[i], point, _vertices[next]);
 					}
 					intersectionCount++;
 				}
@@ -126,7 +126,7 @@ namespace Math {
 		public bool ValidateNewPoint (Vector2 point) {
 			if (NumOfVertices < 2) { return true; }
 
-			Polygon testPolygon = new Polygon(vertices);
+			Polygon testPolygon = new Polygon(_vertices);
 			testPolygon.UnvalidatedAddPoint(point);
 			return !testPolygon.HasIntersectingLines();
 		}
@@ -136,30 +136,30 @@ namespace Math {
 		public bool ValidateClosePolygon () {
 			if (NumOfVertices < 3) { return false; }
 
-			Polygon testPolygon = new Polygon(vertices, true);
+			Polygon testPolygon = new Polygon(_vertices, true);
 			return !testPolygon.HasIntersectingLines();
 		}
 
 		private void UnvalidatedAddPoint (Vector2 point) {
-			vertices.Add(point);
+			_vertices.Add(point);
 		}
 
 		private void UnvalidatedCLosePolygon () {
-			isClosed = true;
+			_isClosed = true;
 		}
 
 		private bool HasIntersectingLines () {
 			for (int i = 0; i < NumOfVertices - 3; i++) {
 				for (int j = i + 2; j < NumOfVertices - 2; j++) {
-					if (LinesIntersect(vertices[i], vertices[i + 1], vertices[j], vertices[j + 1])) {
+					if (LinesIntersect(_vertices[i], _vertices[i + 1], _vertices[j], _vertices[j + 1])) {
 						return true;
 					}
 				}
 			}
 
-			if (isClosed) {
+			if (_isClosed) {
 				for (int i = 1; i < NumOfVertices - 2; i++) {
-					if (LinesIntersect(vertices[i], vertices[i + 1], vertices[0], vertices[NumOfVertices - 1])) {
+					if (LinesIntersect(_vertices[i], _vertices[i + 1], _vertices[0], _vertices[NumOfVertices - 1])) {
 						return true;
 					}
 				}
@@ -235,10 +235,10 @@ namespace Math {
 
 		public Polygon ToWorldPolygon (Vector2 originWorldPosition) {
 			List<Vector2> worldVerts = new List<Vector2>();
-			foreach (Vector2 vertex in vertices) {
+			foreach (Vector2 vertex in _vertices) {
 				worldVerts.Add(vertex + originWorldPosition);
 			}
-			return new Polygon(worldVerts, isClosed);
+			return new Polygon(worldVerts, _isClosed);
 		}
 		
 		private enum Orientation {
@@ -246,7 +246,7 @@ namespace Math {
 		}
 
 		public PolygonSaveData CreateSaveData () {
-			return new PolygonSaveData(vertices, isClosed);
+			return new PolygonSaveData(_vertices, _isClosed);
 		}
 
 		[Serializable]
