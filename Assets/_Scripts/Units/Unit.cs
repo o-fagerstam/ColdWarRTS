@@ -10,8 +10,34 @@ namespace Units {
 
 		public UnitMovement unitMovement { get; private set; }
 
+		public static event EventHandler<OnUnitSpawnedArgs> ServerOnUnitSpawned;
+		public static event EventHandler<OnUnitDespawnedArgs> ServerOnUnitDespawned;		
+		public static event EventHandler<OnUnitSpawnedArgs> AuthorityOnUnitSpawned;
+		public static event EventHandler<OnUnitDespawnedArgs> AuthorityOnUnitDespawned;
+		
+
 		private void OnEnable () {
 			unitMovement = GetComponent<UnitMovement>();
+		}
+
+		public override void OnStartServer () {
+			base.OnStartServer();
+			ServerOnUnitSpawned?.Invoke(this, new OnUnitSpawnedArgs{unit = this});
+		}
+
+		public override void OnStopServer () {
+			base.OnStopServer();
+			ServerOnUnitDespawned?.Invoke(this, new OnUnitDespawnedArgs{unit = this});
+		}
+
+		public override void OnStartAuthority () {
+			base.OnStartAuthority();
+			AuthorityOnUnitSpawned?.Invoke(this, new OnUnitSpawnedArgs(){unit =  this});
+		}
+
+		public override void OnStopAuthority () {
+			base.OnStopAuthority();
+			AuthorityOnUnitDespawned?.Invoke(this, new OnUnitDespawnedArgs(){unit = this});
 		}
 
 		[Client]
@@ -25,5 +51,11 @@ namespace Units {
 			if (!hasAuthority) {return;}
 			selectionCircle.SetActive(false);
 		}
+	}
+	public class OnUnitSpawnedArgs : EventArgs {
+		public Unit unit;
+	}
+	public class OnUnitDespawnedArgs : EventArgs {
+		public Unit unit;
 	}
 }

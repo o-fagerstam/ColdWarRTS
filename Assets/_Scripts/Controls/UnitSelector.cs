@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using Constants;
+using Mirror;
+using Network;
 using Units;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Utils;
 namespace Controls {
 	public class UnitSelector : MonoBehaviour {
+
+		private const float SELECTION_BOX_MIN_SIZE = 10f;
+
+		[SerializeField] private RectTransform unitSelectionBox;
 
 		private AUnitSelectorState _state;
 		private readonly HashSet<Unit> _selectedUnits = new HashSet<Unit>();
@@ -44,18 +50,19 @@ namespace Controls {
 		private abstract class AUnitSelectorState {
 			protected readonly UnitSelector Outer;
 			protected AUnitSelectorState (UnitSelector outer) {
-				this.Outer = outer;
+				Outer = outer;
 			}
 			public abstract void UpdateSelection ();
 		}
 		
 		private class BaseSelectorState : AUnitSelectorState {
+			private Vector2 _dragStartPosition;
 
 			public BaseSelectorState (UnitSelector outer) : base(outer) {}
 			
 			public override void UpdateSelection () {
 				if (Mouse.current.leftButton.wasPressedThisFrame) {
-					// Enter drag box state
+					_dragStartPosition = Mouse.current.position.ReadValue();
 				} else if (Mouse.current.leftButton.wasReleasedThisFrame) {
 					Outer.ClearSelection();
 
@@ -65,6 +72,51 @@ namespace Controls {
 					if (!hit.collider.TryGetComponentInParent(out Unit unit)) {return;}
 					if (!unit.hasAuthority) {return;}
 					Outer.Select(unit);
+				} else if (Mouse.current.leftButton.isPressed ) {
+					if ((_dragStartPosition - Mouse.current.position.ReadValue()).sqrMagnitude > SELECTION_BOX_MIN_SIZE*SELECTION_BOX_MIN_SIZE) {
+						Outer.SetState(new DragBoxSelectorState(Outer, _dragStartPosition));
+					}
+				}
+			}
+		}
+
+		private class DragBoxSelectorState : AUnitSelectorState {
+			private Vector2 _dragStartPosition;
+			public DragBoxSelectorState (UnitSelector outer, Vector2 dragStartPosition) : base(outer) {
+				_dragStartPosition = dragStartPosition;
+			}
+			public override void UpdateSelection () {
+				RectTransform unitSelectionBox = Outer.unitSelectionBox;
+				unitSelectionBox.gameObject.SetActive(true);
+
+				if (Mouse.current.leftButton.isPressed) {
+					Vector2 mousePosition = Mouse.current.position.ReadValue();
+
+					float dragHeight = mousePosition.x - _dragStartPosition.x;
+					float dragWidth = mousePosition.y - _dragStartPosition.y;
+
+					unitSelectionBox.sizeDelta = new Vector2(Mathf.Abs(dragHeight), Mathf.Abs(dragWidth));
+					unitSelectionBox.anchoredPosition = _dragStartPosition + new Vector2(dragHeight/2f, dragWidth/2f);
+				} else {
+					Outer.ClearSelection();
+					
+					Vector2 min = unitSelectionBox.anchoredPosition - (unitSelectionBox.sizeDelta/2f);
+					Vector2 max = unitSelectionBox.anchoredPosition + (unitSelectionBox.sizeDelta/2f);
+
+					Camera mainCamera = Camera.main;
+					foreach (Unit unit in NetworkClient.connection.identity.GetComponent<RtsNetworkPlayer>().Units) {
+						Vector3 screenPosition = mainCamera.WorldToScreenPoint(unit.transform.position);
+
+						if (screenPosition.x > min.x && 
+						    screenPosition.x < max.x && 
+						    screenPosition.y > min.y && 
+						    screenPosition.y < max.y) {
+							Outer.Select(unit);
+						}
+					}
+					
+					unitSelectionBox.gameObject.SetActive(false);
+					Outer.SetState(new BaseSelectorState(Outer));
 				}
 			}
 		}

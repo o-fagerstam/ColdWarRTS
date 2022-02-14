@@ -60,8 +60,9 @@ MonoBehaviour:
   autoCreatePlayer: 1
   playerSpawnMethod: 1
   spawnPrefabs:
-  - {fileID: 7251827213077857477, guid: df096795f369c1944af5c0476d300324, type: 3}
+  - {fileID: 7356965171629369293, guid: f128dcef3c505fc439223bf5e15ad364, type: 3}
   - {fileID: 3993829235098453902, guid: 7a0163509686b4b4cb312ffa87903169, type: 3}
+  - {fileID: 7251827213077857477, guid: df096795f369c1944af5c0476d300324, type: 3}
   unitSpawnerPrefab: {fileID: 3993829235098453902, guid: 7a0163509686b4b4cb312ffa87903169, type: 3}
 --- !u!114 &816120580403001040
 MonoBehaviour:

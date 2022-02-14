@@ -1,7 +1,7 @@
 ﻿using UnityEngine;
 using Utils;
 namespace Singleton {
-	public class ASingletonMonoBehaviour<T> : MonoBehaviour, ISingleton where T : MonoBehaviour {
+	public abstract class ASingletonMonoBehaviour<T> : MonoBehaviour, ISingleton where T : MonoBehaviour {
 		private static T _instance;
 		protected virtual void OnEnable () {
 			if (_instance == null) {
@@ -15,8 +15,8 @@ namespace Singleton {
 		protected virtual void OnDisable () {
 			if (_instance == this) {
 				_instance = null;
+				SingletonManager.Unregister(this);
 			}
-			SingletonManager.Unregister(this);
 		}
 	}
 }
