@@ -47,6 +47,14 @@ namespace Controls {
 			_selectedUnits.Remove(unit);
 		}
 
+		private void SelectDeselect (Unit unit) {
+			if (_selectedUnits.Contains(unit)) {
+				Deselect(unit);
+			} else {
+				Select(unit);
+			}
+		}
+
 		private abstract class AUnitSelectorState {
 			protected readonly UnitSelector Outer;
 			protected AUnitSelectorState (UnitSelector outer) {
@@ -64,14 +72,22 @@ namespace Controls {
 				if (Mouse.current.leftButton.wasPressedThisFrame) {
 					_dragStartPosition = Mouse.current.position.ReadValue();
 				} else if (Mouse.current.leftButton.wasReleasedThisFrame) {
-					Outer.ClearSelection();
+					if (!Keyboard.current.shiftKey.isPressed) {
+						Outer.ClearSelection();
+					}
 
 					Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
 
 					if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMasks.unit)) {return;}
 					if (!hit.collider.TryGetComponentInParent(out Unit unit)) {return;}
 					if (!unit.hasAuthority) {return;}
-					Outer.Select(unit);
+
+					if (Keyboard.current.shiftKey.isPressed) {
+						Outer.SelectDeselect(unit);
+					} else {
+						Outer.Select(unit);
+					}
+
 				} else if (Mouse.current.leftButton.isPressed ) {
 					if ((_dragStartPosition - Mouse.current.position.ReadValue()).sqrMagnitude > SELECTION_BOX_MIN_SIZE*SELECTION_BOX_MIN_SIZE) {
 						Outer.SetState(new DragBoxSelectorState(Outer, _dragStartPosition));
@@ -98,8 +114,10 @@ namespace Controls {
 					unitSelectionBox.sizeDelta = new Vector2(Mathf.Abs(dragHeight), Mathf.Abs(dragWidth));
 					unitSelectionBox.anchoredPosition = _dragStartPosition + new Vector2(dragHeight/2f, dragWidth/2f);
 				} else {
-					Outer.ClearSelection();
-					
+					if (!Keyboard.current.shiftKey.isPressed) {
+						Outer.ClearSelection();
+					}
+
 					Vector2 min = unitSelectionBox.anchoredPosition - (unitSelectionBox.sizeDelta/2f);
 					Vector2 max = unitSelectionBox.anchoredPosition + (unitSelectionBox.sizeDelta/2f);
 
