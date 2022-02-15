@@ -2,13 +2,19 @@
 using Mirror;
 using Sirenix.OdinInspector;
 using Units.Movement;
+using Units.Targeting;
 using UnityEngine;
 namespace Units {
 	[RequireComponent(typeof(UnitMovement))]
 	public class Unit : NetworkBehaviour {
-		[SerializeField][Required] private GameObject selectionCircle;
+		[SerializeField, Required] private GameObject selectionCircle;
 
-		public UnitMovement unitMovement { get; private set; }
+		[SerializeField, Required, ChildGameObjectsOnly]
+		private UnitMovement unitMovement;
+		public UnitMovement UnitMovement => unitMovement;
+		[SerializeField, Required, ChildGameObjectsOnly]
+		private Targeter targeter;
+		public Targeter Targeter => targeter;
 
 		public static event EventHandler<OnUnitSpawnedArgs> ServerOnUnitSpawned;
 		public static event EventHandler<OnUnitDespawnedArgs> ServerOnUnitDespawned;		

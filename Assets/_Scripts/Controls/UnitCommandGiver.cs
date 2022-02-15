@@ -1,7 +1,9 @@
 ﻿using Constants;
 using Units;
+using Units.Targeting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using Utils;
 namespace Controls {
 	public class UnitCommandGiver : MonoBehaviour {
 		private UnitSelector _unitSelector;
@@ -16,16 +18,27 @@ namespace Controls {
 			}
 
 			Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-			if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMasks.anySurface)) {return;}
+			if (!Physics.Raycast(ray, out RaycastHit hit, Mathf.Infinity, LayerMasks.anySurfaceOrUnit)) { return; }
 
-			GiveMoveOrders(hit.point);
+			if (hit.collider.TryGetComponentInParent(out Targetable targetable) &&
+			    !targetable.hasAuthority) { //TODO replace with team logic
+				GiveTargetOrders(targetable);
+			} else {
+				GiveMoveOrders(hit.point);
+			}
+
+
 		}
 		private void GiveMoveOrders (Vector3 point) {
-
 			foreach (Unit unit in _unitSelector.SelectedUnits) {
-				unit.unitMovement.CmdMove(point);
+				unit.UnitMovement.CmdMove(point);
 			}
-			
+		}
+
+		private void GiveTargetOrders (Targetable target) {
+			foreach (Unit unit in _unitSelector.SelectedUnits) {
+				unit.Targeter.CmdSetTarget(target.gameObject);
+			}
 		}
 	}
 }
