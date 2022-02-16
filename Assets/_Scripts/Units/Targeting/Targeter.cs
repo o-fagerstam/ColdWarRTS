@@ -1,5 +1,4 @@
 ﻿using Mirror;
-using Sirenix.OdinInspector;
 using UnityEngine;
 namespace Units.Targeting {
 	public class Targeter : NetworkBehaviour {
@@ -9,12 +8,8 @@ namespace Units.Targeting {
 
 
 		#region Server
-		[Command]
-		public void CmdSetTarget (GameObject targetGameObject) {
-			if (!targetGameObject.TryGetComponent(out Targetable targetable)) {
-				UnityEngine.Debug.LogWarning($"{targetGameObject} lacks {nameof(Targetable)} component.", this);
-				return;
-			}
+		[Server]
+		public void SetTarget (Targetable targetable) {
 			_target = targetable;
 		}
 

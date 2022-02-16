@@ -9,6 +9,7 @@ namespace Controls {
 		}
 		public override void DoCommand () {
 			_commandOwner.UnitMovement.SetState(new UnitMovement.MoveTowardsTargetableState(_commandOwner.UnitMovement, _target, 5f));
+			_commandOwner.Targeter.SetTarget(_target);
 		}
 	}
 }

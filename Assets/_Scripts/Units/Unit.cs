@@ -24,7 +24,6 @@ namespace Units {
 
 		private Queue<AUnitCommand> _commandQueue = new Queue<AUnitCommand>();
 		private AUnitCommand _currentCommand;
-		private AUnitCommand currentCommand => _commandQueue.Count == 0 ? null : _commandQueue.Peek();
 
 		public static event EventHandler<OnUnitSpawnedArgs> ServerOnUnitSpawned;
 		public static event EventHandler<OnUnitDespawnedArgs> ServerOnUnitDespawned;		
@@ -58,7 +57,7 @@ namespace Units {
 
 		[Server]
 		private void GiveCommand (AUnitCommand command, bool enqueue) {
-			if (enqueue && currentCommand == null) {
+			if (enqueue && _currentCommand.GetType() != typeof(IdleUnitCommand)) {
 				EnqueueCommand(command);
 			} else {
 				ImmediateCommand(command);
@@ -79,23 +78,25 @@ namespace Units {
 
 		[Server]
 		private void NextCommand () {
-			AUnitCommand command = _commandQueue.Dequeue();
-			command.OnCommandFinished += HandleCommandFinished;
-			command.DoCommand();
+			if (_commandQueue.Count > 0) {
+				_currentCommand = _commandQueue.Dequeue();
+				_currentCommand.OnCommandFinished += HandleCommandFinished;
+			} else {
+				_currentCommand = new IdleUnitCommand(this);
+			}
+			_currentCommand.DoCommand();
 		}
 
 		[Server]
 		private void AbandonCurrentCommand () {
-			if (currentCommand != null) {
-				currentCommand.OnCommandFinished -= HandleCommandFinished;
+			if (_currentCommand != null) {
+				_currentCommand.OnCommandFinished -= HandleCommandFinished;
 			}
 		}
 		[Server]
 		private void HandleCommandFinished (object sender, AUnitCommand.OnCommandFinishedArgs e) {
 			AbandonCurrentCommand();
-			if (_commandQueue.Count > 0) {
-				NextCommand();
-			}
+			NextCommand();
 		}
 
 		public override void OnStartAuthority () {

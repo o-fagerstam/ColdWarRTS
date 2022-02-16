@@ -23,22 +23,22 @@ namespace Controls {
 
 			if (hit.collider.TryGetComponentInParent(out Targetable targetable) &&
 			    !targetable.hasAuthority) { //TODO replace with team logic
-				GiveAttackOrders(targetable);
+				GiveAttackOrders(targetable, Keyboard.current.shiftKey.isPressed);
 			} else {
-				GiveMoveOrders(hit.point);
+				GiveMoveOrders(hit.point, Keyboard.current.shiftKey.isPressed);
 			}
 
 
 		}
-		private void GiveMoveOrders (Vector3 point) {
+		private void GiveMoveOrders (Vector3 point, bool enqueue) {
 			foreach (Unit unit in _unitSelector.SelectedUnits) {
-				unit.CmdGiveMoveCommand(point, false);
+				unit.CmdGiveMoveCommand(point, enqueue);
 			}
 		}
 
-		private void GiveAttackOrders (Targetable target) {
+		private void GiveAttackOrders (Targetable target, bool enqueue) {
 			foreach (Unit unit in _unitSelector.SelectedUnits) {
-				unit.CmdGiveAttackCommand(target.gameObject, false);
+				unit.CmdGiveAttackCommand(target.gameObject, enqueue);
 			}
 		}
 	}

@@ -21,6 +21,7 @@ namespace Units.Movement {
 			}
 		}
 
+		// TODO Refactor SetState to be private
 		public void SetState (AUnitMovementState state) {
 			_movementState = state;
 			_movementState.OnEnterState();
@@ -36,7 +37,7 @@ namespace Units.Movement {
 			public abstract void OnEnterState ();
 		}
 
-		private class IdleState : AUnitMovementState {
+		public class IdleState : AUnitMovementState {
 			public IdleState(UnitMovement other) : base(other) {}
 			public override void UpdateMovement () {}
 			public override void OnEnterState () {
@@ -62,7 +63,6 @@ namespace Units.Movement {
 			public override void UpdateMovement () {
 				if ((Outer.transform.position - _position).sqrMagnitude < _sqrFinishDistance) {
 					OnPositionReached?.Invoke(this, new OnPositionReachedArgs(){UnitMovement = Outer});
-					Outer.SetState(new IdleState(Outer));
 				}
 			}
 			public override void OnEnterState () {
