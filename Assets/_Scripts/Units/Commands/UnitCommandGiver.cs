@@ -13,6 +13,7 @@ namespace Controls {
 		}
 
 		public void UpdateUnitCommands () {
+			// TODO Move input handling into its own class on the controller
 			if (!Mouse.current.rightButton.wasPressedThisFrame) {
 				return;
 			}
@@ -22,7 +23,7 @@ namespace Controls {
 
 			if (hit.collider.TryGetComponentInParent(out Targetable targetable) &&
 			    !targetable.hasAuthority) { //TODO replace with team logic
-				GiveTargetOrders(targetable);
+				GiveAttackOrders(targetable);
 			} else {
 				GiveMoveOrders(hit.point);
 			}
@@ -31,13 +32,13 @@ namespace Controls {
 		}
 		private void GiveMoveOrders (Vector3 point) {
 			foreach (Unit unit in _unitSelector.SelectedUnits) {
-				unit.UnitMovement.CmdMove(point);
+				unit.CmdGiveMoveCommand(point, false);
 			}
 		}
 
-		private void GiveTargetOrders (Targetable target) {
+		private void GiveAttackOrders (Targetable target) {
 			foreach (Unit unit in _unitSelector.SelectedUnits) {
-				unit.Targeter.CmdSetTarget(target.gameObject);
+				unit.CmdGiveAttackCommand(target.gameObject, false);
 			}
 		}
 	}

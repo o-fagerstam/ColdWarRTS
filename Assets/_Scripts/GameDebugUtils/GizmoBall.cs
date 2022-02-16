@@ -1,5 +1,5 @@
 ﻿using UnityEngine;
-namespace Debug {
+namespace GameDebugUtils {
 	public class GizmoBall : MonoBehaviour {
 
 		private float _radius = 1f;

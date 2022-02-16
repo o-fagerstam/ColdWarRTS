@@ -6,8 +6,8 @@ namespace Units.Targeting {
 		[SerializeField]
 		private Targetable _target;
 		public Targetable Target => _target;
-		
-		
+
+
 		#region Server
 		[Command]
 		public void CmdSetTarget (GameObject targetGameObject) {
