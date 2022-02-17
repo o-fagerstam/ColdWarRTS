@@ -140,8 +140,39 @@ Transform:
   m_Children:
   - {fileID: 4978101913284741045}
   - {fileID: 5503185026030294009}
+  - {fileID: 5263631003688955997}
   m_Father: {fileID: 8765978418948477089}
   m_RootOrder: 1
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &2666583696089225464
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5263631003688955997}
+  m_Layer: 8
+  m_Name: BulletSpawnPoint
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5263631003688955997
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2666583696089225464}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 5.143}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 7614882456869111485}
+  m_RootOrder: 2
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &3450663855729247553
 GameObject:
@@ -353,6 +384,7 @@ GameObject:
   - component: {fileID: 2096130486413439607}
   - component: {fileID: 3661211283255233509}
   - component: {fileID: -5770096316183601576}
+  - component: {fileID: -7990218139428941094}
   m_Layer: 8
   m_Name: ProtoTank
   m_TagString: Untagged
@@ -617,6 +649,29 @@ MonoBehaviour:
   syncInterval: 0.1
   turretPivot: {fileID: 7614882456869111485}
   targeter: {fileID: 3661211283255233509}
+  rotationSpeed: 20
+--- !u!114 &-7990218139428941094
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7251827213077857477}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4b107e2c2cdc4c808c783c21f733e543, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  targeter: {fileID: 3661211283255233509}
+  bulletSpawnPoint: {fileID: 5263631003688955997}
+  weaponForwardPivot: {fileID: 7614882456869111485}
+  projectilePrefab: {fileID: -3635413616398561117, guid: 71940de2876541b48a54307fe0f212df, type: 3}
+  weaponRange: 5
+  rateOfFire: 1
+  projectileLaunchForce: 10
+  projectileLifetime: 5
 --- !u!1 &8093887682232876511
 GameObject:
   m_ObjectHideFlags: 0

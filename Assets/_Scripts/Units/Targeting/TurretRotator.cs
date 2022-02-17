@@ -7,13 +7,17 @@ namespace Units.Targeting {
 		private Transform turretPivot;
 		[SerializeField][Required][ChildGameObjectsOnly]
 		private Targeter targeter;
+		[SerializeField] private float rotationSpeed = 40f;
 		
 		[ServerCallback]
 		private void Update () {
-			if (!isServer) { return; }
-			if (targeter.Target != null) {
-				turretPivot.LookAt(targeter.Target.transform, Vector3.up);
+			Quaternion targetRotation;
+			if (targeter.Target == null) {
+				targetRotation = targeter.transform.rotation;
+			} else {
+				targetRotation = Quaternion.LookRotation(targeter.Target.transform.position - transform.position, targeter.transform.up);
 			}
+			turretPivot.rotation = Quaternion.RotateTowards(turretPivot.rotation, targetRotation, rotationSpeed * Time.deltaTime);
 		}
 	}
 }
