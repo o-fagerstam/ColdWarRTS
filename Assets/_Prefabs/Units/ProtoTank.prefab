@@ -591,6 +591,7 @@ MonoBehaviour:
   unitMovement: {fileID: 5639896018882415974}
   targeter: {fileID: 3661211283255233509}
   health: {fileID: 2455271316832968933}
+  weapon: {fileID: 0}
 --- !u!114 &5639896018882415974
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -605,6 +606,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  unit: {fileID: 8167988007022336556}
 --- !u!114 &2096130486413439607
 MonoBehaviour:
   m_ObjectHideFlags: 0

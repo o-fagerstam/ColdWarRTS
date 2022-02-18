@@ -8,7 +8,7 @@ namespace Controls {
 			_target = target;
 		}
 		public override void DoCommand () {
-			_commandOwner.UnitMovement.SetState(new UnitMovement.MoveTowardsTargetableState(_commandOwner.UnitMovement, _target, 4.8f)); //TODO Make chase range depend on weapon range
+			_commandOwner.UnitMovement.MoveTowardsTargetable(_target); //TODO Make chase range depend on weapon range
 			_commandOwner.Targeter.SetTarget(_target);
 		}
 	}

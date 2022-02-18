@@ -8,6 +8,7 @@ using Sirenix.OdinInspector;
 using UI.HealthBar;
 using Units.Movement;
 using Units.Targeting;
+using Units.Weapons;
 using UnityEngine;
 namespace Units {
 	
@@ -27,6 +28,9 @@ namespace Units {
 		[SerializeField, Required, ChildGameObjectsOnly]
 		private UnitHealth health;
 		public UnitHealth Health => health;
+		[SerializeField, Required, ChildGameObjectsOnly]
+		private TankGun weapon;
+		public TankGun Weapon => weapon;
 
 		private Queue<AUnitCommand> _commandQueue = new Queue<AUnitCommand>();
 		private AUnitCommand _currentCommand;

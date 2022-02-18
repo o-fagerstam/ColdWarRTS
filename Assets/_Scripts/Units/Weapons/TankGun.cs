@@ -14,6 +14,7 @@ namespace Units.Weapons {
 		[SerializeField, Required, AssetsOnly]
 		private SolidProjectile projectilePrefab;
 		[SerializeField] private float weaponRange = 5f;
+		public float Range => weaponRange;
 		[SerializeField] private float rateOfFire = 1f;
 		[SerializeField] private float projectileLaunchForce = 10f;
 		[SerializeField] private float projectileLifetime = 5f;

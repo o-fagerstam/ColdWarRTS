@@ -1,13 +1,19 @@
 ﻿using System;
 using Mirror;
 using Pathfinding;
+using Sirenix.OdinInspector;
 using Units.Targeting;
 using UnityEngine;
 namespace Units.Movement {
 	public class UnitMovement : NetworkBehaviour {
+		[SerializeField, Required, ChildGameObjectsOnly]
+		private Unit unit;
+		
 		private Seeker _seeker;
 		private IAstarAI _ai;
 		private AUnitMovementState _movementState;
+
+		public event EventHandler OnStateFinished;
 
 		private void Awake () {
 			_seeker = GetComponent<Seeker>();
@@ -21,13 +27,28 @@ namespace Units.Movement {
 			}
 		}
 
-		// TODO Refactor SetState to be private
-		public void SetState (AUnitMovementState state) {
+		public void MoveToPosition (Vector3 position) {
+			SetState(new MoveToPositionState(this, position, 0.2f));
+		}
+
+		public void MoveTowardsTargetable (Targetable targetable) {
+			SetState(new MoveTowardsTargetableState(this, targetable, Mathf.Max(unit.Weapon.Range - 0.1f, 0.1f)));
+		}
+
+		public void StopMoving () {
+			SetState(new IdleState(this));
+		}
+
+		private void SetState (AUnitMovementState state) {
 			_movementState = state;
 			_movementState.OnEnterState();
 		}
 
-		public abstract class AUnitMovementState {
+		private void InvokeOnStateFinished () {
+			OnStateFinished?.Invoke(this, EventArgs.Empty);
+		}
+
+		private abstract class AUnitMovementState {
 			protected UnitMovement Outer;
 			protected AUnitMovementState (UnitMovement outer) {
 				Outer = outer;
@@ -37,7 +58,7 @@ namespace Units.Movement {
 			public abstract void OnEnterState ();
 		}
 
-		public class IdleState : AUnitMovementState {
+		private class IdleState : AUnitMovementState {
 			public IdleState(UnitMovement other) : base(other) {}
 			public override void UpdateMovement () {}
 			public override void OnEnterState () {
@@ -46,7 +67,7 @@ namespace Units.Movement {
 			}
 		}
 
-		public class MoveToPositionState : AUnitMovementState {
+		private class MoveToPositionState : AUnitMovementState {
 			private Vector3 _position;
 			private float _sqrFinishDistance;
 
@@ -62,7 +83,7 @@ namespace Units.Movement {
 			}
 			public override void UpdateMovement () {
 				if ((Outer.transform.position - _position).sqrMagnitude < _sqrFinishDistance) {
-					OnPositionReached?.Invoke(this, new OnPositionReachedArgs(){UnitMovement = Outer});
+					Outer.InvokeOnStateFinished();
 				}
 			}
 			public override void OnEnterState () {
@@ -70,7 +91,7 @@ namespace Units.Movement {
 				Outer._ai.SearchPath();
 			}
 		}
-		public class MoveTowardsTargetableState : AUnitMovementState {
+		private class MoveTowardsTargetableState : AUnitMovementState {
 			private Targetable _targetable;
 			private float _sqrChaseRange;
 			public MoveTowardsTargetableState (UnitMovement outer, Targetable targetable, float chaseRange) : base(outer) {
