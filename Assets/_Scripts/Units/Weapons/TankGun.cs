@@ -17,6 +17,7 @@ namespace Units.Weapons {
 		[SerializeField] private float rateOfFire = 1f;
 		[SerializeField] private float projectileLaunchForce = 10f;
 		[SerializeField] private float projectileLifetime = 5f;
+		[SerializeField] private int projectileDamage = 3000;
 		private float _lastFireTime = Mathf.NegativeInfinity;
 		
 		[ServerCallback]
@@ -31,7 +32,7 @@ namespace Units.Weapons {
 		private void Fire () {
 			SolidProjectile projectileInstance = Instantiate(projectilePrefab, bulletSpawnPoint.position, weaponForwardPivot.rotation);
 			NetworkServer.Spawn(projectileInstance.gameObject, connectionToClient); //TODO Set player ID in bullet instead of giving authority over it
-			projectileInstance.Fire(projectileLaunchForce, projectileLifetime);
+			projectileInstance.Fire(projectileLaunchForce, projectileLifetime, projectileDamage);
 			_lastFireTime = Time.time;
 		}
 

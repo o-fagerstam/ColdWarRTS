@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 using Controls;
+using ICSharpCode.NRefactory.Ast;
 using Mirror;
+using Singleton;
 using Sirenix.OdinInspector;
+using UI.HealthBar;
 using Units.Movement;
 using Units.Targeting;
 using UnityEngine;
@@ -21,6 +24,9 @@ namespace Units {
 		[SerializeField, Required, ChildGameObjectsOnly]
 		private Targeter targeter;
 		public Targeter Targeter => targeter;
+		[SerializeField, Required, ChildGameObjectsOnly]
+		private UnitHealth health;
+		public UnitHealth Health => health;
 
 		private Queue<AUnitCommand> _commandQueue = new Queue<AUnitCommand>();
 		private AUnitCommand _currentCommand;
@@ -29,7 +35,11 @@ namespace Units {
 		public static event EventHandler<OnUnitDespawnedArgs> ServerOnUnitDespawned;		
 		public static event EventHandler<OnUnitSpawnedArgs> AuthorityOnUnitSpawned;
 		public static event EventHandler<OnUnitDespawnedArgs> AuthorityOnUnitDespawned;
+		public static event EventHandler<OnUnitSpawnedArgs> ClientOnUnitSpawned;
+		public static event EventHandler<OnUnitDespawnedArgs> ClientOnUnitDespawned;
 		
+		public event EventHandler<OnUnitDeathArgs> ServerOnUnitDeath;
+
 
 		private void OnEnable () {
 			unitMovement = GetComponent<UnitMovement>();
@@ -98,6 +108,11 @@ namespace Units {
 			AbandonCurrentCommand();
 			NextCommand();
 		}
+		
+		[Server]
+		public void ServerDie () {
+			ServerOnUnitDeath?.Invoke(this, new OnUnitDeathArgs(){unit = this});
+		}
 
 		public override void OnStartAuthority () {
 			base.OnStartAuthority();
@@ -107,6 +122,11 @@ namespace Units {
 		public override void OnStopAuthority () {
 			base.OnStopAuthority();
 			AuthorityOnUnitDespawned?.Invoke(this, new OnUnitDespawnedArgs(){unit = this});
+		}
+
+		public override void OnStartClient () {
+			base.OnStartClient();
+			ClientOnUnitSpawned?.Invoke(this, new OnUnitSpawnedArgs(){unit = this});
 		}
 
 		[Client]
@@ -120,11 +140,15 @@ namespace Units {
 			if (!hasAuthority) {return;}
 			selectionCircle.SetActive(false);
 		}
+
 	}
 	public class OnUnitSpawnedArgs : EventArgs {
 		public Unit unit;
 	}
 	public class OnUnitDespawnedArgs : EventArgs {
+		public Unit unit;
+	}
+	public class OnUnitDeathArgs : EventArgs {
 		public Unit unit;
 	}
 }
