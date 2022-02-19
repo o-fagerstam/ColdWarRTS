@@ -116,6 +116,7 @@ namespace Units {
 		[Server]
 		public void ServerDie () {
 			ServerOnUnitDeath?.Invoke(this, new OnUnitDeathArgs(){unit = this});
+			NetworkServer.Destroy(gameObject);
 		}
 
 		public override void OnStartAuthority () {
@@ -131,6 +132,11 @@ namespace Units {
 		public override void OnStartClient () {
 			base.OnStartClient();
 			ClientOnUnitSpawned?.Invoke(this, new OnUnitSpawnedArgs(){unit = this});
+		}
+
+		public override void OnStopClient () {
+			base.OnStopClient();
+			ClientOnUnitDespawned?.Invoke(this, new OnUnitDespawnedArgs(){unit = this});
 		}
 
 		[Client]

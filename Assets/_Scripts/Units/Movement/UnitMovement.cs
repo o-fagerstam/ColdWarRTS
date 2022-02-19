@@ -20,7 +20,6 @@ namespace Units.Movement {
 			_ai = GetComponent<IAstarAI>();
 			SetState(new IdleState(this));
 		}
-
 		private void Update () {
 			if (isServer) {
 				_movementState.UpdateMovement();
@@ -71,12 +70,6 @@ namespace Units.Movement {
 			private Vector3 _position;
 			private float _sqrFinishDistance;
 
-			public event EventHandler<OnPositionReachedArgs> OnPositionReached;
-
-			public class OnPositionReachedArgs : EventArgs {
-				public UnitMovement UnitMovement;
-			}
-			
 			public MoveToPositionState (UnitMovement outer, Vector3 position, float finishDistance) : base(outer) {
 				_position = position;
 				_sqrFinishDistance = finishDistance * finishDistance;
@@ -106,7 +99,6 @@ namespace Units.Movement {
 				}
 			}
 			public override void OnEnterState () {
-				// TODO Subscribe to OnUnitDeath
 				Outer._ai.destination = _targetable.transform.position;
 				Outer._ai.SearchPath();
 			}

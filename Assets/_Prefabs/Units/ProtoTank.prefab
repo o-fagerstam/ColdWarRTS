@@ -591,7 +591,7 @@ MonoBehaviour:
   unitMovement: {fileID: 5639896018882415974}
   targeter: {fileID: 3661211283255233509}
   health: {fileID: 2455271316832968933}
-  weapon: {fileID: 0}
+  weapon: {fileID: -7990218139428941094}
 --- !u!114 &5639896018882415974
 MonoBehaviour:
   m_ObjectHideFlags: 0

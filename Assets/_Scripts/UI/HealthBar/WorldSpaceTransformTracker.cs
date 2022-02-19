@@ -1,5 +1,4 @@
-﻿using System;
-using Mirror;
+﻿using Mirror;
 using Unity.Collections;
 using UnityEngine;
 namespace UI.HealthBar {

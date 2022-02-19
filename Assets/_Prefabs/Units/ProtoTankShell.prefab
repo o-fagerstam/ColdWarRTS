@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: -5403163464699670269}
   - component: {fileID: -470943927631003928}
   - component: {fileID: -3635413616398561117}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: ProtoTankShell
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -125,7 +125,7 @@ GameObject:
   - component: {fileID: 5575817123154177103}
   - component: {fileID: 7751992802135976439}
   - component: {fileID: 2536323963996823980}
-  m_Layer: 0
+  m_Layer: 9
   m_Name: Capsule
   m_TagString: Untagged
   m_Icon: {fileID: 0}
