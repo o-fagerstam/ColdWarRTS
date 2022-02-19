@@ -1,5 +1,4 @@
-﻿using System;
-using System.IO;
+﻿using System.IO;
 using Map;
 using Singleton;
 using UnityEngine;
@@ -16,11 +15,11 @@ namespace Persistence {
 			GameMap.GameMapSaveData mapSaveData = SingletonManager.Retrieve<GameMap>().CreateSaveData();
 			string saveData = JsonUtility.ToJson(mapSaveData, true);
 			
-			UnityEngine.Debug.Log($"Saving to {_path}");
+			Debug.Log($"Saving to {_path}");
 			using FileStream stream = new FileStream(_path, FileMode.Create);
 			using StreamWriter writer = new StreamWriter(stream);
 			writer.Write(saveData);
-			UnityEngine.Debug.Log("Finished saving");
+			Debug.Log("Finished saving");
 		}
 
 		public void LoadMap () {

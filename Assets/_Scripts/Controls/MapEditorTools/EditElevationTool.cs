@@ -4,7 +4,6 @@ using Singleton;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
-using Utils;
 namespace Controls.MapEditorTools {
 	public class EditElevationTool : AMapEditorTool {
 		private const string TOOLTIP_BASE = "Left click: Raise, Right click: Lower, Scroll: Change brush size, Space: Exit";

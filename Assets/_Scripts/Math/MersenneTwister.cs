@@ -44,7 +44,7 @@ namespace Math {
                 minValue = tmp;
             }
             return (int)(System.Math.Floor((maxValue-minValue+1)*genrand_real1()+
-                                    minValue));
+                                           minValue));
         }
         public float NextFloat()
         { return (float) genrand_real2(); }

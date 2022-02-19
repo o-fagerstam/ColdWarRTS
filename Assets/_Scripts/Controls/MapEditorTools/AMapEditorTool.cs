@@ -1,6 +1,5 @@
 ﻿using System;
 using UnityEngine;
-using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public abstract class AMapEditorTool : MonoBehaviour {
 

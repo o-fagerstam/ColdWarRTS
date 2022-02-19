@@ -23,7 +23,7 @@ namespace Map {
 		private void Start () {
 			float nodeSize = AstarPath.active.data.gridGraph.nodeSize;
 			AstarPath.active.data.gridGraph.SetDimensions(Mathf.RoundToInt(mapSize/nodeSize), Mathf.RoundToInt(mapSize/nodeSize), nodeSize);
-			UnityEngine.Debug.Log("Set map size to " + mapSize);
+			Debug.Log("Set map size to " + mapSize);
 			AstarPath.active.Scan();
 		}
 		public void GenerateFlatMap () {

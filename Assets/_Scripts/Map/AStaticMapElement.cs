@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using Math;
-using Singleton;
 using UnityEngine;
-using Utils;
 namespace Map {
 	public abstract class AStaticMapElement : MonoBehaviour {
 		private bool _updateNeeded;

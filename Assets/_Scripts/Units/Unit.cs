@@ -1,11 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using Controls;
-using ICSharpCode.NRefactory.Ast;
 using Mirror;
-using Singleton;
 using Sirenix.OdinInspector;
-using UI.HealthBar;
 using Units.Movement;
 using Units.Targeting;
 using Units.Weapons;

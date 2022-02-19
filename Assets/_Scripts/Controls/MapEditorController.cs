@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using Constants;
-using Controls.MapEditorTools;
-using Map;
-using Singleton;
+﻿using Controls.MapEditorTools;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls {
 	public class MapEditorController : ARtsController {

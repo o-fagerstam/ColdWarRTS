@@ -1,7 +1,6 @@
 ﻿using Singleton;
 using UnityEngine;
 using UnityEngine.InputSystem;
-
 namespace Controls {
 	public abstract class ARtsController : ASingletonMonoBehaviour<ARtsController> {
 		[SerializeField] private float scrollSpeed = 5f;

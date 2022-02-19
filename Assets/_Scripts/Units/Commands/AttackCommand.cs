@@ -1,6 +1,5 @@
 ﻿using System;
 using Units;
-using Units.Movement;
 using Units.Targeting;
 namespace Controls {
 	public class AttackCommand : AUnitCommand {

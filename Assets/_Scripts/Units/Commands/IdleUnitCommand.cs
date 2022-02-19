@@ -1,6 +1,4 @@
-﻿using System;
-using Units;
-using Units.Movement;
+﻿using Units;
 namespace Controls {
 	public class IdleUnitCommand : AUnitCommand {
 		public IdleUnitCommand (Unit commandOwner) : base(commandOwner) {}

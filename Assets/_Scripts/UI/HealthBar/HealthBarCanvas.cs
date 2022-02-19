@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using Singleton;
+﻿using System.Collections.Generic;
 using Sirenix.OdinInspector;
 using Units;
 using UnityEngine;
