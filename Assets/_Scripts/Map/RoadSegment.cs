@@ -208,7 +208,7 @@ namespace Map {
 		private Vector3 Generate3DMeshPoint (Vector2 vec2) {
 			Vector3 worldPoint = vec2.AddY(0f) + transform.position;
 			if (!RaycastUtil.GroundLayerOnlyElevationRaycast(worldPoint, out RaycastHit hit)) {
-				throw new Exception($"Failed to find land over point {worldPoint}.");
+				throw new GroundRaycastException($"Failed to find land over point {worldPoint}.");
 			}
 			Vector3 localPoint = hit.point - transform.position + new Vector3(0f, RoadHeightOverGround, 0f);
 			return localPoint;

@@ -13,12 +13,14 @@ namespace Map {
 		[SerializeField] private float mapSize;
 
 		[SerializeField] private List<MapChunk> chunks = new List<MapChunk>();
-		[SerializeField] private MapChunk mapChunkPrefab;
-		[SerializeField] private ForestSection forestSectionPrefab;
-		[SerializeField] private RoadSegment roadSegmentPrefab;
+		[SerializeField, Required, AssetsOnly] private MapChunk mapChunkPrefab;
+		[SerializeField, Required, AssetsOnly] private ForestSection forestSectionPrefab;
+		[SerializeField, Required, AssetsOnly] private RoadSegment roadSegmentPrefab;
+		[SerializeField, Required, AssetsOnly] private CapturePoint capturePointPrefab;
 		[ShowInInspector][ReadOnly] private List<AStaticMapElement> _allStaticMapElements = new List<AStaticMapElement>();
 		public IEnumerable<ForestSection> AllForests => _allStaticMapElements.OfType<ForestSection>();
 		public IEnumerable<RoadSegment> AllRoadSegments => _allStaticMapElements.OfType<RoadSegment>();
+		public IEnumerable<CapturePoint> AllCapturePoints => _allStaticMapElements.OfType<CapturePoint>();
 
 		private void Start () {
 			float nodeSize = AstarPath.active.data.gridGraph.nodeSize;
@@ -70,6 +72,11 @@ namespace Map {
 				RoadSegment newRoadSegment = Instantiate(roadSegmentPrefab, roadSegmentSaveData.position, Quaternion.identity, transform);
 				newRoadSegment.CreateFromSaveData(roadSegmentSaveData);
 				RegisterStaticMapElement(newRoadSegment);
+			}
+			foreach (CapturePoint.CapturePointData capturePointData in saveData.capturePointData) {
+				CapturePoint newCapturePoint = Instantiate(capturePointPrefab, capturePointData.position, Quaternion.identity, transform);
+				newCapturePoint.RestoreFromSaveData(capturePointData);
+				RegisterStaticMapElement(newCapturePoint);
 			}
 			RecalculateAstarGraph();
 		}
@@ -148,22 +155,14 @@ namespace Map {
 		}
 
 		public GameMapSaveData CreateSaveData () {
-			List<ForestSection> forestSections = new List<ForestSection>();
-			List<RoadSegment> roadSegments = new List<RoadSegment>();
-			foreach (AStaticMapElement staticMapElement in _allStaticMapElements) {
-				if (staticMapElement is ForestSection f) {
-					forestSections.Add(f);
-				} else if (staticMapElement is RoadSegment rs) {
-					roadSegments.Add(rs);
-				}
-			}
 			return new GameMapSaveData(
 				chunksPerSide,
 				chunkResolution,
 				mapSize,
 				chunks.Select(c => c.CreateChunkData()).ToList(),
-				(from fs in forestSections select fs.CreateSaveData()).ToList(),
-				(from rs in roadSegments select rs.CreateSaveData()).ToList()
+				(from fs in AllForests select fs.CreateSaveData()).ToList(),
+				(from rs in AllRoadSegments select rs.CreateSaveData()).ToList(),
+				(from cp in AllCapturePoints select cp.CreateSaveData()).ToList()
 			);
 		}
 
@@ -175,6 +174,7 @@ namespace Map {
 			public List<MapChunk.MapChunkSaveData> chunkData;
 			public List<ForestSection.ForestSectionData> forestSectionData;
 			public List<RoadSegment.RoadSegmentSaveData> roadSegmentData;
+			public List<CapturePoint.CapturePointData> capturePointData;
 
 			public GameMapSaveData (
 				int chunksPerSide,
@@ -182,7 +182,8 @@ namespace Map {
 				float mapSize,
 				List<MapChunk.MapChunkSaveData> chunkData,
 				List<ForestSection.ForestSectionData> forestSectionData,
-				List<RoadSegment.RoadSegmentSaveData> roadSegmentData
+				List<RoadSegment.RoadSegmentSaveData> roadSegmentData,
+				List<CapturePoint.CapturePointData> capturePointData
 			) {
 				this.chunksPerSide = chunksPerSide;
 				this.chunkResolution = chunkResolution;
@@ -190,6 +191,7 @@ namespace Map {
 				this.chunkData = chunkData;
 				this.forestSectionData = forestSectionData;
 				this.roadSegmentData = roadSegmentData;
+				this.capturePointData = capturePointData;
 			}
 		}
 	}

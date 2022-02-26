@@ -50,3 +50,4 @@ MonoBehaviour:
   mapChunkPrefab: {fileID: -1279206610592063365, guid: 8ec56ca023c03344a9b7ca864f054a10, type: 3}
   forestSectionPrefab: {fileID: -4291172762214712010, guid: 4feec96ffd9e4774c905d4742bbbdee6, type: 3}
   roadSegmentPrefab: {fileID: -6440006881211199864, guid: 932bb55d4ab0f9441a7d8e209cd1c16c, type: 3}
+  capturePointPrefab: {fileID: 7857568650443652852, guid: 33994a9b3448e1647aee90632d56131e, type: 3}

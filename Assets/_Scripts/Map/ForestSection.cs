@@ -109,7 +109,7 @@ namespace Map {
 
 		private static GpuInstance RaycastTree (GpuInstance instance) {
 			if (!RaycastUtil.GroundLayerOnlyElevationRaycast(instance.position, out RaycastHit hit)) {
-				throw new Exception("Failed to raycast new tree position: No ground below?");
+				throw new GroundRaycastException("Failed to raycast new tree position: No ground below?");
 			}
 			bool treeOnRoad = RaycastUtil.RoadLayerOnlyElevationRaycast(instance.position, out RaycastHit roadHit);
 			Vector3 newPosition = new Vector3(instance.position.x, hit.point.y, instance.position.z);

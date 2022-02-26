@@ -33,7 +33,7 @@ namespace Controls {
 			OnPositionChanged?.Invoke(this, newWorldPos);
 		}
 		public void RecalculateHeight () {
-			if (!RaycastUtil.GroundLayerOnlyElevationRaycast(transform.position, out RaycastHit hit)) {
+			if (!RaycastUtil.NonRoadSurfaceElevationRaycast(transform.position, out RaycastHit hit)) {
 				return;
 			}
 			transform.position = hit.point;
