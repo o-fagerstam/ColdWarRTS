@@ -9,7 +9,7 @@ using UnityEngine;
 using Utils;
 namespace Map {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
-	public class RoadSegment : AStaticMapElement {
+	public class RoadSegment : AStaticMapElement, IGroundDragMovable {
 		[SerializeField][AssetsOnly][Required] private GroundDraggable handlePrefab;
 		private static readonly float RoadHeightOverGround = ScaleUtil.GameToUnity(.5f);
 		private static readonly float RoadWidth = ScaleUtil.GameToUnity(8f);
@@ -17,6 +17,7 @@ namespace Map {
 		private static readonly int NumRoadEndSubDivisions = 20;
 		private BezierCurve _curve;
 		private Dictionary<GroundDraggable, BezierPoint> _handles; // Order: Anchor1, Anchor2, Control1, Control2;
+		public IEnumerable<GroundDraggable> GroundDraggables => _handles.Keys;
 		[ShowInInspector] [ReadOnly] private List<(Vector3 left, Vector3 right)> _meshPoints = new List<(Vector3 left, Vector3 right)>();
 		private const string ANCHOR_TAG = "RoadAnchor";
 
@@ -66,17 +67,17 @@ namespace Map {
 
 			RecalculateMesh();
 			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
-			DisableAnchors();
+			DisableHandles();
 			InvokeShapeChanged();
 		}
 
-		public void EnableAnchors () {
+		public void EnableHandles () {
 			foreach (GroundDraggable handle in _handles.Keys) {
 				handle.gameObject.SetActive(true);
 			}
 		}
 
-		public void DisableAnchors () {
+		public void DisableHandles () {
 			foreach (GroundDraggable handle in _handles.Keys) {
 				handle.gameObject.SetActive(false);
 			}
@@ -265,5 +266,6 @@ namespace Map {
 				this.control2 = control2;
 			}
 		}
+
 	}
 }

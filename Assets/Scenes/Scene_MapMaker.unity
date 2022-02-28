@@ -133,8 +133,6 @@ GameObject:
   m_Component:
   - component: {fileID: 104541512}
   - component: {fileID: 104541513}
-  - component: {fileID: 104541510}
-  - component: {fileID: 104541511}
   m_Layer: 0
   m_Name: MapEditorController
   m_TagString: Untagged
@@ -142,31 +140,6 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
---- !u!114 &104541510
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 104541509}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1674625106b4688922c4dd0e3ddd229, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameMapPrefab: {fileID: 6955029135892152875, guid: fd81317f594e67847bd359a66058c0dd, type: 3}
---- !u!114 &104541511
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 104541509}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 1092cd04e3574b2fa2158875df9a9096, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!4 &104541512
 Transform:
   m_ObjectHideFlags: 0
@@ -281,7 +254,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 104541510}
+      - m_Target: {fileID: 11400000, guid: 7b0171dcf31de4f46bcaf9c2c5def555, type: 2}
         m_TargetAssemblyTypeName: Persistence.MapSaveSystem, ColdWarRTS
         m_MethodName: NewMap
         m_Mode: 1
@@ -458,7 +431,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 104541510}
+      - m_Target: {fileID: 11400000, guid: 7b0171dcf31de4f46bcaf9c2c5def555, type: 2}
         m_TargetAssemblyTypeName: Persistence.MapSaveSystem, ColdWarRTS
         m_MethodName: LoadMap
         m_Mode: 1
@@ -2055,7 +2028,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 104541510}
+      - m_Target: {fileID: 11400000, guid: 7b0171dcf31de4f46bcaf9c2c5def555, type: 2}
         m_TargetAssemblyTypeName: Persistence.MapSaveSystem, ColdWarRTS
         m_MethodName: SaveMap
         m_Mode: 1

@@ -8,30 +8,34 @@ using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public class CapturePointTool : AMapEditorTool {
 		[SerializeField, Required, AssetsOnly] private CapturePoint capturePointPrefab;
+		private GroundDragHandler _groundDragHandler;
 
 		private const string TOOLTIP_BASE = "Shift-click to place capture point";
 		
 		public override void Activate () {
+			_groundDragHandler = new GroundDragHandler(SingletonManager.Retrieve<GameMap>().AllCapturePoints);
+			_groundDragHandler.EnableDragging();
 			UpdateTooltip(TOOLTIP_BASE);
-			foreach (CapturePoint capturePoint in SingletonManager.Retrieve<GameMap>().AllCapturePoints) {
-				capturePoint.EnableHandle();
-			}
+		}
+
+		public override void Deactivate () {
+			base.Deactivate();
+			_groundDragHandler.DisableDragging();
 		}
 
 		public override void UpdateKeyboard () {}
 		public override void UpdateMouse (Ray mouseRay) {
-			GroundDragManager groundDragManager = SingletonManager.Retrieve<GroundDragManager>();
-			if (groundDragManager.IsDragging) {
+			if (_groundDragHandler.IsDragging) {
 				if (Mouse.current.leftButton.wasReleasedThisFrame) {
-					groundDragManager.FinishDragging();
+					_groundDragHandler.FinishDragging();
 					return;
 				}
 				if (Mouse.current.rightButton.wasPressedThisFrame) {
-					groundDragManager.CancelDragging();
+					_groundDragHandler.CancelDragging();
 					return;
 				}
 				if (Mouse.current.leftButton.isPressed) {
-					groundDragManager.HandleUpdate(mouseRay);
+					_groundDragHandler.HandleUpdate(mouseRay);
 					return;
 				}
 			}
@@ -40,13 +44,13 @@ namespace Controls.MapEditorTools {
 			if (Mouse.current.leftButton.wasPressedThisFrame) {
 				if (Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.anyLand)) {
 					GameMap map = SingletonManager.Retrieve<GameMap>();
-					Instantiate(capturePointPrefab, hit.point, Quaternion.identity, map.transform);
+					CapturePoint capturePoint = Instantiate(capturePointPrefab, hit.point, Quaternion.identity, map.transform);
+					_groundDragHandler.Register(capturePoint);
 				} else if (!Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out hit, Mathf.Infinity, LayerMasks.mouseDraggable)) {
 					GroundDraggable draggedObject = hit.transform.GetComponent<GroundDraggable>();
-					groundDragManager.SelectForDragging(draggedObject);
+					_groundDragHandler.SelectForDragging(draggedObject);
 				}
 			}
 		}
-		
 	}
 }

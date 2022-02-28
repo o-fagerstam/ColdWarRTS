@@ -1,5 +1,4 @@
 ﻿using System;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
@@ -12,17 +11,6 @@ namespace Controls {
 		/// Args: This Object, new position
 		/// </summary>
 		public event Action<GroundDraggable, Vector3> OnPositionChanged;
-
-		private void OnEnable () {
-			if (SingletonManager.TryRetrieve(out GroundDragManager groundDragManager)) {
-				groundDragManager.Register(this);
-			}
-		}
-		private void OnDisable () {
-			if (SingletonManager.TryRetrieve(out GroundDragManager groundDragManager)) {
-				groundDragManager.Deregister(this);
-			}
-		}
 
 		private void Update () {
 			RecalculateHeight();

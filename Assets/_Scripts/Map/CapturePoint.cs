@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Controls;
 using Math;
 using Singleton;
 using UnityEngine;
 using Utils;
 namespace Map {
-	public class CapturePoint : AStaticMapElement {
+	public class CapturePoint : AStaticMapElement, IGroundDragMovable {
 		private GroundDraggable _anchor;
 		private void OnEnable () {
 			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
@@ -55,6 +57,13 @@ namespace Map {
 			public CapturePointData (Vector3 position) {
 				this.position = position;
 			}
+		}
+		public IEnumerable<GroundDraggable> GroundDraggables => Enumerable.Repeat(_anchor, 1);
+		public void EnableHandles () {
+			_anchor.gameObject.SetActive(true);
+		}
+		public void DisableHandles () {
+			_anchor.gameObject.SetActive(false);
 		}
 	}
 }

@@ -1,18 +1,22 @@
 ﻿using System.IO;
 using Map;
 using Singleton;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Persistence {
-	public class MapSaveSystem : ASingletonMonoBehaviour<MapSaveSystem> {
+	[CreateAssetMenu(fileName = "Map Save System", menuName = "Scriptable Objects/Map/Map Save System")]
+	public class MapSaveSystem : ScriptableObject {
 		private string _path;
 		[SerializeField] private GameMap gameMapPrefab;
+		[ShowInInspector, ReadOnly] private GameMap _map;
+		
 
 		private void Awake () {
 			_path = Application.persistentDataPath + "/maptest.json";
 		}
 		public void SaveMap () {
-			GameMap.GameMapSaveData mapSaveData = SingletonManager.Retrieve<GameMap>().CreateSaveData();
+			GameMap.GameMapSaveData mapSaveData = _map.CreateSaveData();
 			string saveData = JsonUtility.ToJson(mapSaveData, true);
 			
 			Debug.Log($"Saving to {_path}");
@@ -28,20 +32,19 @@ namespace Persistence {
 			string saveData = reader.ReadToEnd();
 			GameMap.GameMapSaveData mapSaveData = JsonUtility.FromJson<GameMap.GameMapSaveData>(saveData);
 			RecreateMap();
-			SingletonManager.Retrieve<GameMap>().GenerateFromMapData(mapSaveData);
+			_map.GenerateFromMapData(mapSaveData);
 		}
 
 		public void NewMap () {
 			RecreateMap();
-			SingletonManager.Retrieve<GameMap>().GenerateFlatMap();
+			_map.GenerateFlatMap();
 		}
 
 		private void RecreateMap () {
-			if (SingletonManager.IsRegistered<GameMap>()) {
-				GameMap oldMap = SingletonManager.Retrieve<GameMap>();
-				SafeDestroyUtil.SafeDestroyGameObject(oldMap);
+			if (_map != null) {
+				SafeDestroyUtil.SafeDestroyGameObject(_map);
 			}
-			GameMap newMap = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
+			_map = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
 		}
 	}
 }

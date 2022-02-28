@@ -1,23 +1,26 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Constants;
-using Singleton;
-using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
-	public class GroundDragManager : ASingletonMonoBehaviour<GroundDragManager> {
-		[ReadOnly][ShowInInspector] private HashSet<GroundDraggable> _allGroundDraggables = new HashSet<GroundDraggable>();
-		[ReadOnly][ShowInInspector] private GroundDraggable _currentDraggedObject;
-		[ReadOnly][ShowInInspector] private Vector3 _startDragPosition;
+	public class GroundDragHandler  {
+		private readonly HashSet<IGroundDragMovable> _movables;
+		private GroundDraggable _currentDraggedObject;
+		private Vector3 _startDragPosition;
+		private bool _draggingEnabled;
 		private const float DRAG_SNAP_DISTANCE = 0.3f;
+
+		public GroundDragHandler (IEnumerable<IGroundDragMovable> movables) {
+			_movables = new HashSet<IGroundDragMovable>(movables);
+		}
 
 		public bool IsDragging => _currentDraggedObject != null;
 
 		public void HandleUpdate (Ray mouseRay) {
-			if (_currentDraggedObject == null) {
-				return;
-			}
+			if (!_draggingEnabled) {return; }
+			if (_currentDraggedObject == null) { return; }
 			if (!Mouse.current.leftButton.isPressed) {
 				_currentDraggedObject = null;
 				return;
@@ -27,7 +30,7 @@ namespace Controls {
 			if (_currentDraggedObject.snapTag != null) {
 				float closestSqrDst = float.MaxValue;
 				GroundDraggable closest = null;
-				foreach (GroundDraggable draggable in _allGroundDraggables) {
+				foreach (GroundDraggable draggable in _movables.SelectMany(x=>x.GroundDraggables)) {
 					if (draggable == _currentDraggedObject) {
 						continue;
 					}
@@ -72,12 +75,27 @@ namespace Controls {
 			_currentDraggedObject = null;
 		}
 
-		public void Register (GroundDraggable draggable) {
-			_allGroundDraggables.Add(draggable);
+		public void EnableDragging () {
+			_draggingEnabled = true;
+			foreach (IGroundDragMovable movable in _movables) {
+				movable.EnableHandles();
+			}
 		}
 
-		public void Deregister (GroundDraggable draggable) {
-			_allGroundDraggables.Remove(draggable);
+		public void DisableDragging () {
+			_draggingEnabled = false;
+			foreach (IGroundDragMovable movable in _movables) {
+				movable.DisableHandles();
+			}
+		}
+
+		public void Register (IGroundDragMovable groundDragMovable) {
+			_movables.Add(groundDragMovable);
+			if (_draggingEnabled) {
+				groundDragMovable.EnableHandles();
+			} else {
+				groundDragMovable.DisableHandles();
+			}
 		}
 	}
 }

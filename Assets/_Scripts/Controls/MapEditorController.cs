@@ -7,6 +7,9 @@ namespace Controls {
 		[ReadOnly][ShowInInspector] private AMapEditorTool _currentTool;
 		
 		public void SelectTool (AMapEditorTool tool) {
+			if (_currentTool != null) {
+				_currentTool.Deactivate();
+			}
 			_currentTool = tool;
 			tool.Activate();
 		}
