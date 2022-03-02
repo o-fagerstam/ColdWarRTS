@@ -46,6 +46,10 @@ MonoBehaviour:
   chunksPerSide: 20
   chunkResolution: 20
   mapSize: 100
+  forestSectionRuntimeSet: {fileID: 11400000, guid: 78c0ca873fb74074e86e1fea335b2fce, type: 2}
+  roadSegmentRuntimeSet: {fileID: 11400000, guid: f14733e8a5b306b40be3dffe3c5835bf, type: 2}
+  capturePointRuntimeSet: {fileID: 11400000, guid: ebe23588d37c4f248ad8726c09e781ea, type: 2}
+  onMapReload: {fileID: 11400000, guid: 94d6831822838bb44a8a59da95e30578, type: 2}
   chunks: []
   mapChunkPrefab: {fileID: -1279206610592063365, guid: 8ec56ca023c03344a9b7ca864f054a10, type: 3}
   forestSectionPrefab: {fileID: -4291172762214712010, guid: 4feec96ffd9e4774c905d4742bbbdee6, type: 3}

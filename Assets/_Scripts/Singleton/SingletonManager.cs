@@ -29,15 +29,7 @@ namespace Singleton {
 			}
 			return (T)Singletons[objType];
 		}
-
-		public static bool TryRetrieve<T> (out T singleton) where T : ISingleton {
-			if (Singletons.ContainsKey(typeof(T))) {
-				singleton = (T)Singletons[typeof(T)];
-				return true;
-			}
-			singleton = default;
-			return false;
-		}
+		
 
 		public static bool TryRetrieveAnySubclass<T> (out T singleton) where T : ISingleton {
 			Type parentType = typeof(T);
@@ -50,9 +42,7 @@ namespace Singleton {
 			singleton = default;
 			return false;
 		}
-
-		public static bool IsRegistered<T> () where T : ISingleton => Singletons.ContainsKey(typeof(T));
-
+		
 		public class OnSingletonRegisteredArgs : EventArgs {
 			public Type RegisteredType;
 		}

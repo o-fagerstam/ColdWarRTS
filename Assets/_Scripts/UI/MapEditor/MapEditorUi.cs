@@ -22,5 +22,11 @@ namespace UI {
 			_tooltip.Unsubscribe(tool);
 			tool.OnToolFinished -= HandleToolFinished;
 		}
+
+		private void OnDestroy () {
+			foreach (ToolSelectButton toolSelectButton in GetComponentsInChildren<ToolSelectButton>()) {
+				toolSelectButton.OnToolSelected -= HandleToolSelected;
+			}
+		}
 	}
 }

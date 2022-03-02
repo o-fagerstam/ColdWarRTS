@@ -4,19 +4,22 @@ using System.Linq;
 using Controls;
 using Math;
 using Singleton;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {
 	public class CapturePoint : AStaticMapElement, IGroundDragMovable {
+		[SerializeField, AssetsOnly, Required] private CapturePointRuntimeSet capturePointRuntimeSet;
 		private GroundDraggable _anchor;
 		private void OnEnable () {
-			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
+			capturePointRuntimeSet.Add(this);
 			_anchor = GetComponentInChildren<GroundDraggable>();
 			_anchor.OnPositionChanged += HandleAnchorPositionChanged;
 			DisableHandle();
 		}
 		
 		private void OnDisable () {
+			capturePointRuntimeSet.Remove(this);
 			_anchor.OnPositionChanged -= HandleAnchorPositionChanged;
 		}
 		private void HandleAnchorPositionChanged (GroundDraggable anchor, Vector3 newPosition) {
@@ -63,7 +66,9 @@ namespace Map {
 			_anchor.gameObject.SetActive(true);
 		}
 		public void DisableHandles () {
-			_anchor.gameObject.SetActive(false);
+			if (_anchor != null) {
+				_anchor.gameObject.SetActive(false);
+			}
 		}
 	}
 }

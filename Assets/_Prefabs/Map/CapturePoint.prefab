@@ -155,6 +155,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 80feac203e664136a546ab56c026ad51, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  capturePointRuntimeSet: {fileID: 11400000, guid: ebe23588d37c4f248ad8726c09e781ea, type: 2}
 --- !u!114 &7857568650443652853
 MonoBehaviour:
   m_ObjectHideFlags: 0

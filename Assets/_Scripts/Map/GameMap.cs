@@ -12,21 +12,26 @@ namespace Map {
 		[SerializeField] private int chunkResolution;
 		[SerializeField] private float mapSize;
 
+		[SerializeField, Required, AssetsOnly] private ForestSectionRuntimeSet forestSectionRuntimeSet;
+		[SerializeField, Required, AssetsOnly] private RoadSegmentRuntimeSet roadSegmentRuntimeSet;
+		[SerializeField, Required, AssetsOnly] private CapturePointRuntimeSet capturePointRuntimeSet;
+
+		[SerializeField, Required, AssetsOnly] private GameMapEvent onMapReload;
+
 		[SerializeField] private List<MapChunk> chunks = new List<MapChunk>();
 		[SerializeField, Required, AssetsOnly] private MapChunk mapChunkPrefab;
 		[SerializeField, Required, AssetsOnly] private ForestSection forestSectionPrefab;
 		[SerializeField, Required, AssetsOnly] private RoadSegment roadSegmentPrefab;
 		[SerializeField, Required, AssetsOnly] private CapturePoint capturePointPrefab;
-		[ShowInInspector][ReadOnly] private List<AStaticMapElement> _allStaticMapElements = new List<AStaticMapElement>();
-		public IEnumerable<ForestSection> AllForests => _allStaticMapElements.OfType<ForestSection>();
-		public IEnumerable<RoadSegment> AllRoadSegments => _allStaticMapElements.OfType<RoadSegment>();
-		public IEnumerable<CapturePoint> AllCapturePoints => _allStaticMapElements.OfType<CapturePoint>();
+		public IEnumerable<ForestSection> AllForests => forestSectionRuntimeSet;
+		public IEnumerable<RoadSegment> AllRoadSegments => roadSegmentRuntimeSet;
+		public IEnumerable<CapturePoint> AllCapturePoints => capturePointRuntimeSet;
+		public IEnumerable<AStaticMapElement> AllStaticMapElements => new IEnumerable<AStaticMapElement>[] {AllForests, AllCapturePoints, AllRoadSegments}.SelectMany(x => x);
 
 		private void Start () {
-			float nodeSize = AstarPath.active.data.gridGraph.nodeSize;
-			AstarPath.active.data.gridGraph.SetDimensions(Mathf.RoundToInt(mapSize/nodeSize), Mathf.RoundToInt(mapSize/nodeSize), nodeSize);
-			Debug.Log("Set map size to " + mapSize);
-			AstarPath.active.Scan();
+			forestSectionRuntimeSet.OnElementAdded += RegisterStaticMapElement;
+			roadSegmentRuntimeSet.OnElementAdded += RegisterStaticMapElement;
+			capturePointRuntimeSet.OnElementAdded += RegisterStaticMapElement;
 		}
 		public void GenerateFlatMap () {
 			ClearMap();
@@ -41,7 +46,7 @@ namespace Map {
 					chunks.Add(newChunk);
 				}
 			}
-			RecalculateAstarGraph();
+			PostMapGeneration();
 		}
 
 		public void GenerateFromMapData (GameMapSaveData saveData) {
@@ -66,18 +71,26 @@ namespace Map {
 			foreach (ForestSection.ForestSectionData forestSectionData in saveData.forestSectionData) {
 				ForestSection newForestSection = Instantiate(forestSectionPrefab, forestSectionData.worldPosition, Quaternion.identity, transform);
 				newForestSection.CreateFromSaveData(forestSectionData);
-				RegisterStaticMapElement(newForestSection);
 			}
 			foreach (RoadSegment.RoadSegmentSaveData roadSegmentSaveData in saveData.roadSegmentData) {
 				RoadSegment newRoadSegment = Instantiate(roadSegmentPrefab, roadSegmentSaveData.position, Quaternion.identity, transform);
 				newRoadSegment.CreateFromSaveData(roadSegmentSaveData);
-				RegisterStaticMapElement(newRoadSegment);
 			}
 			foreach (CapturePoint.CapturePointData capturePointData in saveData.capturePointData) {
 				CapturePoint newCapturePoint = Instantiate(capturePointPrefab, capturePointData.position, Quaternion.identity, transform);
 				newCapturePoint.RestoreFromSaveData(capturePointData);
-				RegisterStaticMapElement(newCapturePoint);
 			}
+			PostMapGeneration();
+		}
+
+		private void PostMapGeneration () {
+			InitializePathing();
+			onMapReload.Invoke(this, new GameMapEventArgs(){Map = this});
+		}
+
+		private void InitializePathing () {
+			float nodeSize = AstarPath.active.data.gridGraph.nodeSize;
+			AstarPath.active.data.gridGraph.SetDimensions(Mathf.RoundToInt(mapSize/nodeSize), Mathf.RoundToInt(mapSize/nodeSize), nodeSize);
 			RecalculateAstarGraph();
 		}
 
@@ -86,12 +99,13 @@ namespace Map {
 				SafeDestroyUtil.SafeDestroyGameObject(chunk);
 			}
 			chunks.Clear();
-			foreach (AStaticMapElement staticMapElement in _allStaticMapElements) {
+			List<AStaticMapElement> allElements = AllStaticMapElements.ToList();
+			for (var i = allElements.Count - 1; i >= 0; i--) {
+				AStaticMapElement staticMapElement = allElements[i];
 				staticMapElement.OnDestruction -= HandleStaticElementDestroyed;
 				staticMapElement.OnShapeChanged -= HandleStaticElementShapeChanged;
 				SafeDestroyUtil.SafeDestroyGameObject(staticMapElement);
 			}
-			_allStaticMapElements.Clear();
 		}
 
 		private void RecalculateAstarGraph () {
@@ -120,18 +134,10 @@ namespace Map {
 				}
 			}
 		}
-		public IEnumerable<MapChunk> GetOverlappingChunks (Polygon worldSpacePolygon) {
-			foreach (MapChunk chunk in chunks) {
-				if (chunk.worldRectangle.Overlaps(worldSpacePolygon)) {
-					yield return chunk;
-				}
-			}
-		}
 
 		public void RegisterStaticMapElement (AStaticMapElement element) {
 			element.OnShapeChanged += HandleStaticElementShapeChanged;
 			element.OnDestruction += HandleStaticElementDestroyed;
-			_allStaticMapElements.Add(element);
 			ReevaluateStaticElementChunks(element);
 		}
 
@@ -151,7 +157,6 @@ namespace Map {
 		private void HandleStaticElementDestroyed (AStaticMapElement element) {
 			element.OnDestruction -= HandleStaticElementDestroyed;
 			element.OnShapeChanged -= HandleStaticElementShapeChanged;
-			_allStaticMapElements.Remove(element);
 		}
 
 		public GameMapSaveData CreateSaveData () {

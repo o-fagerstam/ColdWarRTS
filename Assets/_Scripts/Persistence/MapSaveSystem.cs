@@ -31,20 +31,19 @@ namespace Persistence {
 			StreamReader reader = new StreamReader(stream);
 			string saveData = reader.ReadToEnd();
 			GameMap.GameMapSaveData mapSaveData = JsonUtility.FromJson<GameMap.GameMapSaveData>(saveData);
-			RecreateMap();
+			CreateMapIfNecessary();
 			_map.GenerateFromMapData(mapSaveData);
 		}
 
 		public void NewMap () {
-			RecreateMap();
+			CreateMapIfNecessary();
 			_map.GenerateFlatMap();
 		}
 
-		private void RecreateMap () {
-			if (_map != null) {
-				SafeDestroyUtil.SafeDestroyGameObject(_map);
+		private void CreateMapIfNecessary () {
+			if (_map == null) {
+				_map = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
 			}
-			_map = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
 		}
 	}
 }

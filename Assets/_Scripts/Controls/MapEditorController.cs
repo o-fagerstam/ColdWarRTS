@@ -1,17 +1,32 @@
 ﻿using Controls.MapEditorTools;
+using Map;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
 	public class MapEditorController : ARtsController {
+		[SerializeField, Required, AssetsOnly] private GameMapEvent onMapReload;
 		[ReadOnly][ShowInInspector] private AMapEditorTool _currentTool;
-		
+
+		protected override void OnEnable () {
+			base.OnEnable();
+			SelectTool(null);
+			onMapReload.Event += HandleMapReload;
+		}
+
+		protected override void OnDisable () {
+			base.OnDisable();
+			SelectTool(null);
+			onMapReload.Event -= HandleMapReload;
+		}
+
+
 		public void SelectTool (AMapEditorTool tool) {
-			if (_currentTool != null) {
-				_currentTool.Deactivate();
-			}
+			ClearTool();
 			_currentTool = tool;
-			tool.Activate();
+			if (_currentTool != null) {
+				_currentTool.Activate();
+			}
 		}
 		
 		protected override void UpdateKeyboardControl () {
@@ -35,8 +50,14 @@ namespace Controls {
 		}
 
 		private void ClearTool () {
-			_currentTool.Deactivate();
+			if (_currentTool != null) {
+				_currentTool.Deactivate();
+			}
 			_currentTool = null;
+		}
+		
+		private void HandleMapReload (object sender, GameMapEventArgs e) {
+			ClearTool();
 		}
 	}
 }

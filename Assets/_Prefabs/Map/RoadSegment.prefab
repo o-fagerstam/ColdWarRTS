@@ -46,6 +46,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 63eac143cd8f4939a0a7d434d7a60215, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allRoadSegments: {fileID: 11400000, guid: f14733e8a5b306b40be3dffe3c5835bf, type: 2}
   handlePrefab: {fileID: 1251187459502074367, guid: 47fe990d3528b1843b9ccaa51f8198a0, type: 3}
 --- !u!33 &-9124788744205585733
 MeshFilter:

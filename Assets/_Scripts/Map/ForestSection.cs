@@ -10,9 +10,9 @@ using Utils;
 using Random = UnityEngine.Random;
 namespace Map {
 	public class ForestSection : AStaticMapElement {
-
-		[ShowInInspector] private List<GpuInstance> _treeInstances = new List<GpuInstance>();
+		[SerializeField, AssetsOnly, Required] private ForestSectionRuntimeSet forestSectionRuntimeSet;
 		[AssetsOnly][Required][SerializeField] private GameObject treePrefab;
+		[ShowInInspector] private List<GpuInstance> _treeInstances = new List<GpuInstance>();
 		[Range(2f, 10f)]
 		[ShowInInspector] private static readonly float TreeRadiusMeters = 10f;
 		
@@ -23,7 +23,16 @@ namespace Map {
 		private void Awake() {
 			_gpuInstancer = new GpuInstancer(treePrefab);
 		}
-		
+
+		private void OnEnable () {
+			if (IsClosed) {
+				forestSectionRuntimeSet.Add(this);
+			}
+		}
+		private void OnDisable () {
+			forestSectionRuntimeSet.Remove(this);
+		}
+
 		protected override void Update () {
 			base.Update();
 			_gpuInstancer?.RenderBatches();
@@ -42,6 +51,7 @@ namespace Map {
 		public void CreateFromSaveData (ForestSectionData data) {
 			_localSpacePolygon = new Polygon(data.polygon);
 			GenerateTrees(data.seed);
+			forestSectionRuntimeSet.Add(this);
 		}
 
 		public bool IsClosed => _localSpacePolygon.IsClosed;
@@ -77,7 +87,7 @@ namespace Map {
 				return false;
 			}
 			InvokeShapeChanged();
-			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
+			forestSectionRuntimeSet.Add(this);
 			GenerateTrees(Random.Range(int.MinValue, int.MaxValue));
 			return true;
 		}

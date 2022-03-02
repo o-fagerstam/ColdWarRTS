@@ -10,7 +10,8 @@ using Utils;
 namespace Map {
 	[RequireComponent(typeof(MeshFilter), typeof(MeshRenderer), typeof(MeshCollider))]
 	public class RoadSegment : AStaticMapElement, IGroundDragMovable {
-		[SerializeField][AssetsOnly][Required] private GroundDraggable handlePrefab;
+		[SerializeField, AssetsOnly, Required] private RoadSegmentRuntimeSet allRoadSegments;
+		[SerializeField, AssetsOnly, Required] private GroundDraggable handlePrefab;
 		private static readonly float RoadHeightOverGround = ScaleUtil.GameToUnity(.5f);
 		private static readonly float RoadWidth = ScaleUtil.GameToUnity(8f);
 		private static readonly float RoadSegmentLength = ScaleUtil.GameToUnity(2f);
@@ -29,6 +30,13 @@ namespace Map {
 			Vector3 localControl1 = localAnchor1 + dir*0.33f;
 			Vector3 localControl2 = localAnchor2 - dir*0.33f;
 			GenerateCurve(localAnchor1, localAnchor2, localControl1, localControl2, position);
+		}
+
+		private void OnEnable () {
+			allRoadSegments.Add(this);
+		}
+		private void OnDisable () {
+			allRoadSegments.Remove(this);
 		}
 
 		public void CreateFromSaveData (RoadSegmentSaveData data) {
@@ -66,7 +74,6 @@ namespace Map {
 			}
 
 			RecalculateMesh();
-			SingletonManager.Retrieve<GameMap>().RegisterStaticMapElement(this);
 			DisableHandles();
 			InvokeShapeChanged();
 		}
@@ -79,7 +86,9 @@ namespace Map {
 
 		public void DisableHandles () {
 			foreach (GroundDraggable handle in _handles.Keys) {
-				handle.gameObject.SetActive(false);
+				if (handle != null) {
+					handle.gameObject.SetActive(false);
+				}
 			}
 		}
 		
