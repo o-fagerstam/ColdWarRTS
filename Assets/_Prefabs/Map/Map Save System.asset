@@ -13,3 +13,4 @@ MonoBehaviour:
   m_Name: Map Save System
   m_EditorClassIdentifier: 
   gameMapPrefab: {fileID: 6955029135892152875, guid: fd81317f594e67847bd359a66058c0dd, type: 3}
+  gameMap: {fileID: 11400000, guid: 67ad0598ac2a64c47859e6035c1bc28f, type: 2}

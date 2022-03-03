@@ -1,22 +1,21 @@
 ﻿using System.IO;
 using Map;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
-using Utils;
 namespace Persistence {
 	[CreateAssetMenu(fileName = "Map Save System", menuName = "Scriptable Objects/Map/Map Save System")]
 	public class MapSaveSystem : ScriptableObject {
 		private string _path;
 		[SerializeField] private GameMap gameMapPrefab;
-		[ShowInInspector, ReadOnly] private GameMap _map;
+		[SerializeField, AssetsOnly, Required] private GameMapScriptableValue gameMap;
+		
 		
 
 		private void Awake () {
 			_path = Application.persistentDataPath + "/maptest.json";
 		}
 		public void SaveMap () {
-			GameMap.GameMapSaveData mapSaveData = _map.CreateSaveData();
+			GameMap.GameMapSaveData mapSaveData = gameMap.value.CreateSaveData();
 			string saveData = JsonUtility.ToJson(mapSaveData, true);
 			
 			Debug.Log($"Saving to {_path}");
@@ -32,17 +31,17 @@ namespace Persistence {
 			string saveData = reader.ReadToEnd();
 			GameMap.GameMapSaveData mapSaveData = JsonUtility.FromJson<GameMap.GameMapSaveData>(saveData);
 			CreateMapIfNecessary();
-			_map.GenerateFromMapData(mapSaveData);
+			gameMap.value.GenerateFromMapData(mapSaveData);
 		}
 
 		public void NewMap () {
 			CreateMapIfNecessary();
-			_map.GenerateFlatMap();
+			gameMap.value.GenerateFlatMap();
 		}
 
 		private void CreateMapIfNecessary () {
-			if (_map == null) {
-				_map = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
+			if (gameMap.value == null) {
+				gameMap.value = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
 			}
 		}
 	}

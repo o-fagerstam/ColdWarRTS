@@ -1,12 +1,15 @@
 ﻿using Constants;
 using Map;
-using Singleton;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public class EditElevationTool : AMapEditorTool {
 		private const string TOOLTIP_BASE = "Left click: Raise, Right click: Lower, Scroll: Change brush size, Space: Exit";
+
+		[SerializeField, Required, AssetsOnly] private GameMapScriptableValue gameMap;
+		
 		public override void Activate () {
 			UpdateTooltip(TOOLTIP_BASE);
 		}
@@ -34,7 +37,7 @@ namespace Controls.MapEditorTools {
 		}
 
 		public void EditMapElevation (RaycastHit hit, float magnitude) {
-			SingletonManager.Retrieve<GameMap>().EditElevation(hit.point, 5f, magnitude);
+			gameMap.value.EditElevation(hit.point, 5f, magnitude);
 		}
 	}
 }

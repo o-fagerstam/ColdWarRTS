@@ -2,12 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using Math;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
 namespace Map {
-	public class GameMap : ASingletonMonoBehaviour<GameMap> {
+	public class GameMap : MonoBehaviour {
 		[SerializeField] private int chunksPerSide;
 		[SerializeField] private int chunkResolution;
 		[SerializeField] private float mapSize;

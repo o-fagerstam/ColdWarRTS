@@ -1,7 +1,6 @@
 ﻿using Architecture.StateMachine;
 using Constants;
 using Map;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,6 +8,7 @@ using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public class RoadTool : AMapEditorTool {
 		[SerializeField, AssetsOnly, Required] private RoadSegmentRuntimeSet roadSegmentRuntimeSet;
+		[SerializeField, AssetsOnly, Required] private GameMapScriptableValue gameMap;
 		[SerializeField][AssetsOnly] RoadSegment roadPrefab;
 		private GroundDragHandler<RoadSegment> _groundDragHandler;
 		private RoadToolStateMachine _stateMachine;
@@ -102,7 +102,7 @@ namespace Controls.MapEditorTools {
 				if (!Physics.Raycast(mouseRay, out RaycastHit clickHit, Mathf.Infinity, LayerMasks.anyLand)) { return; }
 
 				if (Mouse.current.leftButton.wasPressedThisFrame) {
-					GameMap map = SingletonManager.Retrieve<GameMap>();
+					GameMap map = Context.gameMap.value;
 					RoadSegment newRoadSegment = Instantiate(Context.roadPrefab, _roadStartPoint, Quaternion.identity, map.transform);
 					newRoadSegment.Initialize(_roadStartPoint, clickHit.point);
 					Context._groundDragHandler.HandleMovableAdded(newRoadSegment);

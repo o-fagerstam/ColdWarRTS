@@ -1,6 +1,5 @@
 ﻿using Constants;
 using Map;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -8,12 +7,14 @@ using UnityEngine.InputSystem;
 using Utils;
 namespace Controls.MapEditorTools {
 	public class PlaceForestSectionTool : AMapEditorTool {
-		
+		private const string TOOLTIP_BASE = "Left click on the ground to start placing forest";
+		private const string TOOLTIP_DURING_PLACEMENT = "Left click: Place vertex, Space: Close section, Right click: Stop editing";
+
 		[AssetsOnly] [Required]
 		[SerializeField] private ForestSection forestSectionPrefab;
 		[ShowInInspector] [ReadOnly] private ForestSection _currentForestSection;
-		private const string TOOLTIP_BASE = "Left click on the ground to start placing forest";
-		private const string TOOLTIP_DURING_PLACEMENT = "Left click: Place vertex, Space: Close section, Right click: Stop editing";
+
+		[SerializeField, AssetsOnly, Required] private GameMapScriptableValue gameMap;
 
 		public override void Activate () {
 			UpdateTooltip(TOOLTIP_BASE);
@@ -33,21 +34,21 @@ namespace Controls.MapEditorTools {
 				OnRightClickGround(hit);
 			}
 		}
-		public void OnLeftClickGround (RaycastHit hit) {
+		private void OnLeftClickGround (RaycastHit hit) {
 			Vector3 point = hit.point;
 			if (_currentForestSection == null) {
 				_currentForestSection = Instantiate(
 					forestSectionPrefab, 
 					point, 
 					Quaternion.identity, 
-					SingletonManager.Retrieve<GameMap>().transform);
+					gameMap.value.transform);
 				UpdateTooltip(TOOLTIP_DURING_PLACEMENT);
 			}
 
 			_currentForestSection.AddPoint(point);
 		}
 
-		public void OnRightClickGround (RaycastHit hit) {
+		private void OnRightClickGround (RaycastHit hit) {
 			if (_currentForestSection != null) {
 				SafeDestroyUtil.SafeDestroyGameObject(_currentForestSection);
 				_currentForestSection = null;
@@ -55,7 +56,7 @@ namespace Controls.MapEditorTools {
 			}
 		}
 
-		public void OnSpacePressed () {
+		private void OnSpacePressed () {
 			if (_currentForestSection != null) {
 				if (!_currentForestSection.Close()) {
 					return;

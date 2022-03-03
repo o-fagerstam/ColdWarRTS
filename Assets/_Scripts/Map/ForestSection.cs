@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Constants;
 using Graphics;
 using Math;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
@@ -62,7 +61,7 @@ namespace Map {
 			bool couldAddToPolygon = _localSpacePolygon.AddVertex(WorldVec3ToLocalVec2(point));
 			bool overlapsOtherForest = false;
 			if (couldAddToPolygon) {
-				foreach (ForestSection forestSection in SingletonManager.Retrieve<GameMap>().AllForests) {
+				foreach (ForestSection forestSection in forestSectionRuntimeSet) {
 					if (forestSection == this) {
 						continue;
 					}

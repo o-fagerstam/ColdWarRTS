@@ -1,6 +1,5 @@
 ﻿using Constants;
 using Map;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -9,6 +8,7 @@ namespace Controls.MapEditorTools {
 	public class CapturePointTool : AMapEditorTool {
 		[SerializeField, Required, AssetsOnly] private CapturePointRuntimeSet capturePointRuntimeSet;
 		[SerializeField, Required, AssetsOnly] private CapturePoint capturePointPrefab;
+		[SerializeField, Required, AssetsOnly] private GameMapScriptableValue gameMap;
 		private GroundDragHandler<CapturePoint> _groundDragHandler;
 
 		private const string TOOLTIP_BASE = "Shift-click to place capture point";
@@ -44,8 +44,7 @@ namespace Controls.MapEditorTools {
 			if (EventSystem.current.IsPointerOverGameObject()) { return; }
 			if (Mouse.current.leftButton.wasPressedThisFrame) {
 				if (Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.anyLand)) {
-					GameMap map = SingletonManager.Retrieve<GameMap>();
-					Instantiate(capturePointPrefab, hit.point, Quaternion.identity, map.transform);
+					Instantiate(capturePointPrefab, hit.point, Quaternion.identity, gameMap.value.transform);
 				} else if (!Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out hit, Mathf.Infinity, LayerMasks.mouseDraggable)) {
 					GroundDraggable draggedObject = hit.transform.GetComponent<GroundDraggable>();
 					_groundDragHandler.SelectForDragging(draggedObject);
