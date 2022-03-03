@@ -1,24 +1,25 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using Constants;
+using ScriptableObjectArchitecture;
 using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
-	public class GroundDragHandler  {
-		private readonly HashSet<IGroundDragMovable> _movables;
+	public class GroundDragHandler<TMovable> where TMovable : IGroundDragMovable  {
+		private readonly RuntimeSet<TMovable> _movables;
 		private GroundDraggable _currentDraggedObject;
 		private Vector3 _startDragPosition;
 		private bool _draggingEnabled;
 		private const float DRAG_SNAP_DISTANCE = 0.3f;
 
-		public GroundDragHandler (IEnumerable<IGroundDragMovable> movables) {
-			_movables = new HashSet<IGroundDragMovable>(movables);
+		public GroundDragHandler (RuntimeSet<TMovable> movables) {
+			_movables = movables;
+			_movables.OnElementAdded += HandleMovableAdded;
 		}
 
 		public bool IsDragging => _currentDraggedObject != null;
 
-		public void HandleUpdate (Ray mouseRay) {
+		public void UpdateTick (Ray mouseRay) {
 			if (!_draggingEnabled) {return; }
 			if (_currentDraggedObject == null) { return; }
 			if (!Mouse.current.leftButton.isPressed) {
@@ -77,20 +78,19 @@ namespace Controls {
 
 		public void EnableDragging () {
 			_draggingEnabled = true;
-			foreach (IGroundDragMovable movable in _movables) {
+			foreach (TMovable movable in _movables) {
 				movable.EnableHandles();
 			}
 		}
 
 		public void DisableDragging () {
 			_draggingEnabled = false;
-			foreach (IGroundDragMovable movable in _movables) {
+			foreach (TMovable movable in _movables) {
 				movable.DisableHandles();
 			}
 		}
 
-		public void Register (IGroundDragMovable groundDragMovable) {
-			_movables.Add(groundDragMovable);
+		public void HandleMovableAdded (TMovable groundDragMovable) {
 			if (_draggingEnabled) {
 				groundDragMovable.EnableHandles();
 			} else {

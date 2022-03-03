@@ -92,6 +92,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4e7218daef9e41e385fc0d6c62d911b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  roadSegmentRuntimeSet: {fileID: 11400000, guid: f14733e8a5b306b40be3dffe3c5835bf, type: 2}
   roadPrefab: {fileID: -6440006881211199864, guid: 932bb55d4ab0f9441a7d8e209cd1c16c, type: 3}
 --- !u!1 &7547191519187996152
 GameObject:
@@ -136,6 +137,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f9b75fa4909d42afb9413196072103f0, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  capturePointRuntimeSet: {fileID: 11400000, guid: ebe23588d37c4f248ad8726c09e781ea, type: 2}
   capturePointPrefab: {fileID: 7857568650443652852, guid: 33994a9b3448e1647aee90632d56131e, type: 3}
 --- !u!1 &7547191519302326494
 GameObject:

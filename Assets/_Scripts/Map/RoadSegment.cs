@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Controls;
 using Math;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
@@ -17,7 +16,7 @@ namespace Map {
 		private static readonly float RoadSegmentLength = ScaleUtil.GameToUnity(2f);
 		private static readonly int NumRoadEndSubDivisions = 20;
 		private BezierCurve _curve;
-		private Dictionary<GroundDraggable, BezierPoint> _handles; // Order: Anchor1, Anchor2, Control1, Control2;
+		private Dictionary<GroundDraggable, BezierPoint> _handles = new Dictionary<GroundDraggable, BezierPoint>(); // Order: Anchor1, Anchor2, Control1, Control2;
 		public IEnumerable<GroundDraggable> GroundDraggables => _handles.Keys;
 		[ShowInInspector] [ReadOnly] private List<(Vector3 left, Vector3 right)> _meshPoints = new List<(Vector3 left, Vector3 right)>();
 		private const string ANCHOR_TAG = "RoadAnchor";
@@ -43,6 +42,7 @@ namespace Map {
 			transform.position = data.position;
 			GenerateCurve(data.anchor1, data.anchor2, data.control1, data.control2, data.position);
 		}
+
 		private void GenerateCurve (Vector3 localAnchor1, Vector3 localAnchor2, Vector3 localControl1, Vector3 localControl2, Vector3 position) {
 			_curve = new BezierCurve(
 				VectorUtil.Flatten(localAnchor1),
@@ -62,22 +62,19 @@ namespace Map {
 			anchor2Handle.snapFilterTag = gameObject.GetInstanceID().ToString();
 			GroundDraggable control1Handle = Instantiate(handlePrefab, worldControl1, Quaternion.identity, transform);
 			GroundDraggable control2Handle = Instantiate(handlePrefab, worldControl2, Quaternion.identity, transform);
-			_handles = new Dictionary<GroundDraggable, BezierPoint> {
-				[anchor1Handle] = BezierPoint.Anchor1,
-				[anchor2Handle] = BezierPoint.Anchor2,
-				[control1Handle] = BezierPoint.Control1,
-				[control2Handle] = BezierPoint.Control2
-			};
+			_handles[anchor1Handle] = BezierPoint.Anchor1;
+			_handles[anchor2Handle] = BezierPoint.Anchor2;
+			_handles[control1Handle] = BezierPoint.Control1;
+			_handles[control2Handle] = BezierPoint.Control2;
 			foreach (GroundDraggable handle in _handles.Keys) {
 				handle.transform.localScale = Vector3.one*0.2f;
 				handle.OnPositionChanged += HandleHandlePositionChanged;
 			}
 
-			RecalculateMesh();
 			DisableHandles();
+			RecalculateMesh();
 			InvokeShapeChanged();
 		}
-
 		public void EnableHandles () {
 			foreach (GroundDraggable handle in _handles.Keys) {
 				handle.gameObject.SetActive(true);

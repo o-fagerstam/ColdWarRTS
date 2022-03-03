@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using Controls;
 using Math;
-using Singleton;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using Utils;
@@ -12,15 +11,14 @@ namespace Map {
 		[SerializeField, AssetsOnly, Required] private CapturePointRuntimeSet capturePointRuntimeSet;
 		private GroundDraggable _anchor;
 		private void OnEnable () {
-			capturePointRuntimeSet.Add(this);
 			_anchor = GetComponentInChildren<GroundDraggable>();
 			_anchor.OnPositionChanged += HandleAnchorPositionChanged;
-			DisableHandle();
+			capturePointRuntimeSet.Add(this);
 		}
 		
 		private void OnDisable () {
-			capturePointRuntimeSet.Remove(this);
 			_anchor.OnPositionChanged -= HandleAnchorPositionChanged;
+			capturePointRuntimeSet.Remove(this);
 		}
 		private void HandleAnchorPositionChanged (GroundDraggable anchor, Vector3 newPosition) {
 			transform.position = newPosition;

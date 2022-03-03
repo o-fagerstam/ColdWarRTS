@@ -8,9 +8,9 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 namespace Controls.MapEditorTools {
 	public class RoadTool : AMapEditorTool {
+		[SerializeField, AssetsOnly, Required] private RoadSegmentRuntimeSet roadSegmentRuntimeSet;
 		[SerializeField][AssetsOnly] RoadSegment roadPrefab;
-		[ShowInInspector][ReadOnly] private Vector3 _roadStartPoint;
-		private GroundDragHandler _groundDragHandler;
+		private GroundDragHandler<RoadSegment> _groundDragHandler;
 		private RoadToolStateMachine _stateMachine;
 
 		private void Awake () {
@@ -18,8 +18,8 @@ namespace Controls.MapEditorTools {
 		}
 
 		public override void Activate () {
-			_groundDragHandler = new GroundDragHandler(SingletonManager.Retrieve<GameMap>().AllRoadSegments);
-			_stateMachine.State = _stateMachine.CreatePlacingRoadState();
+			_groundDragHandler = new GroundDragHandler<RoadSegment>(roadSegmentRuntimeSet);
+			_stateMachine.State = _stateMachine.CreateBaseState();
 		}
 
 		public override void Deactivate () {
@@ -42,7 +42,7 @@ namespace Controls.MapEditorTools {
 			public RoadToolStateMachine (RoadTool context) : base(context) {}
 
 			public RoadToolBaseState CreateBaseState () { return new RoadToolBaseState(Context); }
-			public PlacingRoadState CreatePlacingRoadState () { return new PlacingRoadState(Context); }
+			public PlacingRoadState CreatePlacingRoadState (Vector3 _roadStartPoint) { return new PlacingRoadState(Context, _roadStartPoint); }
 		}
 
 		private class RoadToolBaseState : RoadToolState {
@@ -66,7 +66,7 @@ namespace Controls.MapEditorTools {
 						return;
 					}
 					if (Mouse.current.leftButton.isPressed) {
-						Context._groundDragHandler.HandleUpdate(mouseRay);
+						Context._groundDragHandler.UpdateTick(mouseRay);
 						return;
 					}
 				}
@@ -74,8 +74,7 @@ namespace Controls.MapEditorTools {
 				if (EventSystem.current.IsPointerOverGameObject()) { return; }
 				if (Mouse.current.leftButton.wasPressedThisFrame) {
 					if (Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.anyLand)) {
-						Context._roadStartPoint = hit.point;
-						Context._stateMachine.State = new PlacingRoadState(Context);
+						Context._stateMachine.State = Context._stateMachine.CreatePlacingRoadState(hit.point);
 					} else if (!Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out hit, Mathf.Infinity, LayerMasks.mouseDraggable)) {
 						GroundDraggable draggedObject = hit.transform.GetComponent<GroundDraggable>();
 						Context._groundDragHandler.SelectForDragging(draggedObject);
@@ -89,8 +88,10 @@ namespace Controls.MapEditorTools {
 
 		private class PlacingRoadState : RoadToolState {
 			private const string TOOLTIP_PLACING_ROAD = "Click to place road";
-			public PlacingRoadState (RoadTool context) : base(context) {
+			private readonly Vector3 _roadStartPoint;
+			public PlacingRoadState (RoadTool context, Vector3 roadStartPoint) : base(context) {
 				Context = context;
+				_roadStartPoint = roadStartPoint;
 			}
 
 			public override void EnterState () {
@@ -102,9 +103,9 @@ namespace Controls.MapEditorTools {
 
 				if (Mouse.current.leftButton.wasPressedThisFrame) {
 					GameMap map = SingletonManager.Retrieve<GameMap>();
-					RoadSegment newRoadSegment = Instantiate(Context.roadPrefab, Context._roadStartPoint, Quaternion.identity, map.transform);
-					newRoadSegment.Initialize(Context._roadStartPoint, clickHit.point);
-					Context._groundDragHandler.Register(newRoadSegment);
+					RoadSegment newRoadSegment = Instantiate(Context.roadPrefab, _roadStartPoint, Quaternion.identity, map.transform);
+					newRoadSegment.Initialize(_roadStartPoint, clickHit.point);
+					Context._groundDragHandler.HandleMovableAdded(newRoadSegment);
 					Context._stateMachine.State = Context._stateMachine.CreateBaseState();
 				}
 			}
