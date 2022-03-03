@@ -1,5 +1,5 @@
 ﻿using System;
-using ScriptableObjectArchitecture;
+using Architecture.ScriptableObjectArchitecture;
 using UnityEngine;
 namespace Map {
 	[CreateAssetMenu(fileName = "Game Map Event", menuName = "Scriptable Objects/Map/Game Map Event")]

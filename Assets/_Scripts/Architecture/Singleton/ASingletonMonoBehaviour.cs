@@ -1,6 +1,6 @@
 ﻿using UnityEngine;
 using Utils;
-namespace Singleton {
+namespace Architecture.Singleton {
 	public abstract class ASingletonMonoBehaviour<T> : MonoBehaviour, ISingleton where T : MonoBehaviour {
 		private static T _instance;
 		protected virtual void OnEnable () {

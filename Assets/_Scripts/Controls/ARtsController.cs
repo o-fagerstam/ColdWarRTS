@@ -1,4 +1,4 @@
-﻿using Singleton;
+﻿using Architecture.Singleton;
 using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {

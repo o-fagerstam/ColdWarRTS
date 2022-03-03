@@ -1,4 +1,4 @@
-﻿namespace Singleton {
+﻿namespace Architecture.Singleton {
 	public interface ISingleton {
 		
 	}

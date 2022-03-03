@@ -8,8 +8,6 @@ namespace Persistence {
 		private string _path;
 		[SerializeField] private GameMap gameMapPrefab;
 		[SerializeField, AssetsOnly, Required] private GameMapScriptableValue gameMap;
-		
-		
 
 		private void Awake () {
 			_path = Application.persistentDataPath + "/maptest.json";

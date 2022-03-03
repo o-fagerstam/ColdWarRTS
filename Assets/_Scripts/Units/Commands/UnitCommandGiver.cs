@@ -1,10 +1,10 @@
 ﻿using Constants;
-using Units;
+using Controls;
 using Units.Targeting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using Utils;
-namespace Controls {
+namespace Units.Commands {
 	public class UnitCommandGiver : MonoBehaviour {
 		private UnitSelector _unitSelector;
 

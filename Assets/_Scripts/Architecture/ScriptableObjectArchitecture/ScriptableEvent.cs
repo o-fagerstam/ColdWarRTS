@@ -1,6 +1,6 @@
 ﻿using System;
 using UnityEngine;
-namespace ScriptableObjectArchitecture {
+namespace Architecture.ScriptableObjectArchitecture {
 	public abstract class ScriptableEvent<T> : ScriptableObject where T : EventArgs {
 		public event EventHandler<T> Event;
 		public void Invoke (object origin, T eventArgs) {

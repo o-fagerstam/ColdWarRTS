@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
+using Architecture.ScriptableObjectArchitecture;
 using Constants;
-using ScriptableObjectArchitecture;
 using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {

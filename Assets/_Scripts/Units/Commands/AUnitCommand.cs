@@ -1,6 +1,5 @@
 ﻿using System;
-using Units;
-namespace Controls {
+namespace Units.Commands {
 	public abstract class AUnitCommand {
 		protected Unit _commandOwner;
 		public event EventHandler<OnCommandFinishedArgs> OnCommandFinished; 

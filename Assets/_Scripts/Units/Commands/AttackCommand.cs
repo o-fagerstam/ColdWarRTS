@@ -1,7 +1,6 @@
 ﻿using System;
-using Units;
 using Units.Targeting;
-namespace Controls {
+namespace Units.Commands {
 	public class AttackCommand : AUnitCommand {
 		private Targetable _target;
 		public AttackCommand (Unit commandOwner, Targetable target) : base(commandOwner) {

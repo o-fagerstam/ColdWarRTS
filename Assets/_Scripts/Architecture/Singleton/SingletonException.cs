@@ -1,5 +1,5 @@
 ﻿using System;
-namespace Singleton {
+namespace Architecture.Singleton {
 	public class SingletonException : Exception {
 		public SingletonException() {}
 		public SingletonException (string message) : base(message) {

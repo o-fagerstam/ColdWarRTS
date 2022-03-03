@@ -1,5 +1,5 @@
-﻿using Persistence;
-using Singleton;
+﻿using Architecture.Singleton;
+using Persistence;
 using Sirenix.OdinInspector;
 using UnityEngine;
 namespace Managers {

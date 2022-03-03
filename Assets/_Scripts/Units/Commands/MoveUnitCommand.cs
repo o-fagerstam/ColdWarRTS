@@ -1,7 +1,6 @@
 ﻿using System;
-using Units;
 using UnityEngine;
-namespace Controls {
+namespace Units.Commands {
 	public class MoveUnitCommand : AUnitCommand {
 		private readonly Vector3 _point;
 		public MoveUnitCommand (Unit commandOwner, Vector3 point) : base(commandOwner) {

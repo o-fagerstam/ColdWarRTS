@@ -1,5 +1,5 @@
-﻿using Cinemachine;
-using Singleton;
+﻿using Architecture.Singleton;
+using Cinemachine;
 using UnityEngine;
 namespace Controls {
 	public class ControllerFollowCamera : MonoBehaviour {

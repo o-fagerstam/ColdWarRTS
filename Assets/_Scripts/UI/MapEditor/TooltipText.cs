@@ -1,7 +1,7 @@
 ﻿using Controls.MapEditorTools;
 using TMPro;
 using UnityEngine;
-namespace UI {
+namespace UI.MapEditor {
 	public class TooltipText : MonoBehaviour {
 		private TMP_Text _text;
 

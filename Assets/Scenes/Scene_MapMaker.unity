@@ -593,6 +593,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 470c739a224244e8a646895dc97b1a9b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mapEditorControllerRuntimeSet: {fileID: 11400000, guid: 5166787e9ad21a844a300c27570a889f, type: 2}
 --- !u!1 &638110363
 GameObject:
   m_ObjectHideFlags: 0

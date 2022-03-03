@@ -3,7 +3,7 @@ using Controls.MapEditorTools;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
-namespace UI {
+namespace UI.MapEditor {
 	public class ToolSelectButton : MonoBehaviour {
 		[SerializeField] [Required] private AMapEditorTool tool;
 		[ShowInInspector] [ReadOnly] private Button _button;

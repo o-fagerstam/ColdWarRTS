@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-namespace Singleton {
+namespace Architecture.Singleton {
 	public static class SingletonManager {
 
 		private static readonly Dictionary<Type, ISingleton> Singletons = new Dictionary<Type, ISingleton>();

@@ -2,7 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-namespace ScriptableObjectArchitecture {
+namespace Architecture.ScriptableObjectArchitecture {
 	public abstract class RuntimeSet<T> : ScriptableObject, IEnumerable<T> {
 		private readonly HashSet<T> _items = new HashSet<T>();
 		public event Action<T> OnElementAdded;
