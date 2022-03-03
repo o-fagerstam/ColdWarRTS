@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using Architecture.StateMachine;
 using Constants;
 using Mirror;
 using Network;
@@ -13,20 +14,20 @@ namespace Controls {
 
 		[SerializeField] private RectTransform unitSelectionBox;
 
-		private AUnitSelectorState _state;
+		private UnitSelectorStateMachine _stateMachine;
 		private readonly HashSet<Unit> _selectedUnits = new HashSet<Unit>();
 		public IEnumerable<Unit> SelectedUnits => _selectedUnits;
 
-		private void OnEnable () {
-			SetState(new BaseSelectorState(this));
+		private void Awake () {
+			_stateMachine = new UnitSelectorStateMachine(this);
 		}
 
-		private void SetState (AUnitSelectorState newState) {
-			_state = newState;
+		private void OnEnable () {
+			_stateMachine.State = _stateMachine.CreateBaseSelectorState();
 		}
 
 		public void UpdateSelection () {
-			_state.UpdateSelection();	
+			_stateMachine.State.UpdateSelection();	
 		}
 
 		private void ClearSelection () {
@@ -54,25 +55,33 @@ namespace Controls {
 			}
 		}
 
-		private abstract class AUnitSelectorState {
-			protected readonly UnitSelector Outer;
-			protected AUnitSelectorState (UnitSelector outer) {
-				Outer = outer;
-			}
+		private abstract class AUnitSelectorState : State<UnitSelector> {
+			protected AUnitSelectorState (UnitSelector context) : base(context) {}
 			public abstract void UpdateSelection ();
 		}
-		
+
+		private class UnitSelectorStateMachine : StateMachine<UnitSelector, AUnitSelectorState> {
+
+			public UnitSelectorStateMachine (UnitSelector context) : base(context) {}
+			public BaseSelectorState CreateBaseSelectorState () => new BaseSelectorState(Context);
+			public DragBoxSelectorState CreateDragBoxSelectorState (Vector2 dragBoxStartPosition) => new DragBoxSelectorState(Context, dragBoxStartPosition);
+			
+		}
+
 		private class BaseSelectorState : AUnitSelectorState {
 			private Vector2 _dragStartPosition;
 
-			public BaseSelectorState (UnitSelector outer) : base(outer) {}
+			public BaseSelectorState (UnitSelector context) : base(context) {}
+			
+			public override void EnterState () {}
+			public override void ExitState () {}
 			
 			public override void UpdateSelection () {
 				if (Mouse.current.leftButton.wasPressedThisFrame) {
 					_dragStartPosition = Mouse.current.position.ReadValue();
 				} else if (Mouse.current.leftButton.wasReleasedThisFrame) {
 					if (!Keyboard.current.shiftKey.isPressed) {
-						Outer.ClearSelection();
+						Context.ClearSelection();
 					}
 
 					Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
@@ -82,26 +91,30 @@ namespace Controls {
 					if (!unit.hasAuthority) {return;}
 
 					if (Keyboard.current.shiftKey.isPressed) {
-						Outer.SelectDeselect(unit);
+						Context.SelectDeselect(unit);
 					} else {
-						Outer.Select(unit);
+						Context.Select(unit);
 					}
 
 				} else if (Mouse.current.leftButton.isPressed ) {
 					if ((_dragStartPosition - Mouse.current.position.ReadValue()).sqrMagnitude > SELECTION_BOX_MIN_SIZE*SELECTION_BOX_MIN_SIZE) {
-						Outer.SetState(new DragBoxSelectorState(Outer, _dragStartPosition));
+						Context._stateMachine.State = Context._stateMachine.CreateDragBoxSelectorState(_dragStartPosition);
 					}
 				}
 			}
 		}
 
 		private class DragBoxSelectorState : AUnitSelectorState {
-			private Vector2 _dragStartPosition;
-			public DragBoxSelectorState (UnitSelector outer, Vector2 dragStartPosition) : base(outer) {
+			private readonly Vector2 _dragStartPosition;
+			public DragBoxSelectorState (UnitSelector context, Vector2 dragStartPosition) : base(context) {
 				_dragStartPosition = dragStartPosition;
 			}
+			
+			public override void EnterState () {}
+			public override void ExitState () {}
+			
 			public override void UpdateSelection () {
-				RectTransform unitSelectionBox = Outer.unitSelectionBox;
+				RectTransform unitSelectionBox = Context.unitSelectionBox;
 				unitSelectionBox.gameObject.SetActive(true);
 
 				if (Mouse.current.leftButton.isPressed) {
@@ -114,7 +127,7 @@ namespace Controls {
 					unitSelectionBox.anchoredPosition = _dragStartPosition + new Vector2(dragHeight/2f, dragWidth/2f);
 				} else {
 					if (!Keyboard.current.shiftKey.isPressed) {
-						Outer.ClearSelection();
+						Context.ClearSelection();
 					}
 
 					Vector2 min = unitSelectionBox.anchoredPosition - (unitSelectionBox.sizeDelta/2f);
@@ -128,12 +141,11 @@ namespace Controls {
 						    screenPosition.x < max.x && 
 						    screenPosition.y > min.y && 
 						    screenPosition.y < max.y) {
-							Outer.Select(unit);
+							Context.Select(unit);
 						}
 					}
-					
 					unitSelectionBox.gameObject.SetActive(false);
-					Outer.SetState(new BaseSelectorState(Outer));
+					Context._stateMachine.State = Context._stateMachine.CreateBaseSelectorState();
 				}
 			}
 		}
