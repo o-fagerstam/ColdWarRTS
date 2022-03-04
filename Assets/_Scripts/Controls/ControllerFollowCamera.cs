@@ -1,25 +1,24 @@
-﻿using Architecture.Singleton;
+﻿using System.Linq;
 using Cinemachine;
+using Sirenix.OdinInspector;
 using UnityEngine;
 namespace Controls {
 	public class ControllerFollowCamera : MonoBehaviour {
+		[SerializeField, AssetsOnly, Required] private RtsControllerRuntimeSet rtsControllerRuntimeSet;
 		private void OnEnable () {
-			if (SingletonManager.TryRetrieveAnySubclass(out ARtsController playerController)) {
-				GetComponent<CinemachineVirtualCamera>().Follow = playerController.transform;
+			if (rtsControllerRuntimeSet.Count == 0) {
+				rtsControllerRuntimeSet.OnElementAdded += HandleControllerAdded;
 			} else {
-				SingletonManager.OnSingletonRegistered += HandleOnSingletonRegistered;
+				GetComponent<CinemachineVirtualCamera>().Follow = rtsControllerRuntimeSet.First().transform;
 			}
 		}
-		private void HandleOnSingletonRegistered (object sender, SingletonManager.OnSingletonRegisteredArgs e) {
-			if (e.RegisteredType.IsSubclassOf(typeof(ARtsController))) {
-				SingletonManager.TryRetrieveAnySubclass(out ARtsController playerController);
-				GetComponent<CinemachineVirtualCamera>().Follow = playerController.transform;
-				SingletonManager.OnSingletonRegistered -= HandleOnSingletonRegistered;
-			}
+		private void HandleControllerAdded (ARtsController controller) {
+			GetComponent<CinemachineVirtualCamera>().Follow = controller.transform;
+			rtsControllerRuntimeSet.OnElementAdded -= HandleControllerAdded;
 		}
 
 		private void OnDisable () {
-			SingletonManager.OnSingletonRegistered -= HandleOnSingletonRegistered;
+			rtsControllerRuntimeSet.OnElementAdded -= HandleControllerAdded;
 		}
 	}
 }

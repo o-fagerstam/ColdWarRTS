@@ -13,6 +13,7 @@ namespace Map {
 		private void OnEnable () {
 			_anchor = GetComponentInChildren<GroundDraggable>();
 			_anchor.OnPositionChanged += HandleAnchorPositionChanged;
+			DisableHandles();
 			capturePointRuntimeSet.Add(this);
 		}
 		
@@ -23,13 +24,6 @@ namespace Map {
 		private void HandleAnchorPositionChanged (GroundDraggable anchor, Vector3 newPosition) {
 			transform.position = newPosition;
 			anchor.transform.position = newPosition;
-		}
-
-		public void EnableHandle () {
-			_anchor.gameObject.SetActive(true);
-		}
-		public void DisableHandle () {
-			_anchor.gameObject.SetActive(false);
 		}
 		public float Radius { get; private set; } = 3f;
 		protected override void UpdateElementVisuals () {

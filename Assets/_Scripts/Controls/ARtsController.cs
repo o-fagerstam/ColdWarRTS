@@ -1,9 +1,18 @@
-﻿using Architecture.Singleton;
+﻿using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.InputSystem;
 namespace Controls {
-	public abstract class ARtsController : ASingletonMonoBehaviour<ARtsController> {
+	public abstract class ARtsController : MonoBehaviour {
+		[SerializeField, AssetsOnly, Required] private RtsControllerRuntimeSet rtsControllerRuntimeSet;
 		[SerializeField] private float scrollSpeed = 5f;
+
+		protected virtual void OnEnable () {
+			rtsControllerRuntimeSet.Add(this);
+		}
+
+		protected virtual void OnDisable () {
+			rtsControllerRuntimeSet.Remove(this);
+		}
 
 		protected virtual void Update () {
 			UpdateKeyboardControl();
