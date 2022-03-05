@@ -109,7 +109,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
-  unitPrefab: {fileID: 7251827213077857477, guid: df096795f369c1944af5c0476d300324, type: 3}
+  unitPrefab: {fileID: 8167988007022336556, guid: df096795f369c1944af5c0476d300324, type: 3}
   spawnPoint: {fileID: 2376584197861446680}
 --- !u!1 &6235374152862610849
 GameObject:

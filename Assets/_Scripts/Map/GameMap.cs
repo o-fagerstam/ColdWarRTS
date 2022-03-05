@@ -7,6 +7,8 @@ using UnityEngine;
 using Utils;
 namespace Map {
 	public class GameMap : MonoBehaviour {
+		[SerializeField, AssetsOnly, Required] private GameMapScriptableValue gameMapSingletonValue;
+		
 		[SerializeField] private int chunksPerSide;
 		[SerializeField] private int chunkResolution;
 		[SerializeField] private float mapSize;
@@ -27,11 +29,20 @@ namespace Map {
 		public IEnumerable<CapturePoint> AllCapturePoints => capturePointRuntimeSet;
 		public IEnumerable<AStaticMapElement> AllStaticMapElements => new IEnumerable<AStaticMapElement>[] {AllForests, AllCapturePoints, AllRoadSegments}.SelectMany(x => x);
 
-		private void Start () {
+		private void OnEnable () {
 			forestSectionRuntimeSet.OnElementAdded += RegisterStaticMapElement;
 			roadSegmentRuntimeSet.OnElementAdded += RegisterStaticMapElement;
 			capturePointRuntimeSet.OnElementAdded += RegisterStaticMapElement;
+			gameMapSingletonValue.Value = this;
 		}
+		
+		private void OnDisable () {
+			forestSectionRuntimeSet.OnElementAdded -= RegisterStaticMapElement;
+			roadSegmentRuntimeSet.OnElementAdded -= RegisterStaticMapElement;
+			capturePointRuntimeSet.OnElementAdded -= RegisterStaticMapElement;
+			gameMapSingletonValue.Value = null;
+		}
+		
 		public void GenerateFlatMap () {
 			ClearMap();
 

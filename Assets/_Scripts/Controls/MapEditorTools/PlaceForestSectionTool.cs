@@ -41,7 +41,7 @@ namespace Controls.MapEditorTools {
 					forestSectionPrefab, 
 					point, 
 					Quaternion.identity, 
-					gameMap.value.transform);
+					gameMap.Value.transform);
 				UpdateTooltip(TOOLTIP_DURING_PLACEMENT);
 			}
 

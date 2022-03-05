@@ -37,7 +37,7 @@ namespace Controls.MapEditorTools {
 		}
 
 		public void EditMapElevation (RaycastHit hit, float magnitude) {
-			gameMap.value.EditElevation(hit.point, 5f, magnitude);
+			gameMap.Value.EditElevation(hit.point, 5f, magnitude);
 		}
 	}
 }

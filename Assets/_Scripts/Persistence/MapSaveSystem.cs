@@ -7,13 +7,13 @@ namespace Persistence {
 	public class MapSaveSystem : ScriptableObject {
 		private string _path;
 		[SerializeField] private GameMap gameMapPrefab;
-		[SerializeField, AssetsOnly, Required] private GameMapScriptableValue gameMap;
+		[SerializeField, AssetsOnly, Required] private GameMapScriptableValue gameMapSingletonValue;
 
 		private void Awake () {
 			_path = Application.persistentDataPath + "/maptest.json";
 		}
 		public void SaveMap () {
-			GameMap.GameMapSaveData mapSaveData = gameMap.value.CreateSaveData();
+			GameMap.GameMapSaveData mapSaveData = gameMapSingletonValue.Value.CreateSaveData();
 			string saveData = JsonUtility.ToJson(mapSaveData, true);
 			
 			Debug.Log($"Saving to {_path}");
@@ -29,17 +29,17 @@ namespace Persistence {
 			string saveData = reader.ReadToEnd();
 			GameMap.GameMapSaveData mapSaveData = JsonUtility.FromJson<GameMap.GameMapSaveData>(saveData);
 			CreateMapIfNecessary();
-			gameMap.value.GenerateFromMapData(mapSaveData);
+			gameMapSingletonValue.Value.GenerateFromMapData(mapSaveData);
 		}
 
 		public void NewMap () {
 			CreateMapIfNecessary();
-			gameMap.value.GenerateFlatMap();
+			gameMapSingletonValue.Value.GenerateFlatMap();
 		}
 
 		private void CreateMapIfNecessary () {
-			if (gameMap.value == null) {
-				gameMap.value = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
+			if (gameMapSingletonValue.Value == null) {
+				gameMapSingletonValue.Value = Instantiate(gameMapPrefab, Vector3.zero, Quaternion.identity);
 			}
 		}
 	}

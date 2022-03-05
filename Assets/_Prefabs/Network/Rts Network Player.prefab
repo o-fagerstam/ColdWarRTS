@@ -11,8 +11,9 @@ GameObject:
   - component: {fileID: 7597575830533065824}
   - component: {fileID: -8831444911347136529}
   - component: {fileID: -5404860478784118919}
+  - component: {fileID: 5706100849746877207}
   m_Layer: 0
-  m_Name: RTSPlayerPrefab
+  m_Name: Rts Network Player
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -63,3 +64,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  localPlayerRuntimeValue: {fileID: 11400000, guid: 25b875702a8b014479eec93c597aee09, type: 2}
+  _playerName: 
+--- !u!114 &5706100849746877207
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5242224988884441124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c45defaaaf7f4dc1bed95b62a497dfa0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncMode: 0
+  syncInterval: 0.1
+  allPlayers: {fileID: 11400000, guid: 50f7daca83edf5642bdbf4e7b442021a, type: 2}
+  allUnits: {fileID: 11400000, guid: 49d20c9b7c052ea4eb7dd5e9cf256758, type: 2}

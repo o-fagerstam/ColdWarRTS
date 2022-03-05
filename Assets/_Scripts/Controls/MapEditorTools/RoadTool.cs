@@ -102,7 +102,7 @@ namespace Controls.MapEditorTools {
 				if (!Physics.Raycast(mouseRay, out RaycastHit clickHit, Mathf.Infinity, LayerMasks.anyLand)) { return; }
 
 				if (Mouse.current.leftButton.wasPressedThisFrame) {
-					GameMap map = Context.gameMap.value;
+					GameMap map = Context.gameMap.Value;
 					RoadSegment newRoadSegment = Instantiate(Context.roadPrefab, _roadStartPoint, Quaternion.identity, map.transform);
 					newRoadSegment.Initialize(_roadStartPoint, clickHit.point);
 					Context._groundDragHandler.HandleMovableAdded(newRoadSegment);

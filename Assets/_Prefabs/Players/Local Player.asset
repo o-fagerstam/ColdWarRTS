@@ -9,8 +9,6 @@ MonoBehaviour:
   m_GameObject: {fileID: 0}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b1674625106b4688922c4dd0e3ddd229, type: 3}
-  m_Name: Map Save System
+  m_Script: {fileID: 11500000, guid: 029209468ebe4134a7d9b0633d31f818, type: 3}
+  m_Name: Local Player
   m_EditorClassIdentifier: 
-  gameMapPrefab: {fileID: 6955029135892152875, guid: fd81317f594e67847bd359a66058c0dd, type: 3}
-  gameMapSingletonValue: {fileID: 11400000, guid: 67ad0598ac2a64c47859e6035c1bc28f, type: 2}

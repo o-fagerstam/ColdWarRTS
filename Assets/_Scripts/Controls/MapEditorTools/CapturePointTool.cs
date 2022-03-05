@@ -44,7 +44,7 @@ namespace Controls.MapEditorTools {
 			if (EventSystem.current.IsPointerOverGameObject()) { return; }
 			if (Mouse.current.leftButton.wasPressedThisFrame) {
 				if (Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out RaycastHit hit, Mathf.Infinity, LayerMasks.anyLand)) {
-					Instantiate(capturePointPrefab, hit.point, Quaternion.identity, gameMap.value.transform);
+					Instantiate(capturePointPrefab, hit.point, Quaternion.identity, gameMap.Value.transform);
 				} else if (!Keyboard.current.leftShiftKey.isPressed && Physics.Raycast(mouseRay, out hit, Mathf.Infinity, LayerMasks.mouseDraggable)) {
 					GroundDraggable draggedObject = hit.transform.GetComponent<GroundDraggable>();
 					_groundDragHandler.SelectForDragging(draggedObject);

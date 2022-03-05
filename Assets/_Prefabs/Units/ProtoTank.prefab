@@ -587,6 +587,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   syncMode: 0
   syncInterval: 0.1
+  allUnits: {fileID: 11400000, guid: 49d20c9b7c052ea4eb7dd5e9cf256758, type: 2}
   selectionCircle: {fileID: 8093887682232876511}
   unitMovement: {fileID: 5639896018882415974}
   targeter: {fileID: 3661211283255233509}

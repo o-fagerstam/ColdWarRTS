@@ -1,15 +1,24 @@
-﻿using Mirror;
+﻿using GameLogic;
+using Mirror;
 using UnityEngine;
 using UnityEngine.EventSystems;
 namespace Units {
 	public class UnitSpawner : NetworkBehaviour, IPointerClickHandler {
-		[SerializeField] private GameObject unitPrefab;
+		[SyncVar]
+		private GameObject _ownerGameObject;
+		public RtsPlayer Owner => _ownerGameObject.GetComponent<RtsPlayer>();
+		[SerializeField] private Unit unitPrefab;
 		[SerializeField] private Transform spawnPoint;
+
+		public void Initialize (RtsPlayer owner) {
+			_ownerGameObject = owner.gameObject;
+		}
 
 		[Command]
 		private void CmdSpawnUnit () {
-			GameObject spawnedObject = Instantiate(unitPrefab, spawnPoint.position, spawnPoint.rotation);
-			NetworkServer.Spawn(spawnedObject, connectionToClient);
+			Unit spawnedUnit = Instantiate(unitPrefab, spawnPoint.position, spawnPoint.rotation);
+			spawnedUnit.Initialize(Owner);
+			NetworkServer.Spawn(spawnedUnit.gameObject, connectionToClient);
 		}
 
 

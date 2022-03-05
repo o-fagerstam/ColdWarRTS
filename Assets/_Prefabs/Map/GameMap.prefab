@@ -43,6 +43,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 458cf06ae3094189b79554ae210e0385, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  gameMapSingletonValue: {fileID: 11400000, guid: 67ad0598ac2a64c47859e6035c1bc28f, type: 2}
   chunksPerSide: 20
   chunkResolution: 20
   mapSize: 100

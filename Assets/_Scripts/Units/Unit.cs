@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using GameLogic;
 using Mirror;
+using Network;
 using Sirenix.OdinInspector;
 using Units.Commands;
 using Units.Movement;
@@ -14,6 +16,9 @@ namespace Units {
 	/// </summary>
 	[RequireComponent(typeof(UnitMovement))]
 	public class Unit : NetworkBehaviour {
+		[SerializeField, AssetsOnly, Required] private UnitRuntimeSet allUnits;
+
+		[Title("Components")]
 		[SerializeField, Required] private GameObject selectionCircle;
 
 		[SerializeField, Required, ChildGameObjectsOnly]
@@ -32,28 +37,27 @@ namespace Units {
 		private Queue<AUnitCommand> _commandQueue = new Queue<AUnitCommand>();
 		private AUnitCommand _currentCommand;
 
-		public static event EventHandler<OnUnitSpawnedArgs> ServerOnUnitSpawned;
-		public static event EventHandler<OnUnitDespawnedArgs> ServerOnUnitDespawned;		
-		public static event EventHandler<OnUnitSpawnedArgs> AuthorityOnUnitSpawned;
-		public static event EventHandler<OnUnitDespawnedArgs> AuthorityOnUnitDespawned;
-		public static event EventHandler<OnUnitSpawnedArgs> ClientOnUnitSpawned;
-		public static event EventHandler<OnUnitDespawnedArgs> ClientOnUnitDespawned;
-		
-		public event EventHandler<OnUnitDeathArgs> ServerOnUnitDeath;
+		[SyncVar]
+		private GameObject _ownerGameObject;
+		public RtsPlayer Owner => _ownerGameObject.GetComponent<RtsPlayer>();
 
+		private bool _hasBeenInitialized;
+
+		public void Initialize (RtsPlayer owner) {
+			_ownerGameObject = owner.gameObject;
+			allUnits.Add(this);
+			_hasBeenInitialized = true;
+		}
 
 		private void OnEnable () {
 			unitMovement = GetComponent<UnitMovement>();
+			if (_hasBeenInitialized) {
+				allUnits.Add(this);
+			}
 		}
 
-		public override void OnStartServer () {
-			base.OnStartServer();
-			ServerOnUnitSpawned?.Invoke(this, new OnUnitSpawnedArgs{unit = this});
-		}
-
-		public override void OnStopServer () {
-			base.OnStopServer();
-			ServerOnUnitDespawned?.Invoke(this, new OnUnitDespawnedArgs{unit = this});
+		private void OnDisable () {
+			allUnits.Remove(this);
 		}
 
 		[Command]
@@ -112,28 +116,7 @@ namespace Units {
 		
 		[Server]
 		public void ServerDie () {
-			ServerOnUnitDeath?.Invoke(this, new OnUnitDeathArgs(){unit = this});
 			NetworkServer.Destroy(gameObject);
-		}
-
-		public override void OnStartAuthority () {
-			base.OnStartAuthority();
-			AuthorityOnUnitSpawned?.Invoke(this, new OnUnitSpawnedArgs(){unit =  this});
-		}
-
-		public override void OnStopAuthority () {
-			base.OnStopAuthority();
-			AuthorityOnUnitDespawned?.Invoke(this, new OnUnitDespawnedArgs(){unit = this});
-		}
-
-		public override void OnStartClient () {
-			base.OnStartClient();
-			ClientOnUnitSpawned?.Invoke(this, new OnUnitSpawnedArgs(){unit = this});
-		}
-
-		public override void OnStopClient () {
-			base.OnStopClient();
-			ClientOnUnitDespawned?.Invoke(this, new OnUnitDespawnedArgs(){unit = this});
 		}
 
 		[Client]
@@ -148,14 +131,5 @@ namespace Units {
 			selectionCircle.SetActive(false);
 		}
 
-	}
-	public class OnUnitSpawnedArgs : EventArgs {
-		public Unit unit;
-	}
-	public class OnUnitDespawnedArgs : EventArgs {
-		public Unit unit;
-	}
-	public class OnUnitDeathArgs : EventArgs {
-		public Unit unit;
 	}
 }

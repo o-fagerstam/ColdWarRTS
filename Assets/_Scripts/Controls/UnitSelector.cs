@@ -1,8 +1,8 @@
 ﻿using System.Collections.Generic;
 using Architecture.StateMachine;
 using Constants;
-using Mirror;
-using Network;
+using GameLogic;
+using Sirenix.OdinInspector;
 using Units;
 using UnityEngine;
 using UnityEngine.InputSystem;
@@ -13,6 +13,7 @@ namespace Controls {
 		private const float SELECTION_BOX_MIN_SIZE = 10f;
 
 		[SerializeField] private RectTransform unitSelectionBox;
+		[SerializeField, AssetsOnly, Required] private RtsPlayerRuntimeValue localPlayer;
 
 		private UnitSelectorStateMachine _stateMachine;
 		private readonly HashSet<Unit> _selectedUnits = new HashSet<Unit>();
@@ -134,7 +135,7 @@ namespace Controls {
 					Vector2 max = unitSelectionBox.anchoredPosition + (unitSelectionBox.sizeDelta/2f);
 
 					Camera mainCamera = Camera.main;
-					foreach (Unit unit in NetworkClient.connection.identity.GetComponent<RtsNetworkPlayer>().Units) {
+					foreach (Unit unit in Context.localPlayer.Value.Units) {
 						Vector3 screenPosition = mainCamera.WorldToScreenPoint(unit.transform.position);
 
 						if (screenPosition.x > min.x && 

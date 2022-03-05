@@ -59,6 +59,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   unitSelectionBox: {fileID: 2514672925423490719}
+  localPlayer: {fileID: 11400000, guid: 25b875702a8b014479eec93c597aee09, type: 2}
 --- !u!114 &-4349335808883677994
 MonoBehaviour:
   m_ObjectHideFlags: 0
